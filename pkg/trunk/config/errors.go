@@ -25,8 +25,8 @@ func (e *ParseError) Unwrap() error { return e.Err }
 
 // SourceNotFoundError reports that a plugins.sources entry's `local:` path does not exist on
 // disk. A local source is expected to already be present — unlike a git source (uri/ref), which
-// Resolve deliberately never fetches (that would be network access), a missing local source is a
-// configuration error, not something Resolve silently tolerates into an empty result.
+// Resolve fetches itself — a missing local source is a configuration error, not something Resolve
+// silently tolerates into an empty result.
 type SourceNotFoundError struct {
 	SourceID string
 	Path     string
@@ -36,18 +36,31 @@ func (e *SourceNotFoundError) Error() string {
 	return fmt.Sprintf("config: plugin source %q: local path %s does not exist", e.SourceID, e.Path)
 }
 
-// UnsupportedSourceError reports that a plugins.sources entry is a git source (uri/ref). Resolve
-// does not fetch git sources — that would be a `git clone`, i.e. network access, out of scope
-// here (ROADMAP.md v0.2) — so it cannot resolve a config that depends on one.
-type UnsupportedSourceError struct {
+// InvalidSourceError reports that a plugins.sources entry has neither `local:` nor `uri:` set, so
+// Resolve has nothing to read or fetch for it (ARCHITECTURE.md: every source is one or the
+// other).
+type InvalidSourceError struct {
+	SourceID string
+}
+
+func (e *InvalidSourceError) Error() string {
+	return fmt.Sprintf("config: plugin source %q: neither local nor uri is set", e.SourceID)
+}
+
+// FetchError reports that a git plugin source's clone/checkout failed — no network, an
+// unreachable uri, a ref that doesn't exist, and so on. Unwrap returns the underlying error
+// (typically an *exec.ExitError with the git command's stderr).
+type FetchError struct {
 	SourceID string
 	URI      string
 	Ref      string
+	Err      error
 }
 
-func (e *UnsupportedSourceError) Error() string {
-	return fmt.Sprintf("config: plugin source %q: git sources are not fetched yet (uri=%s ref=%s)", e.SourceID, e.URI, e.Ref)
+func (e *FetchError) Error() string {
+	return fmt.Sprintf("config: plugin source %q: fetch %s@%s: %v", e.SourceID, e.URI, e.Ref, e.Err)
 }
+func (e *FetchError) Unwrap() error { return e.Err }
 
 // DuplicateError reports that a resource was defined more than once while merging config: two
 // plugin.yaml files (or two entries in the same one) declaring the same download/tool/lint/

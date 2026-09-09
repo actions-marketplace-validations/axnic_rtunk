@@ -15,9 +15,10 @@
 // Every recorded error (duplicates and dangling references) is returned/joined via errors.Join,
 // so a single Resolve or Validate call reports every problem instead of one per run.
 //
-// Git plugin sources (uri/ref) are never fetched: that would be a `git clone`, i.e. network
-// access, out of scope here (ROADMAP.md v0.2). Resolve reports an *UnsupportedSourceError for
-// one rather than silently skipping it.
+// Git plugin sources (uri/ref) are fetched via the system git binary (init/fetch --depth 1/
+// checkout, so both tags and SHAs work) and cached on disk keyed by uri+ref, since a pinned ref
+// never changes content. A source with neither local nor uri set is a config error, reported as
+// *InvalidSourceError.
 package config
 
 // Config is a fully resolved trunk.yaml: the repo's own enabled lists, plus every definition

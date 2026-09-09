@@ -53,11 +53,12 @@ type pluginFile struct {
 }
 
 // Resolve reads the trunk.yaml file at path and merges in every definition contributed by its
-// local plugin sources. See the package doc for the pipeline; call Validate on the result to
-// check enabled lists and dangling references. The returned Config is always populated with
-// everything Resolve managed to read, even when it also returns an error — callers that only
-// care about specific resources may still use it.
-func Resolve(file string) (Config, error) {
+// plugin sources — local ones read straight off disk, git ones fetched (and cached under
+// cacheDir; "" uses the OS default cache dir) via fetchGitSource. See the package doc for the
+// pipeline; call Validate on the result to check enabled lists and dangling references. The
+// returned Config is always populated with everything Resolve managed to read, even when it also
+// returns an error — callers that only care about specific resources may still use it.
+func Resolve(file, cacheDir string) (Config, error) {
 	cfg := Config{
 		Tools:     map[string]Tool{},
 		Downloads: map[string]Download{},
@@ -83,13 +84,21 @@ func Resolve(file string) (Config, error) {
 
 	// 2. Merge
 	for _, src := range tf.Plugins.Sources {
-		if src.Local == "" {
-			// git source: needs a clone, out of scope here (ROADMAP.md v0.2)
-			return cfg, &UnsupportedSourceError{SourceID: src.ID, URI: src.URI, Ref: src.Ref}
-		}
-		dir := filepath.Join(filepath.Dir(file), src.Local)
-		if info, statErr := os.Stat(dir); statErr != nil || !info.IsDir() {
-			return cfg, &SourceNotFoundError{SourceID: src.ID, Path: dir}
+		var dir string
+		switch {
+		case src.Local != "":
+			dir = filepath.Join(filepath.Dir(file), src.Local)
+			if info, statErr := os.Stat(dir); statErr != nil || !info.IsDir() {
+				return cfg, &SourceNotFoundError{SourceID: src.ID, Path: dir}
+			}
+		case src.URI != "":
+			fetched, err := fetchGitSource(cacheDir, src)
+			if err != nil {
+				return cfg, err
+			}
+			dir = fetched
+		default:
+			return cfg, &InvalidSourceError{SourceID: src.ID}
 		}
 		if err := mergePluginRepo(&cfg, dir, &errs); err != nil {
 			return cfg, err

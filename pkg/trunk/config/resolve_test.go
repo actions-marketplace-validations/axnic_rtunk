@@ -9,37 +9,19 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TestResolve_UnsupportedGitSource: trunk.yaml's only plugin source is a git source (uri/ref).
-// Resolve must report an *UnsupportedSourceError — it never fetches git sources — but the Config
-// it returns alongside that error must still carry everything the lecture phase read.
-func TestResolve_UnsupportedGitSource(t *testing.T) {
-	cfg, err := Resolve("testdata/trunk.yaml")
+// TestResolve_InvalidSource: a plugins.sources entry has neither local: nor uri: set. Resolve
+// must report an *InvalidSourceError rather than trying (and failing confusingly) to fetch it as
+// a git source.
+func TestResolve_InvalidSource(t *testing.T) {
+	_, err := Resolve("testdata/trunk-invalid-source.yaml", t.TempDir())
 
-	var unsupportedErr *UnsupportedSourceError
-	require.ErrorAs(t, err, &unsupportedErr)
-	assert.Equal(t, "trunk", unsupportedErr.SourceID)
-	assert.Equal(t, "https://github.com/trunk-io/plugins", unsupportedErr.URI)
-	assert.Equal(t, "v1.11.0", unsupportedErr.Ref)
-
-	assert.Equal(t, "0.1", cfg.Version)
-	assert.Equal(t, "1.25.0", cfg.CLI.Version)
-	assert.Equal(t, map[string]PluginSource{
-		"trunk": {ID: "trunk", URI: "https://github.com/trunk-io/plugins", Ref: "v1.11.0"},
-	}, cfg.Plugins.Sources)
-	assert.Equal(t, []string{"node@22.16.0", "python@3.14.4"}, cfg.Runtimes.Enabled)
-	assert.Equal(t, []string{"checkov@3.3.16", "git-diff-check"}, cfg.Lint.Enabled)
-	assert.Equal(t, []string{"commitlint", "trunk-check-pre-push"}, cfg.Actions.Enabled)
-
-	// Resolve bails out before merging anything for "trunk" (its only source).
-	assert.Empty(t, cfg.Runtimes.Definitions)
-	assert.Empty(t, cfg.Lint.Definitions)
-	assert.Empty(t, cfg.Actions.Definitions)
-	assert.Empty(t, cfg.Tools)
-	assert.Empty(t, cfg.Downloads)
+	var invalidErr *InvalidSourceError
+	require.ErrorAs(t, err, &invalidErr)
+	assert.Equal(t, "neither", invalidErr.SourceID)
 }
 
 func TestResolve_MissingFile(t *testing.T) {
-	_, err := Resolve("testdata/does-not-exist.yaml")
+	_, err := Resolve("testdata/does-not-exist.yaml", t.TempDir())
 
 	var readErr *ReadError
 	require.ErrorAs(t, err, &readErr)
@@ -50,7 +32,7 @@ func TestResolve_InvalidYAML(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "trunk.yaml")
 	require.NoError(t, os.WriteFile(path, []byte("version: [not-a-mapping\n"), 0o644))
 
-	_, err := Resolve(path)
+	_, err := Resolve(path, t.TempDir())
 
 	var parseErr *ParseError
 	require.ErrorAs(t, err, &parseErr)
@@ -62,7 +44,7 @@ func TestResolve_InvalidYAML(t *testing.T) {
 // merges definitions from every category dir and that everything it enables/references checks
 // out: this fixture is a fully valid, self-consistent config, so Resolve must return no error.
 func TestResolve_WithPluginRepo(t *testing.T) {
-	cfg, err := Resolve("testdata/trunk-with-plugins.yaml")
+	cfg, err := Resolve("testdata/trunk-with-plugins.yaml", t.TempDir())
 	require.NoError(t, err)
 
 	require.Contains(t, cfg.Downloads, "shellcheck")
@@ -89,7 +71,7 @@ func TestResolve_WithPluginRepo(t *testing.T) {
 // tool named "foo". Resolve must report a *DuplicateError, and the later file (foo-b, sorted
 // after foo-a) must win the overwrite.
 func TestResolve_DuplicateResource(t *testing.T) {
-	cfg, err := Resolve("testdata/trunk-duplicate.yaml")
+	cfg, err := Resolve("testdata/trunk-duplicate.yaml", t.TempDir())
 
 	var dupErr *DuplicateError
 	require.ErrorAs(t, err, &dupErr)
@@ -104,7 +86,7 @@ func TestResolve_DuplicateResource(t *testing.T) {
 // itself reads it in without complaint; Validate must report a *ReferenceError identifying
 // exactly what's missing.
 func TestResolve_DanglingReference(t *testing.T) {
-	cfg, err := Resolve("testdata/trunk-dangling.yaml")
+	cfg, err := Resolve("testdata/trunk-dangling.yaml", t.TempDir())
 	require.NoError(t, err)
 
 	err = cfg.Validate()
@@ -117,13 +99,13 @@ func TestResolve_DanglingReference(t *testing.T) {
 	assert.Equal(t, "nonexistent-tool", refErr.Reference)
 }
 
-// TestResolve_SourceNotFound: a `local:` plugin source pointing nowhere is a config error, unlike
-// a git source (uri/ref), which Resolve intentionally never fetches.
+// TestResolve_SourceNotFound: a `local:` plugin source pointing nowhere is a config error — unlike
+// a git source, a local source is expected to already be present, never fetched.
 func TestResolve_SourceNotFound(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "trunk.yaml")
 	require.NoError(t, os.WriteFile(path, []byte("plugins:\n  sources:\n    - id: gone\n      local: ./nowhere\n"), 0o644))
 
-	_, err := Resolve(path)
+	_, err := Resolve(path, t.TempDir())
 
 	var notFoundErr *SourceNotFoundError
 	require.ErrorAs(t, err, &notFoundErr)
