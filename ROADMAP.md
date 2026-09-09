@@ -28,7 +28,7 @@ config. This validates the config model before anything downloads or executes.
   elements that are actually turned on, as opposed to merely defined/available.
 - **`rtunk config {plugins,lint,actions,tools,runtimes} show <id> [--output yaml|json]`** — Show
   detailed information about one specific element by its identifier, formatted as YAML or JSON.
-- **`rtunk config dump [--output yaml|json]`** — Print the fully compiled/merged configuration:
+- **`rtunk config print [--output yaml|json]`** — Print the fully compiled/merged configuration:
   the result of resolving all config sources (base config, local overrides, plugin definitions)
   into the single effective configuration rtunk would act on.
 
