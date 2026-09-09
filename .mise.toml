@@ -1,0 +1,14 @@
+# =============================================================================
+# rtunk Development Environment Configuration
+# =============================================================================
+# mise manages the toolchain needed to build and lint rtunk.
+#
+# Usage:
+#   mise install   # Install all tools
+#   mise trust     # Trust this configuration (if prompted)
+# =============================================================================
+
+[tools]
+
+go = "latest"    # rtunk is implemented in Go (see AGENTS.md)
+trunk = "latest" # Metalinter/formatter, drives .trunk/trunk.yaml
