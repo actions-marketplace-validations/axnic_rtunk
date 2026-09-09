@@ -82,7 +82,7 @@ func TestResolve_WithPluginRepo(t *testing.T) {
 	require.Contains(t, cfg.Actions.Definitions, "go-mod-tidy")
 
 	require.Contains(t, cfg.Runtimes.Definitions, "node")
-	assert.Equal(t, []string{"node", "npm", "npx", "corepack"}, cfg.Runtimes.Definitions["node"].Shims)
+	assert.Equal(t, ShimList{"node", "npm", "npx", "corepack"}, cfg.Runtimes.Definitions["node"].Shims)
 }
 
 // TestResolve_DuplicateResource: two plugin.yaml files under the same local source both define a

@@ -44,8 +44,38 @@ type Tool struct {
 	Runtime          string   `yaml:"runtime,omitempty"`
 	Package          string   `yaml:"package,omitempty"`
 	Download         string   `yaml:"download,omitempty"`
-	Shims            []string `yaml:"shims,omitempty"`
+	Shims            ShimList `yaml:"shims,omitempty"`
 	KnownGoodVersion string   `yaml:"known_good_version,omitempty"`
+}
+
+// ShimList is the shims: field's value. Most entries are a bare executable name, but some
+// (e.g. github.com/trunk-io/plugins tools/bazel-differ/plugin.yaml) are {name, target} objects
+// aliasing the exposed shim name to a different underlying binary. ponytail: only the exposed
+// name is kept — rtunk doesn't build shims until v0.2, so the target alias isn't needed yet; add
+// it (as a parallel slice or a real struct) when shim creation lands.
+type ShimList []string
+
+func (s *ShimList) UnmarshalYAML(node *yaml.Node) error {
+	var raw []yaml.Node
+	if err := node.Decode(&raw); err != nil {
+		return err
+	}
+	out := make([]string, 0, len(raw))
+	for _, n := range raw {
+		if n.Kind == yaml.ScalarNode {
+			out = append(out, n.Value)
+			continue
+		}
+		var obj struct {
+			Name string `yaml:"name"`
+		}
+		if err := n.Decode(&obj); err != nil {
+			return err
+		}
+		out = append(out, obj.Name)
+	}
+	*s = out
+	return nil
 }
 
 // Linter is a linter definition (ARCHITECTURE.md `lint:`), tying files, tools, and commands
@@ -128,10 +158,21 @@ type Trigger struct {
 	Schedule *Schedule `yaml:"schedule,omitempty"`
 }
 
-// Schedule is a periodic background trigger.
+// Schedule is a periodic background trigger: either the {interval, delay} object form, or a bare
+// duration string as shorthand for {interval: <value>} (e.g. github.com/trunk-io/plugins
+// actions/git-blame-ignore-revs/plugin.yaml's `schedule: 24h`).
 type Schedule struct {
 	Interval string `yaml:"interval"`
 	Delay    string `yaml:"delay,omitempty"`
+}
+
+func (s *Schedule) UnmarshalYAML(node *yaml.Node) error {
+	if node.Kind == yaml.ScalarNode {
+		s.Interval = node.Value
+		return nil
+	}
+	type rawSchedule Schedule // avoid infinite recursion into this UnmarshalYAML
+	return node.Decode((*rawSchedule)(s))
 }
 
 // Runtime is a language runtime definition (ARCHITECTURE.md `runtimes:`).
@@ -140,7 +181,7 @@ type Runtime struct {
 	Download           string             `yaml:"download,omitempty"`
 	SystemVersion      string             `yaml:"system_version,omitempty"`
 	KnownGoodVersion   string             `yaml:"known_good_version,omitempty"`
-	Shims              []string           `yaml:"shims,omitempty"`
+	Shims              ShimList           `yaml:"shims,omitempty"`
 	VersionCommands    []VersionCommand   `yaml:"version_commands,omitempty"`
 	RuntimeEnvironment []EnvironmentEntry `yaml:"runtime_environment,omitempty"`
 	LinterEnvironment  []EnvironmentEntry `yaml:"linter_environment,omitempty"`

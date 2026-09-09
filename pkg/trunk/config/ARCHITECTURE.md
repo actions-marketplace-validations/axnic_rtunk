@@ -167,6 +167,19 @@ tools:
       known_good_version: 0.11.0
 ```
 
+```yaml
+# shim aliasing (github.com/trunk-io/plugins, tools/bazel-differ/plugin.yaml)
+tools:
+  definitions:
+    - name: bazel-differ
+      package: github.com/ewhauser/bazel-differ/cli
+      runtime: go
+      known_good_version: 0.0.5
+      shims:
+        - name: bazel-differ
+          target: cli
+```
+
 Fields:
 
 - `name` — id other sections (e.g. `lint.definitions[].tools`) reference.
@@ -174,7 +187,10 @@ Fields:
   Mutually exclusive with `download`.
 - `download` — fetches it via a `downloads:` recipe, for standalone binaries. Mutually exclusive
   with `runtime`/`package`.
-- `shims` — executable names the tool exposes on `PATH` once installed.
+- `shims` — executable names the tool exposes on `PATH` once installed. Each entry is either a
+  bare string, or a `{name, target}` object aliasing the exposed shim name to a different
+  underlying binary (bazel-differ, above, exposes `bazel-differ` on `PATH` but resolves to the
+  package's `cli` binary).
 - `known_good_version` — default/tested version used when nothing pins a different one.
 
 ### `lint:`
@@ -309,9 +325,9 @@ Fields:
   - `git_hooks: [<hook-name>, ...]` — pre-commit, commit-msg, pre-push, post-checkout,
     post-merge, pre-rebase, prepare-commit-msg, ...
   - `files: [<path glob>, ...]` — fires when matching files change.
-  - `schedule: {interval: <duration>, delay: <duration>}` — periodic background trigger, seen
-    only on trunk's own built-in actions via `trunk config print`, not user-authorable the same
-    way.
+  - `schedule: <duration>` or `schedule: {interval: <duration>, delay: <duration>}` — periodic
+    background trigger. The bare form is shorthand for `{interval: <duration>}` (e.g. `schedule:
+24h`, github.com/trunk-io/plugins, `actions/git-blame-ignore-revs/plugin.yaml`).
 - `interactive: true|optional` — whether the action needs a TTY.
 - `notify_on_error: true|false` — whether a failure surfaces a notification.
 
@@ -347,7 +363,8 @@ Fields:
   the host rather than downloading it (php's definition, verified via `version_commands` matched
   against a minimum `version: ">=8.0.0"`, github.com/trunk-io/plugins, `runtimes/php/plugin.yaml`).
 - `known_good_version` — default/tested version.
-- `shims` — executable names the runtime exposes on `PATH` once installed.
+- `shims` — executable names the runtime exposes on `PATH` once installed. Can also use the
+  `{name, target}` object form (see `tools:` above).
 - `version_commands` — `[{run, parse_regex}, ...]` to detect the installed runtime's version.
 - `runtime_environment` — environment used to run the runtime itself.
 - `linter_environment` — environment _added_ when a linter depending on this runtime executes
