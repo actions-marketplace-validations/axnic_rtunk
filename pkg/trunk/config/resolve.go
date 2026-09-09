@@ -4,7 +4,6 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"gopkg.in/yaml.v3"
 )
@@ -53,10 +52,11 @@ type pluginFile struct {
 	} `yaml:"runtimes"`
 }
 
-// Resolve reads the trunk.yaml file at path, merges in every definition contributed by its local
-// plugin sources, and validates the result. See the package doc for the three-phase pipeline.
-// The returned Config is always populated with everything Resolve managed to read, even when it
-// also returns an error — callers that only care about specific resources may still use it.
+// Resolve reads the trunk.yaml file at path and merges in every definition contributed by its
+// local plugin sources. See the package doc for the pipeline; call Validate on the result to
+// check enabled lists and dangling references. The returned Config is always populated with
+// everything Resolve managed to read, even when it also returns an error — callers that only
+// care about specific resources may still use it.
 func Resolve(file string) (Config, error) {
 	cfg := Config{
 		Tools:     map[string]Tool{},
@@ -84,8 +84,7 @@ func Resolve(file string) (Config, error) {
 	// 2. Merge
 	for _, src := range tf.Plugins.Sources {
 		if src.Local == "" {
-			cfg.incomplete = true // git source: needs a clone, out of scope here (ROADMAP.md v0.2)
-			continue
+			continue // git source: needs a clone, out of scope here (ROADMAP.md v0.2)
 		}
 		dir := filepath.Join(filepath.Dir(file), src.Local)
 		if info, statErr := os.Stat(dir); statErr != nil || !info.IsDir() {
@@ -95,9 +94,6 @@ func Resolve(file string) (Config, error) {
 			return cfg, err
 		}
 	}
-
-	// 3. Validation
-	errs = append(errs, cfg.Validate())
 
 	return cfg, errors.Join(errs...)
 }
@@ -153,55 +149,4 @@ func mergeKeyed[T any](dst map[string]T, items []T, key func(T) string, category
 		}
 		dst[k] = item
 	}
-}
-
-// checkEnabled reports a *ReferenceError for every entry of enabled (a trunk.yaml `enabled:`
-// list, each optionally pinned as `id@version`) whose id has no matching key in defs.
-func checkEnabled[T any](category string, enabled []string, defs map[string]T) []error {
-	var errs []error
-	for _, e := range enabled {
-		id, _, _ := strings.Cut(e, "@")
-		if _, ok := defs[id]; !ok {
-			errs = append(errs, &ReferenceError{Category: category, Key: e, Field: "enabled", Reference: id})
-		}
-	}
-	return errs
-}
-
-// validateReferences reports a *ReferenceError for every by-id reference (a tool's
-// download/runtime, a runtime's download, a linter's tools) that doesn't resolve to a key
-// actually present in cfg.
-func validateReferences(cfg *Config) []error {
-	var errs []error
-
-	for name, t := range cfg.Tools {
-		if t.Runtime != "" {
-			if _, ok := cfg.Runtimes.Definitions[t.Runtime]; !ok {
-				errs = append(errs, &ReferenceError{Category: "tool", Key: name, Field: "runtime", Reference: t.Runtime})
-			}
-		}
-		if t.Download != "" {
-			if _, ok := cfg.Downloads[t.Download]; !ok {
-				errs = append(errs, &ReferenceError{Category: "tool", Key: name, Field: "download", Reference: t.Download})
-			}
-		}
-	}
-
-	for typ, r := range cfg.Runtimes.Definitions {
-		if r.Download != "" {
-			if _, ok := cfg.Downloads[r.Download]; !ok {
-				errs = append(errs, &ReferenceError{Category: "runtime", Key: typ, Field: "download", Reference: r.Download})
-			}
-		}
-	}
-
-	for name, l := range cfg.Lint.Definitions {
-		for _, toolName := range l.Tools {
-			if _, ok := cfg.Tools[toolName]; !ok {
-				errs = append(errs, &ReferenceError{Category: "lint", Key: name, Field: "tools", Reference: toolName})
-			}
-		}
-	}
-
-	return errs
 }

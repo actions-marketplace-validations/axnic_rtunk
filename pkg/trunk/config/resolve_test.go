@@ -93,10 +93,14 @@ func TestResolve_DuplicateResource(t *testing.T) {
 	assert.Equal(t, "2.0.0", cfg.Tools["foo"].KnownGoodVersion, "later source must win the whole key, not merge fields")
 }
 
-// TestResolve_DanglingReference: a linter names a tool that no plugin.yaml defines. Resolve must
-// report a *ReferenceError identifying exactly what's missing.
+// TestResolve_DanglingReference: a linter names a tool that no plugin.yaml defines. Resolve
+// itself reads it in without complaint; Validate must report a *ReferenceError identifying
+// exactly what's missing.
 func TestResolve_DanglingReference(t *testing.T) {
-	_, err := Resolve("testdata/trunk-dangling.yaml")
+	cfg, err := Resolve("testdata/trunk-dangling.yaml")
+	require.NoError(t, err)
+
+	err = cfg.Validate()
 
 	var refErr *ReferenceError
 	require.ErrorAs(t, err, &refErr)
