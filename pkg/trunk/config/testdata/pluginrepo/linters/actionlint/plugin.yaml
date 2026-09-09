@@ -1,0 +1,19 @@
+# github.com/trunk-io/plugins, linters/actionlint/plugin.yaml (ARCHITECTURE.md `lint:`)
+lint:
+  definitions:
+    - name: actionlint
+      files: [github-workflow]
+      tools: [actionlint]
+      description: Verify your Github workflows
+      commands:
+        - name: lint
+          run: actionlint -format "{{json .}}" ${target}
+          output: actionlint
+          success_codes: [0, 1]
+      direct_configs:
+        - .github/actionlint.yaml
+        - .github/actionlint.yml
+      issue_url_format: https://github.com/rhysd/actionlint/blob/main/docs/checks.md
+      suggest_if: files_present
+      known_good_version: 1.7.8
+      version_command: { run: actionlint --version, parse_regex: "${semver}" }

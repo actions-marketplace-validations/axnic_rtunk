@@ -1,0 +1,15 @@
+version: "0.1"
+plugins:
+  sources:
+    - id: trunk
+      local: ./pluginrepo
+runtimes:
+  enabled:
+    - node@22.18.0
+lint:
+  enabled:
+    - actionlint
+    - prettier
+actions:
+  enabled:
+    - commitlint

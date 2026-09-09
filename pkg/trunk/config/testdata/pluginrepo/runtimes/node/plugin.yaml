@@ -1,0 +1,16 @@
+# github.com/trunk-io/plugins, runtimes/node/plugin.yaml, abbreviated (ARCHITECTURE.md `runtimes:`)
+runtimes:
+  definitions:
+    - type: node
+      download: node
+      known_good_version: 22.18.0
+      shims: [node, npm, npx, corepack]
+      version_commands:
+        - run: node --version
+          parse_regex: "${semver}"
+      runtime_environment:
+        - { name: PATH, list: ["${runtime}/bin", "${runtime}", "${env.PATH}"] }
+        - { name: NODE_OPTIONS, value: "${env.NODE_OPTIONS}", optional: true }
+      linter_environment:
+        - { name: PATH, list: ["${linter}/node_modules/.bin"] }
+        - { name: NODE_PATH, value: "${linter}/node_modules" }

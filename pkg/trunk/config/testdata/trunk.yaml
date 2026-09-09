@@ -1,0 +1,23 @@
+# fixture mirroring the two-layer model described in ARCHITECTURE.md
+version: "0.1"
+cli:
+  version: 1.25.0
+plugins:
+  sources:
+    - id: trunk
+      ref: v1.11.0
+      uri: https://github.com/trunk-io/plugins
+    - id: local-plugins
+      local: ../plugins
+runtimes:
+  enabled:
+    - node@22.16.0
+    - python@3.14.4
+lint:
+  enabled:
+    - checkov@3.3.16
+    - git-diff-check
+actions:
+  enabled:
+    - commitlint
+    - trunk-check-pre-push

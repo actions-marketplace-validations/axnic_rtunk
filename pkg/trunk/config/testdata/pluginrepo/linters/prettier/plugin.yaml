@@ -1,0 +1,17 @@
+# github.com/trunk-io/plugins, linters/prettier/plugin.yaml — commands/parser block is verbatim
+# (ARCHITECTURE.md `commands[]` `parser`); name/files/tools added to make it a valid standalone
+# lint definition for this fixture.
+lint:
+  definitions:
+    - name: prettier
+      files: [javascript]
+      tools: [prettier]
+      commands:
+        - name: format
+          run: prettier -w ${target}
+          in_place: true
+          formatter: true
+          output: sarif
+          parser:
+            runtime: python
+            run: python3 ${plugin}/linters/prettier/prettier_to_sarif.py ${exit_code}

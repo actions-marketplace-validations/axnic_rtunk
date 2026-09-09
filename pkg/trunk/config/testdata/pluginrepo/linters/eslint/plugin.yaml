@@ -1,0 +1,8 @@
+# github.com/trunk-io/plugins, linters/eslint/plugin.yaml (ARCHITECTURE.md `tools:`)
+tools:
+  definitions:
+    - name: eslint
+      runtime: node
+      package: eslint
+      shims: [eslint]
+      known_good_version: 8.10.0
