@@ -123,6 +123,10 @@ diff already shows what changed.
 
 - Motivation, trade-offs, or user impact — not a narration of the diff.
 - Max 80 characters per line, sentence-case.
+- Sentence-case applies to the body's very first character, not each line.
+  `rtunk`/`trunk` are lowercase by convention, so if the first sentence would
+  otherwise start with one of them, rephrase around it instead
+  (e.g. "Pins go and trunk because..." not "trunk needs...").
 - The "why" must come from the user's own words in conversation. Never infer
   it from the diff. If the user hasn't stated it, ask before writing the
   body.
@@ -184,14 +188,15 @@ Prompt configuration (for interactive commit tooling, if wired up later):
 
 ### If commitlint fails
 
-| Rule                   | Likely cause                                           | Fix                                                                  |
-| ---------------------- | ------------------------------------------------------ | -------------------------------------------------------------------- |
-| `type-enum`            | Symbol missing or misspelled                           | Use one of the 12 base symbols, or a `+!`/`~!`/`-!` breaking variant |
-| `scope-empty`          | No `[scope]` bracket                                   | Add a bracketed scope from the Scopes table                          |
-| `header-max-length`    | Subject too long                                       | Trim to ≤100 chars total, move detail to the body                    |
-| `subject-full-stop`    | Trailing period on subject                             | Remove it                                                            |
-| `body-max-line-length` | Body line >80 chars                                    | Rewrap                                                               |
-| `footer-leading-blank` | No blank line before `Assisted-by:`/`BREAKING CHANGE:` | Add a blank line before the footer                                   |
+| Rule                   | Likely cause                                              | Fix                                                                  |
+| ---------------------- | --------------------------------------------------------- | -------------------------------------------------------------------- |
+| `type-enum`            | Symbol missing or misspelled                              | Use one of the 12 base symbols, or a `+!`/`~!`/`-!` breaking variant |
+| `scope-empty`          | No `[scope]` bracket                                      | Add a bracketed scope from the Scopes table                          |
+| `header-max-length`    | Subject too long                                          | Trim to ≤100 chars total, move detail to the body                    |
+| `subject-full-stop`    | Trailing period on subject                                | Remove it                                                            |
+| `body-max-line-length` | Body line >80 chars                                       | Rewrap                                                               |
+| `body-case`            | Body starts with a lowercase word (often `rtunk`/`trunk`) | Rephrase the opening so the first character is uppercase             |
+| `footer-leading-blank` | No blank line before `Assisted-by:`/`BREAKING CHANGE:`    | Add a blank line before the footer                                   |
 
 ## Workflow
 
@@ -220,7 +225,7 @@ Prompt configuration (for interactive commit tooling, if wired up later):
 ```
 +[check]: Add SARIF output normalization for gitleaks
 
-trunk-compatible tooling expects SARIF; without it, downstream
+Trunk-compatible tooling expects SARIF; without it, downstream
 consumers (editors, CI annotators) can't parse gitleaks findings
 the same way they parse every other linter's output.
 
