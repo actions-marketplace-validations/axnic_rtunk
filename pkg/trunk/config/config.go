@@ -16,9 +16,11 @@
 // so a single Resolve or Validate call reports every problem instead of one per run.
 //
 // Git plugin sources (uri/ref) are fetched via the system git binary (init/fetch --depth 1/
-// checkout, so both tags and SHAs work) and cached on disk keyed by uri+ref, since a pinned ref
-// never changes content. A source with neither local nor uri set is a config error, reported as
-// *InvalidSourceError.
+// checkout, so both tags and SHAs work) into a throwaway temp dir, parsed, then discarded — what
+// persists on disk is a cache of the parsed definitions, keyed by uri+ref, since a pinned
+// ref never changes content. A cache file that fails to decode (corrupted, or from an incompatible
+// rtunk version) is dropped and regenerated from the network rather than treated as fatal. A
+// source with neither local nor uri set is a config error, reported as *InvalidSourceError.
 package config
 
 // Config is a fully resolved trunk.yaml: the repo's own enabled lists, plus every definition

@@ -53,11 +53,12 @@ type pluginFile struct {
 }
 
 // Resolve reads the trunk.yaml file at path and merges in every definition contributed by its
-// plugin sources — local ones read straight off disk, git ones fetched (and cached under
-// cacheDir; "" uses the OS default cache dir) via fetchGitSource. See the package doc for the
-// pipeline; call Validate on the result to check enabled lists and dangling references. The
-// returned Config is always populated with everything Resolve managed to read, even when it also
-// returns an error — callers that only care about specific resources may still use it.
+// plugin sources — local ones read straight off disk, git ones fetched via fetchGitSource, which
+// caches the parsed result (not the raw checkout) under cacheDir ("" uses the OS default cache
+// dir). See the package doc for the pipeline; call Validate on the result to check enabled lists
+// and dangling references. The returned Config is always populated with everything Resolve
+// managed to read, even when it also returns an error — callers that only care about specific
+// resources may still use it.
 func Resolve(file, cacheDir string) (Config, error) {
 	cfg := Config{
 		Tools:     map[string]Tool{},
@@ -84,24 +85,24 @@ func Resolve(file, cacheDir string) (Config, error) {
 
 	// 2. Merge
 	for _, src := range tf.Plugins.Sources {
-		var dir string
 		switch {
 		case src.Local != "":
-			dir = filepath.Join(filepath.Dir(file), src.Local)
+			dir := filepath.Join(filepath.Dir(file), src.Local)
 			if info, statErr := os.Stat(dir); statErr != nil || !info.IsDir() {
 				return cfg, &SourceNotFoundError{SourceID: src.ID, Path: dir}
 			}
+			if err := mergePluginRepo(&cfg, dir, &errs); err != nil {
+				return cfg, err
+			}
 		case src.URI != "":
-			fetched, err := fetchGitSource(cacheDir, src)
+			defs, dupErrs, err := fetchGitSource(cacheDir, src)
 			if err != nil {
 				return cfg, err
 			}
-			dir = fetched
+			errs = append(errs, dupErrs...)
+			mergeSourceInto(&cfg, defs, &errs)
 		default:
 			return cfg, &InvalidSourceError{SourceID: src.ID}
-		}
-		if err := mergePluginRepo(&cfg, dir, &errs); err != nil {
-			return cfg, err
 		}
 	}
 
@@ -121,31 +122,74 @@ func readTrunkFile(path string) (trunkFile, error) {
 }
 
 // mergePluginRepo walks every plugin.yaml under dir's category subdirs and merges its
-// definitions into cfg, recording any duplicate keys into *errs.
+// definitions into cfg, recording any duplicate keys (within dir, or against what's already in
+// cfg from an earlier source) into *errs.
 func mergePluginRepo(cfg *Config, dir string, errs *[]error) error {
+	defs, dupErrs, err := parseSourceDir(dir)
+	if err != nil {
+		return err
+	}
+	*errs = append(*errs, dupErrs...)
+	mergeSourceInto(cfg, defs, errs)
+	return nil
+}
+
+// parseSourceDir walks dir's category subdirs and returns everything its plugin.yaml files
+// define, unmerged — the per-source shape fetchGitSource caches. dupErrs holds a *DuplicateError
+// for every key repeated across the plugin.yaml files within this one dir (e.g. two files each
+// defining a tool named "foo"); duplicates against another source are mergeSourceInto's job.
+func parseSourceDir(dir string) (defs sourceDefs, dupErrs []error, err error) {
+	defs = sourceDefs{
+		Downloads: map[string]Download{},
+		Tools:     map[string]Tool{},
+		Lint:      map[string]Linter{},
+		Actions:   map[string]Action{},
+		Runtimes:  map[string]Runtime{},
+	}
 	for _, category := range pluginCategories {
 		matches, err := filepath.Glob(filepath.Join(dir, category, "*", "plugin.yaml"))
 		if err != nil {
-			return err // malformed glob pattern; unreachable with our fixed patterns
+			return sourceDefs{}, nil, err // malformed glob pattern; unreachable with our fixed patterns
 		}
 		for _, path := range matches {
 			data, err := os.ReadFile(path)
 			if err != nil {
-				return &ReadError{Path: path, Err: err}
+				return sourceDefs{}, nil, &ReadError{Path: path, Err: err}
 			}
 			var pf pluginFile
 			if err := yaml.Unmarshal(data, &pf); err != nil {
-				return &ParseError{Path: path, Err: err}
+				return sourceDefs{}, nil, &ParseError{Path: path, Err: err}
 			}
 
-			mergeKeyed(cfg.Downloads, pf.Downloads, func(d Download) string { return d.Name }, "download", errs)
-			mergeKeyed(cfg.Tools, pf.Tools.Definitions, func(t Tool) string { return t.Name }, "tool", errs)
-			mergeKeyed(cfg.Lint.Definitions, pf.Lint.Definitions, func(l Linter) string { return l.Name }, "lint", errs)
-			mergeKeyed(cfg.Actions.Definitions, pf.Actions.Definitions, func(a Action) string { return a.ID }, "action", errs)
-			mergeKeyed(cfg.Runtimes.Definitions, pf.Runtimes.Definitions, func(r Runtime) string { return r.Type }, "runtime", errs)
+			mergeKeyed(defs.Downloads, pf.Downloads, func(d Download) string { return d.Name }, "download", &dupErrs)
+			mergeKeyed(defs.Tools, pf.Tools.Definitions, func(t Tool) string { return t.Name }, "tool", &dupErrs)
+			mergeKeyed(defs.Lint, pf.Lint.Definitions, func(l Linter) string { return l.Name }, "lint", &dupErrs)
+			mergeKeyed(defs.Actions, pf.Actions.Definitions, func(a Action) string { return a.ID }, "action", &dupErrs)
+			mergeKeyed(defs.Runtimes, pf.Runtimes.Definitions, func(r Runtime) string { return r.Type }, "runtime", &dupErrs)
 		}
 	}
-	return nil
+	return defs, dupErrs, nil
+}
+
+// mergeSourceInto folds defs into cfg's global maps, recording a *DuplicateError for any key
+// already contributed by an earlier source into *errs.
+func mergeSourceInto(cfg *Config, defs sourceDefs, errs *[]error) {
+	mergeMapInto(cfg.Downloads, defs.Downloads, "download", errs)
+	mergeMapInto(cfg.Tools, defs.Tools, "tool", errs)
+	mergeMapInto(cfg.Lint.Definitions, defs.Lint, "lint", errs)
+	mergeMapInto(cfg.Actions.Definitions, defs.Actions, "action", errs)
+	mergeMapInto(cfg.Runtimes.Definitions, defs.Runtimes, "runtime", errs)
+}
+
+// mergeMapInto copies src into dst key by key, recording a *DuplicateError for any key already
+// present in dst.
+func mergeMapInto[T any](dst map[string]T, src map[string]T, category string, errs *[]error) {
+	for k, v := range src {
+		if _, exists := dst[k]; exists {
+			*errs = append(*errs, &DuplicateError{Category: category, Key: k})
+		}
+		dst[k] = v
+	}
 }
 
 // mergeKeyed inserts each item into dst, keyed by key(item). A key already present in dst (from
