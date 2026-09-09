@@ -7,8 +7,6 @@ plugins:
     - id: trunk
       ref: v1.11.0
       uri: https://github.com/trunk-io/plugins
-    - id: local-plugins
-      local: ../plugins
 runtimes:
   enabled:
     - node@22.16.0

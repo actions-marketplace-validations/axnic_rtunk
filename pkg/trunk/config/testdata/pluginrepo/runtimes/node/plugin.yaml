@@ -1,4 +1,15 @@
-# github.com/trunk-io/plugins, runtimes/node/plugin.yaml, abbreviated (ARCHITECTURE.md `runtimes:`)
+# github.com/trunk-io/plugins, runtimes/node/plugin.yaml, abbreviated (ARCHITECTURE.md `runtimes:`).
+# The `downloads:` section below isn't in the ARCHITECTURE.md excerpt — added here (real
+# nodejs.org dist layout) so `download: node` resolves to something for this fixture's reference
+# validation.
+downloads:
+  - name: node
+    version: 22.18.0
+    downloads:
+      - os: { linux: linux, macos: darwin }
+        cpu: { arm_64: arm64, x86_64: x64 }
+        url: https://nodejs.org/dist/v${version}/node-v${version}-${os}-${cpu}.tar.gz
+        strip_components: 1
 runtimes:
   definitions:
     - type: node

@@ -1,0 +1,7 @@
+# synthetic fixture (not upstream content) for TestResolve_DanglingReference: references a tool
+# that no plugin.yaml in this repo defines.
+lint:
+  definitions:
+    - name: orphan
+      files: [text]
+      tools: [nonexistent-tool]

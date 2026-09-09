@@ -1,6 +1,15 @@
 # github.com/trunk-io/plugins, linters/prettier/plugin.yaml — commands/parser block is verbatim
 # (ARCHITECTURE.md `commands[]` `parser`); name/files/tools added to make it a valid standalone
-# lint definition for this fixture.
+# lint definition for this fixture. `tools:` below is inferred (prettier is npm-distributed, same
+# runtime-based shape as eslint's), not copied from ARCHITECTURE.md, so `tools: [prettier]`
+# resolves to something for this fixture's reference validation.
+tools:
+  definitions:
+    - name: prettier
+      runtime: node
+      package: prettier
+      shims: [prettier]
+      known_good_version: 3.9.6
 lint:
   definitions:
     - name: prettier

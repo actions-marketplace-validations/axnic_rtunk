@@ -1,4 +1,20 @@
-# github.com/trunk-io/plugins, linters/actionlint/plugin.yaml (ARCHITECTURE.md `lint:`)
+# github.com/trunk-io/plugins, linters/actionlint/plugin.yaml (ARCHITECTURE.md `lint:`).
+# The `downloads:`/`tools:` sections below aren't in the ARCHITECTURE.md excerpt (which only
+# shows `lint:`) — added here, in the doc's own documented shape, so `tools: [actionlint]`
+# resolves to something for this fixture's reference validation.
+downloads:
+  - name: actionlint
+    version: 1.7.8
+    downloads:
+      - os: { linux: linux, macos: darwin }
+        cpu: { arm_64: arm64, x86_64: amd64 }
+        url: https://github.com/rhysd/actionlint/releases/download/v${version}/actionlint_${version}_${os}_${cpu}.tar.gz
+tools:
+  definitions:
+    - name: actionlint
+      download: actionlint
+      shims: [actionlint]
+      known_good_version: 1.7.8
 lint:
   definitions:
     - name: actionlint
