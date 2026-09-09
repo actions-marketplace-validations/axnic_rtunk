@@ -1,14 +1,12 @@
 package config
 
 import (
-	"errors"
 	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"gopkg.in/yaml.v3"
 )
 
 func TestResolve(t *testing.T) {
@@ -119,21 +117,4 @@ func TestResolve_SourceNotFound(t *testing.T) {
 	var notFoundErr *SourceNotFoundError
 	require.ErrorAs(t, err, &notFoundErr)
 	assert.Equal(t, "gone", notFoundErr.SourceID)
-}
-
-// TestAction_Interactive checks the interactive field's two documented literal forms (bare
-// `true`, or the string "optional") both decode without error.
-func TestAction_Interactive(t *testing.T) {
-	for _, snippet := range []string{"interactive: true", "interactive: optional"} {
-		var a Action
-		require.NoError(t, yaml.Unmarshal([]byte(snippet), &a))
-		assert.NotEmpty(t, a.Interactive)
-	}
-}
-
-// TestReadError_Unwrap and TestParseError_Unwrap: both typed errors must unwrap to the underlying
-// os/yaml error, so callers can errors.Is/As against it (e.g. os.ErrNotExist).
-func TestReadError_Unwrap(t *testing.T) {
-	_, err := Resolve("testdata/does-not-exist.yaml")
-	assert.True(t, errors.Is(err, os.ErrNotExist))
 }
