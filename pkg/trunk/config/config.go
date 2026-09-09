@@ -15,8 +15,9 @@
 // Every recorded error (duplicates and dangling references) is returned/joined via errors.Join,
 // so a single Resolve or Validate call reports every problem instead of one per run.
 //
-// Git plugin sources (uri/ref) are recorded but never fetched: that would be a `git clone`, i.e.
-// network access, out of scope here (ROADMAP.md v0.2). Resolve skips merging for such a source.
+// Git plugin sources (uri/ref) are never fetched: that would be a `git clone`, i.e. network
+// access, out of scope here (ROADMAP.md v0.2). Resolve reports an *UnsupportedSourceError for
+// one rather than silently skipping it.
 package config
 
 // Config is a fully resolved trunk.yaml: the repo's own enabled lists, plus every definition

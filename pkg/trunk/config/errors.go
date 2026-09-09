@@ -36,6 +36,19 @@ func (e *SourceNotFoundError) Error() string {
 	return fmt.Sprintf("config: plugin source %q: local path %s does not exist", e.SourceID, e.Path)
 }
 
+// UnsupportedSourceError reports that a plugins.sources entry is a git source (uri/ref). Resolve
+// does not fetch git sources — that would be a `git clone`, i.e. network access, out of scope
+// here (ROADMAP.md v0.2) — so it cannot resolve a config that depends on one.
+type UnsupportedSourceError struct {
+	SourceID string
+	URI      string
+	Ref      string
+}
+
+func (e *UnsupportedSourceError) Error() string {
+	return fmt.Sprintf("config: plugin source %q: git sources are not fetched yet (uri=%s ref=%s)", e.SourceID, e.URI, e.Ref)
+}
+
 // DuplicateError reports that a resource was defined more than once while merging config: two
 // plugin.yaml files (or two entries in the same one) declaring the same download/tool/lint/
 // action/runtime name, or trunk.yaml's plugins.sources repeating an id. It is never fatal on its

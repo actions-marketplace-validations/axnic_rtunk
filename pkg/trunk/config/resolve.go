@@ -84,7 +84,8 @@ func Resolve(file string) (Config, error) {
 	// 2. Merge
 	for _, src := range tf.Plugins.Sources {
 		if src.Local == "" {
-			continue // git source: needs a clone, out of scope here (ROADMAP.md v0.2)
+			// git source: needs a clone, out of scope here (ROADMAP.md v0.2)
+			return cfg, &UnsupportedSourceError{SourceID: src.ID, URI: src.URI, Ref: src.Ref}
 		}
 		dir := filepath.Join(filepath.Dir(file), src.Local)
 		if info, statErr := os.Stat(dir); statErr != nil || !info.IsDir() {

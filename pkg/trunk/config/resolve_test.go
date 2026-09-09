@@ -9,9 +9,17 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestResolve(t *testing.T) {
+// TestResolve_UnsupportedGitSource: trunk.yaml's only plugin source is a git source (uri/ref).
+// Resolve must report an *UnsupportedSourceError — it never fetches git sources — but the Config
+// it returns alongside that error must still carry everything the lecture phase read.
+func TestResolve_UnsupportedGitSource(t *testing.T) {
 	cfg, err := Resolve("testdata/trunk.yaml")
-	require.NoError(t, err)
+
+	var unsupportedErr *UnsupportedSourceError
+	require.ErrorAs(t, err, &unsupportedErr)
+	assert.Equal(t, "trunk", unsupportedErr.SourceID)
+	assert.Equal(t, "https://github.com/trunk-io/plugins", unsupportedErr.URI)
+	assert.Equal(t, "v1.11.0", unsupportedErr.Ref)
 
 	assert.Equal(t, "0.1", cfg.Version)
 	assert.Equal(t, "1.25.0", cfg.CLI.Version)
@@ -22,8 +30,7 @@ func TestResolve(t *testing.T) {
 	assert.Equal(t, []string{"checkov@3.3.16", "git-diff-check"}, cfg.Lint.Enabled)
 	assert.Equal(t, []string{"commitlint", "trunk-check-pre-push"}, cfg.Actions.Enabled)
 
-	// "trunk" is a git source (no network, never fetched): nothing to merge, and — since
-	// resolution is incomplete — the enabled lists aren't checked against (empty) Definitions.
+	// Resolve bails out before merging anything for "trunk" (its only source).
 	assert.Empty(t, cfg.Runtimes.Definitions)
 	assert.Empty(t, cfg.Lint.Definitions)
 	assert.Empty(t, cfg.Actions.Definitions)
