@@ -1,53 +1,155 @@
-package config
+package config_test
 
 import (
+	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/xunleii/rtunk/pkg/trunk/config"
 )
 
-// unreachableSource never resolves (.invalid is reserved by RFC 2606 to never resolve), so any
-// test using it that still succeeds proves the network was never actually touched.
-var unreachableSource = PluginSource{ID: "unreachable", URI: "https://example.invalid/plugins", Ref: "v0.0.0"}
+// gitFixture copies srcDir into a temp git repo tagged v1.0.0 and returns a PluginSource pointing
+// at it, so tests can exercise fetchGitSource's real git plumbing — and the caching around it —
+// without any network access: git treats a local path exactly like a remote.
+func gitFixture(t *testing.T, srcDir string) config.PluginSource {
+	t.Helper()
+	dir := t.TempDir()
+	require.NoError(t, os.CopyFS(dir, os.DirFS(srcDir)))
 
-// TestFetchGitSource_CacheHit: a valid cache for src's uri+ref must be used as-is, with no git
-// command run at all — proven here by pointing src at a uri that can never be reached.
-func TestFetchGitSource_CacheHit(t *testing.T) {
-	cacheDir := t.TempDir()
-	want := sourceDefs{
-		Downloads: map[string]Download{},
-		Tools:     map[string]Tool{"foo": {Name: "foo", KnownGoodVersion: "1.0.0"}},
-		Lint:      map[string]Linter{},
-		Actions:   map[string]Action{},
-		Runtimes:  map[string]Runtime{},
+	run := func(args ...string) {
+		t.Helper()
+		cmd := exec.Command("git", args...)
+		cmd.Dir = dir
+		cmd.Env = append(os.Environ(),
+			"GIT_AUTHOR_NAME=rtunk-test", "GIT_AUTHOR_EMAIL=rtunk-test@example.com",
+			"GIT_COMMITTER_NAME=rtunk-test", "GIT_COMMITTER_EMAIL=rtunk-test@example.com")
+		out, err := cmd.CombinedOutput()
+		require.NoError(t, err, "git %v: %s", args, out)
 	}
-	require.NoError(t, saveSourceCache(cacheFilePath(cacheDir, unreachableSource), want))
+	run("init", "-q")
+	run("add", "-A")
+	run("commit", "-q", "-m", "fixture")
+	// -m/--no-sign: the user's global gitconfig may have tag.gpgSign=true, which turns a bare
+	// `git tag` into an annotated+signed tag needing both a message and a working GPG setup —
+	// neither of which this hermetic fixture should depend on.
+	run("tag", "-m", "fixture", "--no-sign", "v1.0.0")
 
-	defs, dupErrs, err := fetchGitSource(cacheDir, unreachableSource)
-
-	require.NoError(t, err)
-	assert.Empty(t, dupErrs)
-	assert.Equal(t, want, defs)
+	return config.PluginSource{ID: "fixture", URI: dir, Ref: "v1.0.0"}
 }
 
-// TestFetchGitSource_CorruptCache_Regenerates: a cache file that fails to decode must be dropped
-// rather than trusted, and fetchGitSource must fall through to a real fetch — which, against an
-// unreachable uri, surfaces as a *FetchError. Proves the stale-cache path without needing network
-// to succeed, only to be attempted.
-func TestFetchGitSource_CorruptCache_Regenerates(t *testing.T) {
+// trunkYAMLFor writes a minimal trunk.yaml with src as its only plugin source and returns its
+// path.
+func trunkYAMLFor(t *testing.T, src config.PluginSource) string {
+	t.Helper()
+	path := filepath.Join(t.TempDir(), "trunk.yaml")
+	content := fmt.Sprintf("version: \"0.1\"\nplugins:\n  sources:\n    - id: %q\n      uri: %q\n      ref: %q\n",
+		src.ID, src.URI, src.Ref)
+	require.NoError(t, os.WriteFile(path, []byte(content), 0o644))
+	return path
+}
+
+// TestResolve_GitSource clones a local git fixture (built from the same plugin repo excerpts as
+// TestResolve_WithPluginRepo) and resolves against it, and confirms the fetch leaves a cache file
+// behind under cacheDir.
+func TestResolve_GitSource(t *testing.T) {
+	src := gitFixture(t, "testdata/pluginrepo")
 	cacheDir := t.TempDir()
-	cacheFile := cacheFilePath(cacheDir, unreachableSource)
-	require.NoError(t, os.MkdirAll(filepath.Dir(cacheFile), 0o755))
+
+	cfg, err := config.Resolve(trunkYAMLFor(t, src), cacheDir)
+	require.NoError(t, err)
+
+	assert.Contains(t, cfg.Tools, "eslint")
+	assert.Contains(t, cfg.Lint.Definitions, "actionlint")
+	assert.Contains(t, cfg.Actions.Definitions, "commitlint")
+	assert.Contains(t, cfg.Runtimes.Definitions, "node")
+
+	entries, err := os.ReadDir(cacheDir)
+	require.NoError(t, err)
+	assert.Len(t, entries, 1, "fetch must leave exactly one cache file behind")
+}
+
+// TestResolve_GitSource_DuplicateResource proves duplicate detection also fires for a git source
+// (not just a local one, see TestResolve_DuplicateResource): two plugin.yaml files in the same
+// fixture repo both define a tool named "foo", and the later one must win.
+func TestResolve_GitSource_DuplicateResource(t *testing.T) {
+	src := gitFixture(t, "testdata/pluginrepo-duplicate")
+
+	cfg, err := config.Resolve(trunkYAMLFor(t, src), t.TempDir())
+
+	var dupErr *config.DuplicateError
+	require.ErrorAs(t, err, &dupErr)
+	assert.Equal(t, "tool", dupErr.Category)
+	assert.Equal(t, "foo", dupErr.Key)
+	assert.Equal(t, "2.0.0", cfg.Tools["foo"].KnownGoodVersion)
+}
+
+// TestResolve_GitSource_CacheHit: once a source is cached, a second Resolve must reuse the cache
+// instead of fetching again — proven here by deleting the fixture repo between the two calls, so
+// a real second fetch would fail.
+func TestResolve_GitSource_CacheHit(t *testing.T) {
+	src := gitFixture(t, "testdata/pluginrepo")
+	cacheDir := t.TempDir()
+	trunkYAML := trunkYAMLFor(t, src)
+
+	cfg1, err := config.Resolve(trunkYAML, cacheDir)
+	require.NoError(t, err)
+
+	require.NoError(t, os.RemoveAll(src.URI))
+
+	cfg2, err := config.Resolve(trunkYAML, cacheDir)
+	require.NoError(t, err)
+	assert.Equal(t, cfg1, cfg2)
+}
+
+// TestResolve_GitSource_CorruptCache_Regenerates: a cache file that fails to decode must be
+// dropped and rebuilt from a real fetch, not trusted or treated as fatal.
+func TestResolve_GitSource_CorruptCache_Regenerates(t *testing.T) {
+	src := gitFixture(t, "testdata/pluginrepo")
+	cacheDir := t.TempDir()
+	trunkYAML := trunkYAMLFor(t, src)
+
+	cfg1, err := config.Resolve(trunkYAML, cacheDir)
+	require.NoError(t, err)
+
+	entries, err := os.ReadDir(cacheDir)
+	require.NoError(t, err)
+	require.Len(t, entries, 1)
+	cacheFile := filepath.Join(cacheDir, entries[0].Name())
 	require.NoError(t, os.WriteFile(cacheFile, []byte("not valid json"), 0o644))
 
-	_, _, err := fetchGitSource(cacheDir, unreachableSource)
+	cfg2, err := config.Resolve(trunkYAML, cacheDir)
+	require.NoError(t, err)
+	assert.Equal(t, cfg1, cfg2)
+}
 
-	var fetchErr *FetchError
+// TestResolve_GitSource_CorruptCache_FetchFails: same as above, but the fixture repo is also gone
+// by the second Resolve — the dropped cache must surface as a real *FetchError, not a silent
+// empty result.
+func TestResolve_GitSource_CorruptCache_FetchFails(t *testing.T) {
+	src := gitFixture(t, "testdata/pluginrepo")
+	cacheDir := t.TempDir()
+	trunkYAML := trunkYAMLFor(t, src)
+
+	_, err := config.Resolve(trunkYAML, cacheDir)
+	require.NoError(t, err)
+
+	entries, err := os.ReadDir(cacheDir)
+	require.NoError(t, err)
+	require.Len(t, entries, 1)
+	cacheFile := filepath.Join(cacheDir, entries[0].Name())
+	require.NoError(t, os.WriteFile(cacheFile, []byte("not valid json"), 0o644))
+	require.NoError(t, os.RemoveAll(src.URI))
+
+	_, err = config.Resolve(trunkYAML, cacheDir)
+
+	var fetchErr *config.FetchError
 	require.ErrorAs(t, err, &fetchErr)
-	assert.Equal(t, "unreachable", fetchErr.SourceID)
+	assert.Equal(t, "fixture", fetchErr.SourceID)
 	_, statErr := os.Stat(cacheFile)
 	assert.True(t, os.IsNotExist(statErr), "corrupt cache file must be removed, not left behind")
 }

@@ -1,4 +1,4 @@
-package config
+package config_test
 
 import (
 	"os"
@@ -7,23 +7,25 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/xunleii/rtunk/pkg/trunk/config"
 )
 
 // TestResolve_InvalidSource: a plugins.sources entry has neither local: nor uri: set. Resolve
 // must report an *InvalidSourceError rather than trying (and failing confusingly) to fetch it as
 // a git source.
 func TestResolve_InvalidSource(t *testing.T) {
-	_, err := Resolve("testdata/trunk-invalid-source.yaml", t.TempDir())
+	_, err := config.Resolve("testdata/trunk-invalid-source.yaml", t.TempDir())
 
-	var invalidErr *InvalidSourceError
+	var invalidErr *config.InvalidSourceError
 	require.ErrorAs(t, err, &invalidErr)
 	assert.Equal(t, "neither", invalidErr.SourceID)
 }
 
 func TestResolve_MissingFile(t *testing.T) {
-	_, err := Resolve("testdata/does-not-exist.yaml", t.TempDir())
+	_, err := config.Resolve("testdata/does-not-exist.yaml", t.TempDir())
 
-	var readErr *ReadError
+	var readErr *config.ReadError
 	require.ErrorAs(t, err, &readErr)
 	assert.Equal(t, "testdata/does-not-exist.yaml", readErr.Path)
 }
@@ -32,9 +34,9 @@ func TestResolve_InvalidYAML(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "trunk.yaml")
 	require.NoError(t, os.WriteFile(path, []byte("version: [not-a-mapping\n"), 0o644))
 
-	_, err := Resolve(path, t.TempDir())
+	_, err := config.Resolve(path, t.TempDir())
 
-	var parseErr *ParseError
+	var parseErr *config.ParseError
 	require.ErrorAs(t, err, &parseErr)
 	assert.Equal(t, path, parseErr.Path)
 }
@@ -44,13 +46,13 @@ func TestResolve_InvalidYAML(t *testing.T) {
 // merges definitions from every category dir and that everything it enables/references checks
 // out: this fixture is a fully valid, self-consistent config, so Resolve must return no error.
 func TestResolve_WithPluginRepo(t *testing.T) {
-	cfg, err := Resolve("testdata/trunk-with-plugins.yaml", t.TempDir())
+	cfg, err := config.Resolve("testdata/trunk-with-plugins.yaml", t.TempDir())
 	require.NoError(t, err)
 
 	require.Contains(t, cfg.Downloads, "shellcheck")
-	assert.Equal(t, OSSpec{"macos": "macos"}, cfg.Downloads["shellcheck"].Downloads[1].OS)
-	assert.Equal(t, OSSpec{"linux": "linux"}, cfg.Downloads["shellcheck"].Downloads[0].OS)
-	assert.Equal(t, OSSpec{"arm_64": "aarch64", "x86_64": "x86_64"}, cfg.Downloads["shellcheck"].Downloads[0].CPU)
+	assert.Equal(t, config.OSSpec{"macos": "macos"}, cfg.Downloads["shellcheck"].Downloads[1].OS)
+	assert.Equal(t, config.OSSpec{"linux": "linux"}, cfg.Downloads["shellcheck"].Downloads[0].OS)
+	assert.Equal(t, config.OSSpec{"arm_64": "aarch64", "x86_64": "x86_64"}, cfg.Downloads["shellcheck"].Downloads[0].CPU)
 
 	assert.Contains(t, cfg.Tools, "eslint")
 	assert.Contains(t, cfg.Tools, "shellcheck")
@@ -64,16 +66,16 @@ func TestResolve_WithPluginRepo(t *testing.T) {
 	require.Contains(t, cfg.Actions.Definitions, "go-mod-tidy")
 
 	require.Contains(t, cfg.Runtimes.Definitions, "node")
-	assert.Equal(t, ShimList{"node", "npm", "npx", "corepack"}, cfg.Runtimes.Definitions["node"].Shims)
+	assert.Equal(t, config.ShimList{"node", "npm", "npx", "corepack"}, cfg.Runtimes.Definitions["node"].Shims)
 }
 
 // TestResolve_DuplicateResource: two plugin.yaml files under the same local source both define a
 // tool named "foo". Resolve must report a *DuplicateError, and the later file (foo-b, sorted
 // after foo-a) must win the overwrite.
 func TestResolve_DuplicateResource(t *testing.T) {
-	cfg, err := Resolve("testdata/trunk-duplicate.yaml", t.TempDir())
+	cfg, err := config.Resolve("testdata/trunk-duplicate.yaml", t.TempDir())
 
-	var dupErr *DuplicateError
+	var dupErr *config.DuplicateError
 	require.ErrorAs(t, err, &dupErr)
 	assert.Equal(t, "tool", dupErr.Category)
 	assert.Equal(t, "foo", dupErr.Key)
@@ -86,12 +88,12 @@ func TestResolve_DuplicateResource(t *testing.T) {
 // itself reads it in without complaint; Validate must report a *ReferenceError identifying
 // exactly what's missing.
 func TestResolve_DanglingReference(t *testing.T) {
-	cfg, err := Resolve("testdata/trunk-dangling.yaml", t.TempDir())
+	cfg, err := config.Resolve("testdata/trunk-dangling.yaml", t.TempDir())
 	require.NoError(t, err)
 
 	err = cfg.Validate()
 
-	var refErr *ReferenceError
+	var refErr *config.ReferenceError
 	require.ErrorAs(t, err, &refErr)
 	assert.Equal(t, "lint", refErr.Category)
 	assert.Equal(t, "orphan", refErr.Key)
@@ -105,9 +107,9 @@ func TestResolve_SourceNotFound(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "trunk.yaml")
 	require.NoError(t, os.WriteFile(path, []byte("plugins:\n  sources:\n    - id: gone\n      local: ./nowhere\n"), 0o644))
 
-	_, err := Resolve(path, t.TempDir())
+	_, err := config.Resolve(path, t.TempDir())
 
-	var notFoundErr *SourceNotFoundError
+	var notFoundErr *config.SourceNotFoundError
 	require.ErrorAs(t, err, &notFoundErr)
 	assert.Equal(t, "gone", notFoundErr.SourceID)
 }

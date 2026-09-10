@@ -1,16 +1,18 @@
-package config
+package config_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/xunleii/rtunk/pkg/trunk/config"
 )
 
 // TestConfig_Validate_Empty: a zero-value Config (nil maps/slices throughout) has nothing to
 // check and must not panic ranging over them.
 func TestConfig_Validate_Empty(t *testing.T) {
-	var cfg Config
+	var cfg config.Config
 	assert.NoError(t, cfg.Validate())
 }
 
@@ -19,54 +21,54 @@ func TestConfig_Validate_Empty(t *testing.T) {
 func TestConfig_Validate_EnabledLists(t *testing.T) {
 	tests := []struct {
 		name        string
-		cfg         Config
+		cfg         config.Config
 		wantCat     string
 		wantMissing string // "" means Validate must return nil
 	}{
 		{
 			name: "runtime enabled, missing definition",
-			cfg: Config{Runtimes: CategoryConfig[Runtime]{
-				Enabled: []string{"node"}, Definitions: map[string]Runtime{},
+			cfg: config.Config{Runtimes: config.CategoryConfig[config.Runtime]{
+				Enabled: []string{"node"}, Definitions: map[string]config.Runtime{},
 			}},
 			wantCat: "runtime", wantMissing: "node",
 		},
 		{
 			name: "runtime enabled, pinned version, missing definition",
-			cfg: Config{Runtimes: CategoryConfig[Runtime]{
-				Enabled: []string{"node@22.0.0"}, Definitions: map[string]Runtime{},
+			cfg: config.Config{Runtimes: config.CategoryConfig[config.Runtime]{
+				Enabled: []string{"node@22.0.0"}, Definitions: map[string]config.Runtime{},
 			}},
 			wantCat: "runtime", wantMissing: "node",
 		},
 		{
 			name: "runtime enabled, definition present",
-			cfg: Config{Runtimes: CategoryConfig[Runtime]{
-				Enabled: []string{"node@22.0.0"}, Definitions: map[string]Runtime{"node": {Type: "node"}},
+			cfg: config.Config{Runtimes: config.CategoryConfig[config.Runtime]{
+				Enabled: []string{"node@22.0.0"}, Definitions: map[string]config.Runtime{"node": {Type: "node"}},
 			}},
 		},
 		{
 			name: "lint enabled, missing definition",
-			cfg: Config{Lint: CategoryConfig[Linter]{
-				Enabled: []string{"eslint"}, Definitions: map[string]Linter{},
+			cfg: config.Config{Lint: config.CategoryConfig[config.Linter]{
+				Enabled: []string{"eslint"}, Definitions: map[string]config.Linter{},
 			}},
 			wantCat: "lint", wantMissing: "eslint",
 		},
 		{
 			name: "lint enabled, definition present",
-			cfg: Config{Lint: CategoryConfig[Linter]{
-				Enabled: []string{"eslint"}, Definitions: map[string]Linter{"eslint": {Name: "eslint"}},
+			cfg: config.Config{Lint: config.CategoryConfig[config.Linter]{
+				Enabled: []string{"eslint"}, Definitions: map[string]config.Linter{"eslint": {Name: "eslint"}},
 			}},
 		},
 		{
 			name: "action enabled, missing definition",
-			cfg: Config{Actions: CategoryConfig[Action]{
-				Enabled: []string{"commitlint"}, Definitions: map[string]Action{},
+			cfg: config.Config{Actions: config.CategoryConfig[config.Action]{
+				Enabled: []string{"commitlint"}, Definitions: map[string]config.Action{},
 			}},
 			wantCat: "action", wantMissing: "commitlint",
 		},
 		{
 			name: "action enabled, definition present",
-			cfg: Config{Actions: CategoryConfig[Action]{
-				Enabled: []string{"commitlint"}, Definitions: map[string]Action{"commitlint": {ID: "commitlint"}},
+			cfg: config.Config{Actions: config.CategoryConfig[config.Action]{
+				Enabled: []string{"commitlint"}, Definitions: map[string]config.Action{"commitlint": {ID: "commitlint"}},
 			}},
 		},
 	}
@@ -77,7 +79,7 @@ func TestConfig_Validate_EnabledLists(t *testing.T) {
 				assert.NoError(t, err)
 				return
 			}
-			var refErr *ReferenceError
+			var refErr *config.ReferenceError
 			require.ErrorAs(t, err, &refErr)
 			assert.Equal(t, tt.wantCat, refErr.Category)
 			assert.Equal(t, "enabled", refErr.Field)
@@ -91,7 +93,7 @@ func TestConfig_Validate_EnabledLists(t *testing.T) {
 func TestConfig_Validate_References(t *testing.T) {
 	tests := []struct {
 		name      string
-		cfg       Config
+		cfg       config.Config
 		wantCat   string
 		wantKey   string
 		wantField string
@@ -99,68 +101,68 @@ func TestConfig_Validate_References(t *testing.T) {
 	}{
 		{
 			name: "tool runtime, missing",
-			cfg: Config{
-				Tools:    map[string]Tool{"eslint": {Name: "eslint", Runtime: "node"}},
-				Runtimes: CategoryConfig[Runtime]{Definitions: map[string]Runtime{}},
+			cfg: config.Config{
+				Tools:    map[string]config.Tool{"eslint": {Name: "eslint", Runtime: "node"}},
+				Runtimes: config.CategoryConfig[config.Runtime]{Definitions: map[string]config.Runtime{}},
 			},
 			wantCat: "tool", wantKey: "eslint", wantField: "runtime", wantRef: "node",
 		},
 		{
 			name: "tool runtime, present",
-			cfg: Config{
-				Tools:    map[string]Tool{"eslint": {Name: "eslint", Runtime: "node"}},
-				Runtimes: CategoryConfig[Runtime]{Definitions: map[string]Runtime{"node": {Type: "node"}}},
+			cfg: config.Config{
+				Tools:    map[string]config.Tool{"eslint": {Name: "eslint", Runtime: "node"}},
+				Runtimes: config.CategoryConfig[config.Runtime]{Definitions: map[string]config.Runtime{"node": {Type: "node"}}},
 			},
 		},
 		{
 			name: "tool download, missing",
-			cfg: Config{
-				Tools:     map[string]Tool{"shellcheck": {Name: "shellcheck", Download: "shellcheck"}},
-				Downloads: map[string]Download{},
+			cfg: config.Config{
+				Tools:     map[string]config.Tool{"shellcheck": {Name: "shellcheck", Download: "shellcheck"}},
+				Downloads: map[string]config.Download{},
 			},
 			wantCat: "tool", wantKey: "shellcheck", wantField: "download", wantRef: "shellcheck",
 		},
 		{
 			name: "tool download, present",
-			cfg: Config{
-				Tools:     map[string]Tool{"shellcheck": {Name: "shellcheck", Download: "shellcheck"}},
-				Downloads: map[string]Download{"shellcheck": {Name: "shellcheck"}},
+			cfg: config.Config{
+				Tools:     map[string]config.Tool{"shellcheck": {Name: "shellcheck", Download: "shellcheck"}},
+				Downloads: map[string]config.Download{"shellcheck": {Name: "shellcheck"}},
 			},
 		},
 		{
 			name: "tool with neither runtime nor download set",
-			cfg: Config{
-				Tools: map[string]Tool{"standalone": {Name: "standalone"}},
+			cfg: config.Config{
+				Tools: map[string]config.Tool{"standalone": {Name: "standalone"}},
 			},
 		},
 		{
 			name: "runtime download, missing",
-			cfg: Config{
-				Runtimes:  CategoryConfig[Runtime]{Definitions: map[string]Runtime{"node": {Type: "node", Download: "node"}}},
-				Downloads: map[string]Download{},
+			cfg: config.Config{
+				Runtimes:  config.CategoryConfig[config.Runtime]{Definitions: map[string]config.Runtime{"node": {Type: "node", Download: "node"}}},
+				Downloads: map[string]config.Download{},
 			},
 			wantCat: "runtime", wantKey: "node", wantField: "download", wantRef: "node",
 		},
 		{
 			name: "runtime download, present",
-			cfg: Config{
-				Runtimes:  CategoryConfig[Runtime]{Definitions: map[string]Runtime{"node": {Type: "node", Download: "node"}}},
-				Downloads: map[string]Download{"node": {Name: "node"}},
+			cfg: config.Config{
+				Runtimes:  config.CategoryConfig[config.Runtime]{Definitions: map[string]config.Runtime{"node": {Type: "node", Download: "node"}}},
+				Downloads: map[string]config.Download{"node": {Name: "node"}},
 			},
 		},
 		{
 			name: "lint tools, missing",
-			cfg: Config{
-				Lint:  CategoryConfig[Linter]{Definitions: map[string]Linter{"eslint": {Name: "eslint", Tools: []string{"eslint-bin"}}}},
-				Tools: map[string]Tool{},
+			cfg: config.Config{
+				Lint:  config.CategoryConfig[config.Linter]{Definitions: map[string]config.Linter{"eslint": {Name: "eslint", Tools: []string{"eslint-bin"}}}},
+				Tools: map[string]config.Tool{},
 			},
 			wantCat: "lint", wantKey: "eslint", wantField: "tools", wantRef: "eslint-bin",
 		},
 		{
 			name: "lint tools, present",
-			cfg: Config{
-				Lint:  CategoryConfig[Linter]{Definitions: map[string]Linter{"eslint": {Name: "eslint", Tools: []string{"eslint-bin"}}}},
-				Tools: map[string]Tool{"eslint-bin": {Name: "eslint-bin"}},
+			cfg: config.Config{
+				Lint:  config.CategoryConfig[config.Linter]{Definitions: map[string]config.Linter{"eslint": {Name: "eslint", Tools: []string{"eslint-bin"}}}},
+				Tools: map[string]config.Tool{"eslint-bin": {Name: "eslint-bin"}},
 			},
 		},
 	}
@@ -171,7 +173,7 @@ func TestConfig_Validate_References(t *testing.T) {
 				assert.NoError(t, err)
 				return
 			}
-			var refErr *ReferenceError
+			var refErr *config.ReferenceError
 			require.ErrorAs(t, err, &refErr)
 			assert.Equal(t, tt.wantCat, refErr.Category)
 			assert.Equal(t, tt.wantKey, refErr.Key)
@@ -184,9 +186,9 @@ func TestConfig_Validate_References(t *testing.T) {
 // TestConfig_Validate_JoinsMultipleErrors: every problem Validate finds is reported together, not
 // just the first — callers get errors.Join's []error, one per missing reference.
 func TestConfig_Validate_JoinsMultipleErrors(t *testing.T) {
-	cfg := Config{
-		Runtimes: CategoryConfig[Runtime]{Enabled: []string{"node"}, Definitions: map[string]Runtime{}},
-		Lint:     CategoryConfig[Linter]{Enabled: []string{"eslint"}, Definitions: map[string]Linter{}},
+	cfg := config.Config{
+		Runtimes: config.CategoryConfig[config.Runtime]{Enabled: []string{"node"}, Definitions: map[string]config.Runtime{}},
+		Lint:     config.CategoryConfig[config.Linter]{Enabled: []string{"eslint"}, Definitions: map[string]config.Linter{}},
 	}
 
 	err := cfg.Validate()

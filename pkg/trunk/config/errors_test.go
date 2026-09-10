@@ -1,4 +1,4 @@
-package config
+package config_test
 
 import (
 	"errors"
@@ -6,11 +6,13 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"github.com/xunleii/rtunk/pkg/trunk/config"
 )
 
 // TestReadError_Unwrap and TestParseError_Unwrap: both typed errors must unwrap to the underlying
 // os/yaml error, so callers can errors.Is/As against it (e.g. os.ErrNotExist).
 func TestReadError_Unwrap(t *testing.T) {
-	_, err := Resolve("testdata/does-not-exist.yaml", t.TempDir())
+	_, err := config.Resolve("testdata/does-not-exist.yaml", t.TempDir())
 	assert.True(t, errors.Is(err, os.ErrNotExist))
 }

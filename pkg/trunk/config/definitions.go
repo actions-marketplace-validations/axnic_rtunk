@@ -50,9 +50,7 @@ type Tool struct {
 
 // ShimList is the shims: field's value. Most entries are a bare executable name, but some
 // (e.g. github.com/trunk-io/plugins tools/bazel-differ/plugin.yaml) are {name, target} objects
-// aliasing the exposed shim name to a different underlying binary. ponytail: only the exposed
-// name is kept — rtunk doesn't build shims until v0.2, so the target alias isn't needed yet; add
-// it (as a parallel slice or a real struct) when shim creation lands.
+// aliasing the exposed shim name to a different underlying binary; only the exposed name is kept.
 type ShimList []string
 
 func (s *ShimList) UnmarshalYAML(node *yaml.Node) error {
