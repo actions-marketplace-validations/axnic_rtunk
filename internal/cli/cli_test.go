@@ -1,10 +1,9 @@
-package main
+package cli
 
 import (
 	"bytes"
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -19,54 +18,8 @@ const trunkYAML = "../../pkg/trunk/config/testdata/trunk-with-plugins.yaml"
 func run2(t *testing.T, args ...string) (stdout, stderr string, err error) {
 	t.Helper()
 	var out, errOut bytes.Buffer
-	err = run(args, &out, &errOut)
+	err = Run(args, &out, &errOut)
 	return out.String(), errOut.String(), err
-}
-
-func TestConfigList(t *testing.T) {
-	tests := []struct {
-		args []string
-		want []string
-	}{
-		// eslint/shellcheck's plugin.yaml only define a tool, not a lint: block (see
-		// testdata/pluginrepo/linters/{eslint,shellcheck}/plugin.yaml) — actionlint/prettier are
-		// the only two actual linter definitions in the fixture, and both happen to be enabled.
-		{[]string{"config", "lint", "list"}, []string{"actionlint", "prettier"}},
-		{[]string{"config", "lint", "list", "--enabled"}, []string{"actionlint", "prettier"}},
-		// config.Resolve itself now trims to enabled+used (pkg/trunk/config's filterEnabled), so
-		// eslint/shellcheck (unreferenced tools) and go-mod-tidy (a defined but never-enabled
-		// action) are gone before the CLI even sees them — list and list --enabled agree here.
-		{[]string{"config", "tools", "list"}, []string{"actionlint", "prettier"}},
-		{[]string{"config", "tools", "list", "--enabled"}, []string{"actionlint", "prettier"}},
-		{[]string{"config", "plugins", "list"}, []string{"trunk"}},
-		{[]string{"config", "plugins", "list", "--enabled"}, []string{"trunk"}},
-		{[]string{"config", "actions", "list"}, []string{"commitlint"}},
-		{[]string{"config", "actions", "list", "--enabled"}, []string{"commitlint"}},
-		{[]string{"config", "runtimes", "list"}, []string{"node"}},
-	}
-	for _, tt := range tests {
-		t.Run(strings.Join(tt.args, " "), func(t *testing.T) {
-			stdout, stderr, err := run2(t, append([]string{"--config", trunkYAML}, tt.args...)...)
-			require.NoError(t, err, "stderr: %s", stderr)
-			assert.Equal(t, tt.want, strings.Fields(stdout))
-		})
-	}
-}
-
-func TestConfigShow(t *testing.T) {
-	stdout, stderr, err := run2(t, "--config", trunkYAML, "config", "lint", "show", "actionlint")
-	require.NoError(t, err, "stderr: %s", stderr)
-	assert.Contains(t, stdout, "name: actionlint")
-	assert.Contains(t, stdout, "tools:")
-
-	_, _, err = run2(t, "--config", trunkYAML, "config", "lint", "show", "does-not-exist")
-	assert.Error(t, err)
-}
-
-func TestConfigShow_JSON(t *testing.T) {
-	stdout, stderr, err := run2(t, "--config", trunkYAML, "config", "runtimes", "show", "node", "--output", "json")
-	require.NoError(t, err, "stderr: %s", stderr)
-	assert.Contains(t, stdout, `"type": "node"`)
 }
 
 func TestConfigPrint(t *testing.T) {
@@ -78,7 +31,7 @@ func TestConfigPrint(t *testing.T) {
 	assert.NotContains(t, stdout, "eslint", "eslint is an unreferenced tool the default enabled+used print must drop")
 }
 
-// TestConfigPrint_All: --all switches to config.ResolveAll, surfacing eslint/shellcheck — tools
+// TestConfigPrint_All: --all switches to config.ResolveAll, surfacing eslint/shellcheck -- tools
 // the fixture plugin repo defines but nothing in trunk-with-plugins.yaml enables or references
 // (see TestConfigPrint above, and pkg/trunk/config's TestResolveAll_WithPluginRepo).
 func TestConfigPrint_All(t *testing.T) {
@@ -90,7 +43,7 @@ func TestConfigPrint_All(t *testing.T) {
 
 func TestFindTrunkYAML(t *testing.T) {
 	// EvalSymlinks: on macOS, t.TempDir() lives under /var, a symlink to /private/var, and
-	// os.Getwd() (which findTrunkYAML calls) returns the resolved physical path — normalize here
+	// os.Getwd() (which findTrunkYAML calls) returns the resolved physical path -- normalize here
 	// so the two sides of the comparison below agree.
 	root, err := filepath.EvalSymlinks(t.TempDir())
 	require.NoError(t, err)
