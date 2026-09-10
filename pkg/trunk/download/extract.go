@@ -1,0 +1,163 @@
+package download
+
+import (
+	"archive/tar"
+	"archive/zip"
+	"compress/gzip"
+	"fmt"
+	"io"
+	"os"
+	"path/filepath"
+	"strings"
+
+	"github.com/ulikunitz/xz"
+
+	"github.com/xunleii/rtunk/pkg/trunk/config"
+)
+
+// InstallDownload materializes one fetched blob into destDir: a straight copy (chmod +x) for a
+// bare-binary download (entry.Executable), or an extracted archive otherwise, format inferred
+// from url's own extension since blobPath's name is a content hash, not a filename.
+func InstallDownload(blobPath, url, destDir string, entry config.DownloadEntry) error {
+	if err := os.MkdirAll(destDir, 0o755); err != nil {
+		return err
+	}
+
+	if entry.Executable {
+		name := filepath.Base(strings.SplitN(url, "?", 2)[0])
+		return copyFile(blobPath, filepath.Join(destDir, name), 0o755)
+	}
+
+	f, err := os.Open(blobPath)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	switch {
+	case strings.HasSuffix(url, ".tar.gz") || strings.HasSuffix(url, ".tgz"):
+		gz, err := gzip.NewReader(f)
+		if err != nil {
+			return err
+		}
+		defer gz.Close()
+		return extractTar(gz, destDir, entry.StripComponents)
+	case strings.HasSuffix(url, ".tar.xz"):
+		xr, err := xz.NewReader(f)
+		if err != nil {
+			return err
+		}
+		return extractTar(xr, destDir, entry.StripComponents)
+	case strings.HasSuffix(url, ".zip"):
+		info, err := f.Stat()
+		if err != nil {
+			return err
+		}
+		zr, err := zip.NewReader(f, info.Size())
+		if err != nil {
+			return err
+		}
+		return extractZip(zr, destDir, entry.StripComponents)
+	default:
+		return fmt.Errorf("download: %s: unrecognized archive format", url)
+	}
+}
+
+// extractTar walks a tar stream, stripping the first strip path components off every entry name
+// (tar-style, matching ARCHITECTURE.md "downloads[].strip_components") and writing files under
+// destDir, preserving each entry's mode (in particular the executable bit).
+func extractTar(r io.Reader, destDir string, strip int) error {
+	tr := tar.NewReader(r)
+	for {
+		hdr, err := tr.Next()
+		if err == io.EOF {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		name, ok := stripPath(hdr.Name, strip)
+		if !ok || hdr.Typeflag != tar.TypeReg {
+			continue // stripped away entirely, or a dir/symlink entry -- v0.2 only needs regular files
+		}
+		dst := filepath.Join(destDir, name)
+		if err := os.MkdirAll(filepath.Dir(dst), 0o755); err != nil {
+			return err
+		}
+		out, err := os.OpenFile(dst, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, os.FileMode(hdr.Mode))
+		if err != nil {
+			return err
+		}
+		if _, err := io.Copy(out, tr); err != nil {
+			out.Close()
+			return err
+		}
+		if err := out.Close(); err != nil {
+			return err
+		}
+	}
+}
+
+// extractZip is extractTar's archive/zip equivalent.
+func extractZip(zr *zip.Reader, destDir string, strip int) error {
+	for _, f := range zr.File {
+		if f.FileInfo().IsDir() {
+			continue
+		}
+		name, ok := stripPath(f.Name, strip)
+		if !ok {
+			continue
+		}
+		dst := filepath.Join(destDir, name)
+		if err := os.MkdirAll(filepath.Dir(dst), 0o755); err != nil {
+			return err
+		}
+		rc, err := f.Open()
+		if err != nil {
+			return err
+		}
+		out, err := os.OpenFile(dst, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, f.Mode())
+		if err != nil {
+			rc.Close()
+			return err
+		}
+		if _, err := io.Copy(out, rc); err != nil {
+			out.Close()
+			rc.Close()
+			return err
+		}
+		out.Close()
+		rc.Close()
+	}
+	return nil
+}
+
+// stripPath drops the first n path components of name (tar-style strip_components). ok is false
+// if name has n or fewer components -- the entry is entirely consumed by stripping (e.g. the
+// top-level directory entry itself) and should be skipped.
+func stripPath(name string, n int) (string, bool) {
+	parts := strings.Split(filepath.ToSlash(name), "/")
+	if len(parts) <= n {
+		return "", false
+	}
+	return filepath.Join(parts[n:]...), true
+}
+
+// copyFile copies src to dst with the given mode, used for entry.Executable == true downloads
+// that are a bare binary, not an archive.
+func copyFile(src, dst string, mode os.FileMode) error {
+	in, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer in.Close()
+	out, err := os.OpenFile(dst, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, mode)
+	if err != nil {
+		return err
+	}
+	if _, err := io.Copy(out, in); err != nil {
+		out.Close()
+		return err
+	}
+	return out.Close()
+}
