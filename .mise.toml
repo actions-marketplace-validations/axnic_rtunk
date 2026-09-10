@@ -12,3 +12,5 @@
 
 go = "latest"    # rtunk is implemented in Go (see AGENTS.md)
 trunk = "latest" # Metalinter/formatter, drives .trunk/trunk.yaml
+
+"go:golang.org/x/tools/gopls" = "latest" # Go language server, used by editors/agents (Serena)
