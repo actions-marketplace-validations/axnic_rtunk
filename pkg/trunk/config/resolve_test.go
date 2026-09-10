@@ -45,25 +45,29 @@ func TestResolve_InvalidYAML(t *testing.T) {
 // from the excerpts documented in ARCHITECTURE.md (github.com/trunk-io/plugins), proving Resolve
 // merges definitions from every category dir and that everything it enables/references checks
 // out: this fixture is a fully valid, self-consistent config, so Resolve must return no error.
+//
+// The fixture's trunk.yaml only enables lint: [actionlint, prettier], actions: [commitlint],
+// runtimes: [node] — Resolve's enabled+used filter must keep exactly that closure (actionlint's
+// and prettier's own tools:, since they're referenced) and drop everything else the plugin repo
+// merely defines: eslint/shellcheck (unreferenced tools, and shellcheck's download with them) and
+// the go-mod-tidy action (defined but never enabled).
 func TestResolve_WithPluginRepo(t *testing.T) {
 	cfg, err := config.Resolve("testdata/trunk-with-plugins.yaml", t.TempDir())
 	require.NoError(t, err)
 
-	require.Contains(t, cfg.Downloads, "shellcheck")
-	assert.Equal(t, config.OSSpec{"macos": "macos"}, cfg.Downloads["shellcheck"].Downloads[1].OS)
-	assert.Equal(t, config.OSSpec{"linux": "linux"}, cfg.Downloads["shellcheck"].Downloads[0].OS)
-	assert.Equal(t, config.OSSpec{"arm_64": "aarch64", "x86_64": "x86_64"}, cfg.Downloads["shellcheck"].Downloads[0].CPU)
+	require.Contains(t, cfg.Downloads, "actionlint")
+	assert.NotContains(t, cfg.Downloads, "shellcheck")
 
-	assert.Contains(t, cfg.Tools, "eslint")
-	assert.Contains(t, cfg.Tools, "shellcheck")
 	assert.Contains(t, cfg.Tools, "actionlint")
 	assert.Contains(t, cfg.Tools, "prettier")
+	assert.NotContains(t, cfg.Tools, "eslint")
+	assert.NotContains(t, cfg.Tools, "shellcheck")
 
 	require.Contains(t, cfg.Lint.Definitions, "actionlint")
 	require.Contains(t, cfg.Lint.Definitions, "prettier")
 
 	require.Contains(t, cfg.Actions.Definitions, "commitlint")
-	require.Contains(t, cfg.Actions.Definitions, "go-mod-tidy")
+	assert.NotContains(t, cfg.Actions.Definitions, "go-mod-tidy")
 
 	require.Contains(t, cfg.Runtimes.Definitions, "node")
 	assert.Equal(t, config.ShimList{"node", "npm", "npx", "corepack"}, cfg.Runtimes.Definitions["node"].Shims)

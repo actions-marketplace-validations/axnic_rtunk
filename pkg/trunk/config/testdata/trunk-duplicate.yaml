@@ -3,3 +3,6 @@ plugins:
   sources:
     - id: trunk
       local: ./pluginrepo-duplicate
+lint:
+  enabled:
+    - use-foo

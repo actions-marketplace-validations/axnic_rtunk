@@ -56,11 +56,16 @@ type pluginFile struct {
 // plugin sources — local ones read straight off disk, git ones fetched via fetchGitSource, which
 // caches the parsed result (not the raw checkout) under cacheDir ("" uses the OS default cache
 // dir). See the package doc for the pipeline; call Validate on the result to check enabled lists
-// and dangling references. The returned Config is always populated with everything Resolve
-// managed to read, even when it also returns an error — callers that only care about specific
-// resources may still use it.
-func Resolve(file, cacheDir string) (Config, error) {
-	cfg := Config{
+// and dangling references. Before returning, filterEnabled trims the merged result down to what
+// trunk.yaml actually enabled plus whatever those enabled definitions reference transitively — a
+// plugin source's whole catalog is a poor stand-in for "the effective configuration". The
+// returned Config is always populated with everything Resolve managed to read (and keep), even
+// when it also returns an error — callers that only care about specific resources may still use
+// it.
+func Resolve(file, cacheDir string) (cfg Config, err error) {
+	defer func() { filterEnabled(&cfg) }()
+
+	cfg = Config{
 		Tools:     map[string]Tool{},
 		Downloads: map[string]Download{},
 	}

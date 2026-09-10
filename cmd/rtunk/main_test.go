@@ -33,11 +33,14 @@ func TestConfigList(t *testing.T) {
 		// the only two actual linter definitions in the fixture, and both happen to be enabled.
 		{[]string{"config", "lint", "list"}, []string{"actionlint", "prettier"}},
 		{[]string{"config", "lint", "list", "--enabled"}, []string{"actionlint", "prettier"}},
-		{[]string{"config", "tools", "list"}, []string{"actionlint", "eslint", "prettier", "shellcheck"}},
+		// config.Resolve itself now trims to enabled+used (pkg/trunk/config's filterEnabled), so
+		// eslint/shellcheck (unreferenced tools) and go-mod-tidy (a defined but never-enabled
+		// action) are gone before the CLI even sees them — list and list --enabled agree here.
+		{[]string{"config", "tools", "list"}, []string{"actionlint", "prettier"}},
 		{[]string{"config", "tools", "list", "--enabled"}, []string{"actionlint", "prettier"}},
 		{[]string{"config", "plugins", "list"}, []string{"trunk"}},
 		{[]string{"config", "plugins", "list", "--enabled"}, []string{"trunk"}},
-		{[]string{"config", "actions", "list"}, []string{"commitlint", "go-mod-tidy"}},
+		{[]string{"config", "actions", "list"}, []string{"commitlint"}},
 		{[]string{"config", "actions", "list", "--enabled"}, []string{"commitlint"}},
 		{[]string{"config", "runtimes", "list"}, []string{"node"}},
 	}

@@ -1,0 +1,9 @@
+# synthetic fixture (not upstream content): a real linter referencing "foo" (defined twice, see
+# tools/foo-a and tools/foo-b) so the winning "foo" tool survives Resolve's enabled+used filter —
+# TestResolve_DuplicateResource / TestResolve_GitSource_DuplicateResource enable this linter to
+# still observe which definition won.
+lint:
+  definitions:
+    - name: use-foo
+      files: [text]
+      tools: [foo]

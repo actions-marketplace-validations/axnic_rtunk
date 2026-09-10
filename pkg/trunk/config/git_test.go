@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -42,14 +43,31 @@ func gitFixture(t *testing.T, srcDir string) config.PluginSource {
 	return config.PluginSource{ID: "fixture", URI: dir, Ref: "v1.0.0"}
 }
 
-// trunkYAMLFor writes a minimal trunk.yaml with src as its only plugin source and returns its
-// path.
-func trunkYAMLFor(t *testing.T, src config.PluginSource) string {
+// trunkYAMLFor writes a minimal trunk.yaml with src as its only plugin source, enabling
+// lintEnabled/actionsEnabled/runtimesEnabled (any of which may be nil — Resolve now trims the
+// merged config down to enabled+used, so a test that needs a specific definition to survive into
+// the returned Config must enable it here), and returns its path.
+func trunkYAMLFor(t *testing.T, src config.PluginSource, lintEnabled, actionsEnabled, runtimesEnabled []string) string {
 	t.Helper()
 	path := filepath.Join(t.TempDir(), "trunk.yaml")
-	content := fmt.Sprintf("version: \"0.1\"\nplugins:\n  sources:\n    - id: %q\n      uri: %q\n      ref: %q\n",
+
+	var sb strings.Builder
+	fmt.Fprintf(&sb, "version: \"0.1\"\nplugins:\n  sources:\n    - id: %q\n      uri: %q\n      ref: %q\n",
 		src.ID, src.URI, src.Ref)
-	require.NoError(t, os.WriteFile(path, []byte(content), 0o644))
+	for _, section := range []struct {
+		name    string
+		enabled []string
+	}{{"lint", lintEnabled}, {"actions", actionsEnabled}, {"runtimes", runtimesEnabled}} {
+		if len(section.enabled) == 0 {
+			continue
+		}
+		fmt.Fprintf(&sb, "%s:\n  enabled:\n", section.name)
+		for _, id := range section.enabled {
+			fmt.Fprintf(&sb, "    - %s\n", id)
+		}
+	}
+
+	require.NoError(t, os.WriteFile(path, []byte(sb.String()), 0o644))
 	return path
 }
 
@@ -59,11 +77,12 @@ func trunkYAMLFor(t *testing.T, src config.PluginSource) string {
 func TestResolve_GitSource(t *testing.T) {
 	src := gitFixture(t, "testdata/pluginrepo")
 	cacheDir := t.TempDir()
+	trunkYAML := trunkYAMLFor(t, src, []string{"actionlint"}, []string{"commitlint"}, []string{"node"})
 
-	cfg, err := config.Resolve(trunkYAMLFor(t, src), cacheDir)
+	cfg, err := config.Resolve(trunkYAML, cacheDir)
 	require.NoError(t, err)
 
-	assert.Contains(t, cfg.Tools, "eslint")
+	assert.Contains(t, cfg.Tools, "actionlint")
 	assert.Contains(t, cfg.Lint.Definitions, "actionlint")
 	assert.Contains(t, cfg.Actions.Definitions, "commitlint")
 	assert.Contains(t, cfg.Runtimes.Definitions, "node")
@@ -79,7 +98,7 @@ func TestResolve_GitSource(t *testing.T) {
 func TestResolve_GitSource_DuplicateResource(t *testing.T) {
 	src := gitFixture(t, "testdata/pluginrepo-duplicate")
 
-	cfg, err := config.Resolve(trunkYAMLFor(t, src), t.TempDir())
+	cfg, err := config.Resolve(trunkYAMLFor(t, src, []string{"use-foo"}, nil, nil), t.TempDir())
 
 	var dupErr *config.DuplicateError
 	require.ErrorAs(t, err, &dupErr)
@@ -94,7 +113,7 @@ func TestResolve_GitSource_DuplicateResource(t *testing.T) {
 func TestResolve_GitSource_CacheHit(t *testing.T) {
 	src := gitFixture(t, "testdata/pluginrepo")
 	cacheDir := t.TempDir()
-	trunkYAML := trunkYAMLFor(t, src)
+	trunkYAML := trunkYAMLFor(t, src, nil, nil, nil)
 
 	cfg1, err := config.Resolve(trunkYAML, cacheDir)
 	require.NoError(t, err)
@@ -111,7 +130,7 @@ func TestResolve_GitSource_CacheHit(t *testing.T) {
 func TestResolve_GitSource_CorruptCache_Regenerates(t *testing.T) {
 	src := gitFixture(t, "testdata/pluginrepo")
 	cacheDir := t.TempDir()
-	trunkYAML := trunkYAMLFor(t, src)
+	trunkYAML := trunkYAMLFor(t, src, nil, nil, nil)
 
 	cfg1, err := config.Resolve(trunkYAML, cacheDir)
 	require.NoError(t, err)
@@ -133,7 +152,7 @@ func TestResolve_GitSource_CorruptCache_Regenerates(t *testing.T) {
 func TestResolve_GitSource_CorruptCache_FetchFails(t *testing.T) {
 	src := gitFixture(t, "testdata/pluginrepo")
 	cacheDir := t.TempDir()
-	trunkYAML := trunkYAMLFor(t, src)
+	trunkYAML := trunkYAMLFor(t, src, nil, nil, nil)
 
 	_, err := config.Resolve(trunkYAML, cacheDir)
 	require.NoError(t, err)
