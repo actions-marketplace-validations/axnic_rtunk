@@ -33,7 +33,7 @@ const topUsage = `usage: rtunk [--config path] [--cache-dir path] <command>
 commands:
   config {plugins,lint,actions,tools,runtimes} list [--enabled]
   config {plugins,lint,actions,tools,runtimes} show <id> [--output yaml|json]
-  config print [--output yaml|json]
+  config print [--output yaml|json] [--all]
 `
 
 func run(args []string, stdout, stderr io.Writer) error {
@@ -96,7 +96,7 @@ func runConfigList(configPath, cacheDir string, cat category, args []string, std
 		return err
 	}
 
-	cfg, err := resolveConfig(configPath, cacheDir)
+	cfg, err := resolveConfig(configPath, cacheDir, false)
 	if err != nil {
 		return err
 	}
@@ -135,7 +135,7 @@ func runConfigShow(configPath, cacheDir string, cat category, args []string, std
 		return fmt.Errorf("usage: rtunk config <category> show <id> [--output yaml|json]")
 	}
 
-	cfg, err := resolveConfig(configPath, cacheDir)
+	cfg, err := resolveConfig(configPath, cacheDir, false)
 	if err != nil {
 		return err
 	}
@@ -151,11 +151,12 @@ func runConfigPrint(configPath, cacheDir string, args []string, stdout, stderr i
 	fs := flag.NewFlagSet("rtunk config print", flag.ContinueOnError)
 	fs.SetOutput(stderr)
 	output := fs.String("output", "yaml", "output format: yaml|json")
+	all := fs.Bool("all", false, "print the full merged plugin catalog instead of only enabled+used")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
 
-	cfg, err := resolveConfig(configPath, cacheDir)
+	cfg, err := resolveConfig(configPath, cacheDir, *all)
 	if err != nil {
 		return err
 	}
@@ -163,13 +164,18 @@ func runConfigPrint(configPath, cacheDir string, args []string, stdout, stderr i
 }
 
 // resolveConfig finds (unless configPath is already set) and resolves the trunk.yaml in effect.
-func resolveConfig(configPath, cacheDir string) (config.Config, error) {
+// all selects ResolveAll (the full merged catalog) over Resolve (enabled+used only); only `config
+// print --all` sets it — list/show always operate on the trimmed config.
+func resolveConfig(configPath, cacheDir string, all bool) (config.Config, error) {
 	if configPath == "" {
 		found, err := findTrunkYAML()
 		if err != nil {
 			return config.Config{}, err
 		}
 		configPath = found
+	}
+	if all {
+		return config.ResolveAll(configPath, cacheDir)
 	}
 	return config.Resolve(configPath, cacheDir)
 }

@@ -192,3 +192,39 @@ type EnvironmentEntry struct {
 	Value    string   `yaml:"value,omitempty"`
 	Optional bool     `yaml:"optional,omitempty"`
 }
+
+// NamedEnvironment is one named group of EnvironmentEntry, contributed by a plugin repo's own
+// root plugin.yaml `environments:` (ARCHITECTURE.md "Plugin repository layout") — global,
+// non-trunk.yaml-enableable config always in effect, unlike Runtime/Linter definitions.
+type NamedEnvironment struct {
+	Name        string             `yaml:"name"`
+	Environment []EnvironmentEntry `yaml:"environment"`
+}
+
+// FileType is one named entry of the file-type registry (ARCHITECTURE.md `lint.files:`) — what
+// `lint.definitions[].files: [...]` values reference. Matched against a real file by any of
+// Extensions/Filenames/Regexes/Shebangs (the last against a `#!/usr/bin/env <shebang>` line, for
+// extensionless scripts); RequiredYAMLKeys further narrows a YAML match (e.g. distinguishing
+// `cloudformation` from plain `yaml`). Comments names CommentFormat entries this file type uses
+// for trunk-ignore detection. Inherit composes other named FileTypes in (e.g. `bazel` inheriting
+// `bazel-build`/`bazel-workspace`/`bazel-module`) instead of repeating their fields.
+type FileType struct {
+	Name             string   `yaml:"name"`
+	Extensions       []string `yaml:"extensions,omitempty"`
+	Filenames        []string `yaml:"filenames,omitempty"`
+	Regexes          []string `yaml:"regexes,omitempty"`
+	Shebangs         []string `yaml:"shebangs,omitempty"`
+	RequiredYAMLKeys []string `yaml:"required_yaml_keys,omitempty"`
+	Comments         []string `yaml:"comments,omitempty"`
+	Inherit          []string `yaml:"inherit,omitempty"`
+}
+
+// CommentFormat is one named comment-delimiter style (`hash`, `slashes-block`, ...), contributed
+// by a plugin repo's own category-root plugin.yaml (e.g. linters/plugin.yaml's `lint.
+// comment_formats:`), used to detect trunk-ignore-style comments (ARCHITECTURE.md "Built-in /
+// global config") — global, non-trunk.yaml-enableable config always in effect.
+type CommentFormat struct {
+	Name              string `yaml:"name"`
+	LeadingDelimiter  string `yaml:"leading_delimiter"`
+	TrailingDelimiter string `yaml:"trailing_delimiter,omitempty"`
+}

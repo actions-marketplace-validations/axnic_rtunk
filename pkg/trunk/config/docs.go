@@ -5,7 +5,11 @@
 // each into its own raw shape (as YAML naturally decodes it: lists, not maps), then folds every
 // list into the Config's maps, keyed by each resource's own id/name. A repeated key is never
 // field-by-field merged — the later definition fully replaces the earlier one — but every such
-// collision is recorded as a *DuplicateError.
+// collision is recorded as a *DuplicateError. A source's optional repo-root plugin.yaml and each
+// category's own root plugin.yaml (e.g. linters/plugin.yaml) contribute global, non-enableable
+// config instead — Environments and Lint.CommentFormats — concatenated rather than keyed, since
+// they have no id to collide on. ResolveAll is Resolve without the final enabled+used trim (see
+// filterEnabled below); Environments/Lint.CommentFormats are identical either way.
 //
 // Config.Validate then checks that everything referenced by id (a tool's download/runtime, a
 // linter's tools, trunk.yaml's own enabled lists) actually exists among what was merged,

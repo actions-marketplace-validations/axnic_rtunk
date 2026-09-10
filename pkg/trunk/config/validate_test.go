@@ -47,16 +47,16 @@ func TestConfig_Validate_EnabledLists(t *testing.T) {
 		},
 		{
 			name: "lint enabled, missing definition",
-			cfg: config.Config{Lint: config.CategoryConfig[config.Linter]{
+			cfg: config.Config{Lint: config.LintConfig{CategoryConfig: config.CategoryConfig[config.Linter]{
 				Enabled: []string{"eslint"}, Definitions: map[string]config.Linter{},
-			}},
+			}}},
 			wantCat: "lint", wantMissing: "eslint",
 		},
 		{
 			name: "lint enabled, definition present",
-			cfg: config.Config{Lint: config.CategoryConfig[config.Linter]{
+			cfg: config.Config{Lint: config.LintConfig{CategoryConfig: config.CategoryConfig[config.Linter]{
 				Enabled: []string{"eslint"}, Definitions: map[string]config.Linter{"eslint": {Name: "eslint"}},
-			}},
+			}}},
 		},
 		{
 			name: "action enabled, missing definition",
@@ -153,7 +153,7 @@ func TestConfig_Validate_References(t *testing.T) {
 		{
 			name: "lint tools, missing",
 			cfg: config.Config{
-				Lint:  config.CategoryConfig[config.Linter]{Definitions: map[string]config.Linter{"eslint": {Name: "eslint", Tools: []string{"eslint-bin"}}}},
+				Lint:  config.LintConfig{CategoryConfig: config.CategoryConfig[config.Linter]{Definitions: map[string]config.Linter{"eslint": {Name: "eslint", Tools: []string{"eslint-bin"}}}}},
 				Tools: map[string]config.Tool{},
 			},
 			wantCat: "lint", wantKey: "eslint", wantField: "tools", wantRef: "eslint-bin",
@@ -161,8 +161,43 @@ func TestConfig_Validate_References(t *testing.T) {
 		{
 			name: "lint tools, present",
 			cfg: config.Config{
-				Lint:  config.CategoryConfig[config.Linter]{Definitions: map[string]config.Linter{"eslint": {Name: "eslint", Tools: []string{"eslint-bin"}}}},
+				Lint:  config.LintConfig{CategoryConfig: config.CategoryConfig[config.Linter]{Definitions: map[string]config.Linter{"eslint": {Name: "eslint", Tools: []string{"eslint-bin"}}}}},
 				Tools: map[string]config.Tool{"eslint-bin": {Name: "eslint-bin"}},
+			},
+		},
+		{
+			name: "lint files, missing",
+			cfg: config.Config{
+				Lint: config.LintConfig{
+					CategoryConfig: config.CategoryConfig[config.Linter]{Definitions: map[string]config.Linter{"eslint": {Name: "eslint", Files: []string{"javascript"}}}},
+					Files:          map[string]config.FileType{},
+				},
+			},
+			wantCat: "lint", wantKey: "eslint", wantField: "files", wantRef: "javascript",
+		},
+		{
+			name: "lint files, present",
+			cfg: config.Config{
+				Lint: config.LintConfig{
+					CategoryConfig: config.CategoryConfig[config.Linter]{Definitions: map[string]config.Linter{"eslint": {Name: "eslint", Files: []string{"javascript"}}}},
+					Files:          map[string]config.FileType{"javascript": {Name: "javascript"}},
+				},
+			},
+		},
+		{
+			name: "file inherit, missing",
+			cfg: config.Config{
+				Lint: config.LintConfig{Files: map[string]config.FileType{"bazel": {Name: "bazel", Inherit: []string{"bazel-build"}}}},
+			},
+			wantCat: "file", wantKey: "bazel", wantField: "inherit", wantRef: "bazel-build",
+		},
+		{
+			name: "file inherit, present",
+			cfg: config.Config{
+				Lint: config.LintConfig{Files: map[string]config.FileType{
+					"bazel":       {Name: "bazel", Inherit: []string{"bazel-build"}},
+					"bazel-build": {Name: "bazel-build"},
+				}},
 			},
 		},
 	}
@@ -188,7 +223,7 @@ func TestConfig_Validate_References(t *testing.T) {
 func TestConfig_Validate_JoinsMultipleErrors(t *testing.T) {
 	cfg := config.Config{
 		Runtimes: config.CategoryConfig[config.Runtime]{Enabled: []string{"node"}, Definitions: map[string]config.Runtime{}},
-		Lint:     config.CategoryConfig[config.Linter]{Enabled: []string{"eslint"}, Definitions: map[string]config.Linter{}},
+		Lint:     config.LintConfig{CategoryConfig: config.CategoryConfig[config.Linter]{Enabled: []string{"eslint"}, Definitions: map[string]config.Linter{}}},
 	}
 
 	err := cfg.Validate()

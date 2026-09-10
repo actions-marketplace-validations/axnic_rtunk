@@ -12,11 +12,22 @@ import (
 // while everything unreferenced (an unrelated tool/runtime/download/action/linter) is dropped.
 func TestFilterEnabled(t *testing.T) {
 	cfg := Config{
-		Lint: CategoryConfig[Linter]{
-			Enabled: []string{"eslint@8.10.0"}, // pinned: filterEnabled must strip the @version
-			Definitions: map[string]Linter{
-				"eslint": {Name: "eslint", Tools: []string{"eslint-bin"}},
-				"unused": {Name: "unused", Tools: []string{"orphan-tool"}},
+		// Global, non-enableable config — filterEnabled must leave both untouched, unlike every
+		// enabled:/Definitions pair below.
+		Environments: []NamedEnvironment{{Name: "SYSTEM"}},
+		Lint: LintConfig{
+			CategoryConfig: CategoryConfig[Linter]{
+				Enabled: []string{"eslint@8.10.0"}, // pinned: filterEnabled must strip the @version
+				Definitions: map[string]Linter{
+					"eslint": {Name: "eslint", Tools: []string{"eslint-bin"}, Files: []string{"github-workflow"}},
+					"unused": {Name: "unused", Tools: []string{"orphan-tool"}, Files: []string{"orphan-file"}},
+				},
+			},
+			CommentFormats: []CommentFormat{{Name: "hash", LeadingDelimiter: "#"}},
+			Files: map[string]FileType{
+				"github-workflow": {Name: "github-workflow", Inherit: []string{"yaml"}},
+				"yaml":            {Name: "yaml"},
+				"orphan-file":     {Name: "orphan-file"},
 			},
 		},
 		Actions: CategoryConfig[Action]{
@@ -54,6 +65,11 @@ func TestFilterEnabled(t *testing.T) {
 	assert.Equal(t, map[string]Tool{"eslint-bin": cfg.Tools["eslint-bin"]}, cfg.Tools)
 	assert.ElementsMatch(t, []string{"node", "python"}, keysOf(cfg.Runtimes.Definitions))
 	assert.ElementsMatch(t, []string{"node", "python"}, keysOf(cfg.Downloads))
+	assert.Equal(t, []NamedEnvironment{{Name: "SYSTEM"}}, cfg.Environments)
+	assert.Equal(t, []CommentFormat{{Name: "hash", LeadingDelimiter: "#"}}, cfg.Lint.CommentFormats)
+	// "yaml" is only reachable via github-workflow's inherit: — proves the closure is followed,
+	// not just files: itself; "orphan-file" is dropped since "unused" was never enabled.
+	assert.ElementsMatch(t, []string{"github-workflow", "yaml"}, keysOf(cfg.Lint.Files))
 }
 
 func keysOf[T any](m map[string]T) []string {

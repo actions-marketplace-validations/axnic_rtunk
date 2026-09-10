@@ -1,0 +1,6 @@
+version: "0.1"
+environments:
+  - name: SYSTEM
+    environment:
+      - name: PATH
+        list: ["${env.PATH:-}"]

@@ -10,20 +10,27 @@ import "strings"
 // still be caught as a duplicate; it just won't survive into the returned Config.
 //
 // "Used by the enabled ones" follows the reference graph one hop at a time: an enabled linter's
-// tools:, then a kept tool's runtime:/download:, an enabled action's runtime:, and a kept
-// runtime's download:. There's no cycle to worry about (a Tool/Runtime never references a Linter/
-// Action back), so a single pass is enough — no fixed-point iteration needed.
+// tools:/files:, then a kept tool's runtime:/download:, an enabled action's runtime:, and a kept
+// runtime's download:. A kept FileType's own inherit: chain is followed to a fixed point (unlike
+// the rest of the graph, it can be more than one hop deep — e.g. bazel -> bazel-build -> ...).
+// There's no cycle to worry about elsewhere (a Tool/Runtime never references a Linter/Action
+// back), so a single pass is enough there.
 func filterEnabled(cfg *Config) {
 	keepLint := filterMap(cfg.Lint.Definitions, enabledIDs(cfg.Lint.Enabled))
 	keepActions := filterMap(cfg.Actions.Definitions, enabledIDs(cfg.Actions.Enabled))
 
 	toolIDs := map[string]struct{}{}
+	fileIDs := map[string]struct{}{}
 	for _, l := range keepLint {
 		for _, t := range l.Tools {
 			toolIDs[t] = struct{}{}
 		}
+		for _, f := range l.Files {
+			fileIDs[f] = struct{}{}
+		}
 	}
 	keepTools := filterMap(cfg.Tools, toolIDs)
+	keepFiles := filterMapTransitive(cfg.Lint.Files, fileIDs, func(f FileType) []string { return f.Inherit })
 
 	runtimeIDs := enabledIDs(cfg.Runtimes.Enabled)
 	for _, t := range keepTools {
@@ -54,6 +61,7 @@ func filterEnabled(cfg *Config) {
 	cfg.Lint.Definitions = keepLint
 	cfg.Actions.Definitions = keepActions
 	cfg.Tools = keepTools
+	cfg.Lint.Files = keepFiles
 	cfg.Runtimes.Definitions = keepRuntimes
 	cfg.Downloads = keepDownloads
 }
@@ -69,6 +77,30 @@ func filterMap[T any](m map[string]T, keep map[string]struct{}) map[string]T {
 		}
 	}
 	return out
+}
+
+// filterMapTransitive is filterMap, but first grows keep to a fixed point by following refs(v)
+// for every entry it pulls in — e.g. FileType.Inherit, which can chain more than one hop deep.
+func filterMapTransitive[T any](m map[string]T, keep map[string]struct{}, refs func(T) []string) map[string]T {
+	queue := make([]string, 0, len(keep))
+	for k := range keep {
+		queue = append(queue, k)
+	}
+	for len(queue) > 0 {
+		k := queue[len(queue)-1]
+		queue = queue[:len(queue)-1]
+		v, ok := m[k]
+		if !ok {
+			continue // dangling reference; Validate reports it, not this filter
+		}
+		for _, ref := range refs(v) {
+			if _, seen := keep[ref]; !seen {
+				keep[ref] = struct{}{}
+				queue = append(queue, ref)
+			}
+		}
+	}
+	return filterMap(m, keep)
 }
 
 // enabledIDs turns a trunk.yaml enabled: list (each entry optionally pinned as `id@version`) into

@@ -75,6 +75,17 @@ func TestConfigPrint(t *testing.T) {
 	assert.Contains(t, stdout, "actionlint")
 	assert.Contains(t, stdout, "node")
 	assert.Contains(t, stdout, "commitlint")
+	assert.NotContains(t, stdout, "eslint", "eslint is an unreferenced tool the default enabled+used print must drop")
+}
+
+// TestConfigPrint_All: --all switches to config.ResolveAll, surfacing eslint/shellcheck — tools
+// the fixture plugin repo defines but nothing in trunk-with-plugins.yaml enables or references
+// (see TestConfigPrint above, and pkg/trunk/config's TestResolveAll_WithPluginRepo).
+func TestConfigPrint_All(t *testing.T) {
+	stdout, stderr, err := run2(t, "--config", trunkYAML, "config", "print", "--all")
+	require.NoError(t, err, "stderr: %s", stderr)
+	assert.Contains(t, stdout, "eslint")
+	assert.Contains(t, stdout, "shellcheck")
 }
 
 func TestFindTrunkYAML(t *testing.T) {

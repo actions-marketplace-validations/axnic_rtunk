@@ -12,8 +12,13 @@ type Config struct {
 		Sources map[string]PluginSource
 	}
 
+	// Environments are global env var groups contributed by a plugin repo's own root
+	// plugin.yaml `environments:` — not trunk.yaml-enableable, always in effect, and never
+	// trimmed by filterEnabled (unlike Runtimes/Lint/Actions.Definitions).
+	Environments []NamedEnvironment
+
 	Runtimes CategoryConfig[Runtime]
-	Lint     CategoryConfig[Linter]
+	Lint     LintConfig
 	Actions  CategoryConfig[Action]
 
 	// Tools and Downloads have no trunk.yaml `enabled:` list of their own; they are referenced
@@ -37,4 +42,18 @@ type PluginSource struct {
 type CategoryConfig[T any] struct {
 	Enabled     []string
 	Definitions map[string]T
+}
+
+// LintConfig is CategoryConfig[Linter] plus comment_formats: (global, never trimmed, as above)
+// and files:, the file-type registry a plugin repo's own linters/plugin.yaml contributes
+// (ARCHITECTURE.md "Built-in / global config") — keyed by name like Tools/Downloads, since
+// `lint.definitions[].files: [...]` values reference it by id, and trimmed by filterEnabled down
+// to what a kept linter's files: (plus any FileType.Inherit chain) actually uses.
+// `yaml:",inline"` is required on the embedded field: yaml.v3 does not auto-promote anonymous
+// struct fields the way Go itself (or encoding/json) does, so without it Enabled/Definitions
+// would nest under a spurious "categoryconfig:" key instead of sitting directly under "lint:".
+type LintConfig struct {
+	CategoryConfig[Linter] `yaml:",inline"`
+	CommentFormats         []CommentFormat     `yaml:"comment_formats,omitempty"`
+	Files                  map[string]FileType `yaml:"files,omitempty"`
 }

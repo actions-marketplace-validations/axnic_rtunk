@@ -11,9 +11,16 @@ import (
 // sourceDefs holds every definition contributed by a single plugin source, unmerged — the shape
 // both the on-disk cache stores and mergeSourceInto folds into a Config.
 type sourceDefs struct {
+	// Environments and CommentFormats are global config, not per-id definitions: no map, just
+	// concatenated across every plugin.yaml that contributes them (ARCHITECTURE.md "Built-in /
+	// global config").
+	Environments   []NamedEnvironment
+	CommentFormats []CommentFormat
+
 	Downloads map[string]Download
 	Tools     map[string]Tool
 	Lint      map[string]Linter
+	Files     map[string]FileType
 	Actions   map[string]Action
 	Runtimes  map[string]Runtime
 }

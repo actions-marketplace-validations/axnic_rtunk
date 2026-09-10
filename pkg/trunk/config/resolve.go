@@ -34,15 +34,21 @@ type trunkFile struct {
 	} `yaml:"actions"`
 }
 
-// pluginFile is the raw shape of one category plugin.yaml: any mix of the section kinds below
-// (ARCHITECTURE.md "a single file commonly mixes sections").
+// pluginFile is the raw shape of one plugin.yaml: any mix of the section kinds below
+// (ARCHITECTURE.md "a single file commonly mixes sections"). The same shape covers both a
+// resource file (linters/<name>/plugin.yaml, contributing Lint.Definitions etc.) and a global
+// config file (the repo-root plugin.yaml, contributing Environments; a category-root file like
+// linters/plugin.yaml, contributing Lint.CommentFormats) — whichever fields a given file sets.
 type pluginFile struct {
-	Downloads []Download `yaml:"downloads"`
-	Tools     struct {
+	Environments []NamedEnvironment `yaml:"environments"`
+	Downloads    []Download         `yaml:"downloads"`
+	Tools        struct {
 		Definitions []Tool `yaml:"definitions"`
 	} `yaml:"tools"`
 	Lint struct {
-		Definitions []Linter `yaml:"definitions"`
+		Definitions    []Linter        `yaml:"definitions"`
+		CommentFormats []CommentFormat `yaml:"comment_formats"`
+		Files          []FileType      `yaml:"files"`
 	} `yaml:"lint"`
 	Actions struct {
 		Definitions []Action `yaml:"definitions"`
@@ -58,13 +64,27 @@ type pluginFile struct {
 // dir). See the package doc for the pipeline; call Validate on the result to check enabled lists
 // and dangling references. Before returning, filterEnabled trims the merged result down to what
 // trunk.yaml actually enabled plus whatever those enabled definitions reference transitively — a
-// plugin source's whole catalog is a poor stand-in for "the effective configuration". The
-// returned Config is always populated with everything Resolve managed to read (and keep), even
-// when it also returns an error — callers that only care about specific resources may still use
-// it.
-func Resolve(file, cacheDir string) (cfg Config, err error) {
-	defer func() { filterEnabled(&cfg) }()
+// plugin source's whole catalog is a poor stand-in for "the effective configuration" (mirrors
+// `trunk config print`'s default view). Use ResolveAll for the untrimmed catalog (`trunk config
+// print --all`). The returned Config is always populated with everything Resolve managed to read
+// (and keep), even when it also returns an error — callers that only care about specific
+// resources may still use it.
+func Resolve(file, cacheDir string) (Config, error) {
+	cfg, err := resolveMerged(file, cacheDir)
+	filterEnabled(&cfg)
+	return cfg, err
+}
 
+// ResolveAll is Resolve without the enabled+used trim: every definition merged from trunk.yaml's
+// plugin sources, regardless of what trunk.yaml itself turns on (`trunk config print --all`).
+// Environments and Lint.CommentFormats are global, non-enableable config either way, so they're
+// identical between Resolve and ResolveAll.
+func ResolveAll(file, cacheDir string) (Config, error) {
+	return resolveMerged(file, cacheDir)
+}
+
+// resolveMerged is Resolve/ResolveAll's shared pipeline, before filterEnabled trims anything.
+func resolveMerged(file, cacheDir string) (cfg Config, err error) {
 	cfg = Config{
 		Tools:     map[string]Tool{},
 		Downloads: map[string]Download{},
@@ -72,6 +92,7 @@ func Resolve(file, cacheDir string) (cfg Config, err error) {
 	cfg.Plugins.Sources = map[string]PluginSource{}
 	cfg.Runtimes.Definitions = map[string]Runtime{}
 	cfg.Lint.Definitions = map[string]Linter{}
+	cfg.Lint.Files = map[string]FileType{}
 	cfg.Actions.Definitions = map[string]Action{}
 
 	// 1. Lecture
@@ -148,22 +169,40 @@ func parseSourceDir(dir string) (defs sourceDefs, dupErrs []error, err error) {
 		Downloads: map[string]Download{},
 		Tools:     map[string]Tool{},
 		Lint:      map[string]Linter{},
+		Files:     map[string]FileType{},
 		Actions:   map[string]Action{},
 		Runtimes:  map[string]Runtime{},
 	}
+
+	// The repo-root plugin.yaml (environments:) and each category's own root plugin.yaml (e.g.
+	// linters/plugin.yaml's lint.comment_formats:) are optional global config, not per-resource
+	// definitions (ARCHITECTURE.md "Built-in / global config") — read whichever are present.
+	globalFiles := []string{filepath.Join(dir, "plugin.yaml")}
+	for _, category := range pluginCategories {
+		globalFiles = append(globalFiles, filepath.Join(dir, category, "plugin.yaml"))
+	}
+	for _, path := range globalFiles {
+		pf, err := readPluginFile(path)
+		if errors.Is(err, os.ErrNotExist) {
+			continue
+		}
+		if err != nil {
+			return sourceDefs{}, nil, err
+		}
+		defs.Environments = append(defs.Environments, pf.Environments...)
+		defs.CommentFormats = append(defs.CommentFormats, pf.Lint.CommentFormats...)
+		mergeKeyed(defs.Files, pf.Lint.Files, func(f FileType) string { return f.Name }, "file", &dupErrs)
+	}
+
 	for _, category := range pluginCategories {
 		matches, err := filepath.Glob(filepath.Join(dir, category, "*", "plugin.yaml"))
 		if err != nil {
 			return sourceDefs{}, nil, err // malformed glob pattern; unreachable with our fixed patterns
 		}
 		for _, path := range matches {
-			data, err := os.ReadFile(path)
+			pf, err := readPluginFile(path)
 			if err != nil {
-				return sourceDefs{}, nil, &ReadError{Path: path, Err: err}
-			}
-			var pf pluginFile
-			if err := yaml.Unmarshal(data, &pf); err != nil {
-				return sourceDefs{}, nil, &ParseError{Path: path, Err: err}
+				return sourceDefs{}, nil, err
 			}
 
 			mergeKeyed(defs.Downloads, pf.Downloads, func(d Download) string { return d.Name }, "download", &dupErrs)
@@ -176,12 +215,33 @@ func parseSourceDir(dir string) (defs sourceDefs, dupErrs []error, err error) {
 	return defs, dupErrs, nil
 }
 
+// readPluginFile reads and parses one plugin.yaml. A missing file is returned as the raw
+// os.ErrNotExist-wrapping error (unwrapped by errors.Is), not a *ReadError, so callers reading an
+// optional global file (see globalFiles above) can tell "absent" from "unreadable".
+func readPluginFile(path string) (pluginFile, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return pluginFile{}, err
+		}
+		return pluginFile{}, &ReadError{Path: path, Err: err}
+	}
+	var pf pluginFile
+	if err := yaml.Unmarshal(data, &pf); err != nil {
+		return pluginFile{}, &ParseError{Path: path, Err: err}
+	}
+	return pf, nil
+}
+
 // mergeSourceInto folds defs into cfg's global maps, recording a *DuplicateError for any key
 // already contributed by an earlier source into *errs.
 func mergeSourceInto(cfg *Config, defs sourceDefs, errs *[]error) {
+	cfg.Environments = append(cfg.Environments, defs.Environments...)
+	cfg.Lint.CommentFormats = append(cfg.Lint.CommentFormats, defs.CommentFormats...)
 	mergeMapInto(cfg.Downloads, defs.Downloads, "download", errs)
 	mergeMapInto(cfg.Tools, defs.Tools, "tool", errs)
 	mergeMapInto(cfg.Lint.Definitions, defs.Lint, "lint", errs)
+	mergeMapInto(cfg.Lint.Files, defs.Files, "file", errs)
 	mergeMapInto(cfg.Actions.Definitions, defs.Actions, "action", errs)
 	mergeMapInto(cfg.Runtimes.Definitions, defs.Runtimes, "runtime", errs)
 }

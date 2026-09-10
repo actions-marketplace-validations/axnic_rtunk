@@ -32,8 +32,8 @@ func checkEnabled[T any](category string, enabled []string, defs map[string]T) [
 }
 
 // validateReferences reports a *ReferenceError for every by-id reference (a tool's
-// download/runtime, a runtime's download, a linter's tools) that doesn't resolve to a key
-// actually present in cfg.
+// download/runtime, a runtime's download, a linter's tools/files, a file type's inherit) that
+// doesn't resolve to a key actually present in cfg.
 func validateReferences(cfg *Config) []error {
 	var errs []error
 
@@ -62,6 +62,19 @@ func validateReferences(cfg *Config) []error {
 		for _, toolName := range l.Tools {
 			if _, ok := cfg.Tools[toolName]; !ok {
 				errs = append(errs, &ReferenceError{Category: "lint", Key: name, Field: "tools", Reference: toolName})
+			}
+		}
+		for _, fileName := range l.Files {
+			if _, ok := cfg.Lint.Files[fileName]; !ok {
+				errs = append(errs, &ReferenceError{Category: "lint", Key: name, Field: "files", Reference: fileName})
+			}
+		}
+	}
+
+	for name, f := range cfg.Lint.Files {
+		for _, inh := range f.Inherit {
+			if _, ok := cfg.Lint.Files[inh]; !ok {
+				errs = append(errs, &ReferenceError{Category: "file", Key: name, Field: "inherit", Reference: inh})
 			}
 		}
 	}

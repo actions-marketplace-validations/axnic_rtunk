@@ -12,6 +12,10 @@ import (
 // network at all. Caching is keyed by uri+ref (never mutates once fetched, since ref is always a
 // tag or SHA per ARCHITECTURE.md), so a cache hit is safe to reuse indefinitely.
 //
+// ponytail: a cache file written before Environments/CommentFormats existed on sourceDefs
+// decodes fine (json.Unmarshal leaves them nil) but silently omits that data until the source is
+// re-fetched; a cache format version would close this, add one if a real upgrade ever needs it.
+//
 // On a cache miss — or a cache file that fails to decode, e.g. corrupted or from an incompatible
 // rtunk version — it's dropped and regenerated: src's ref is cloned into a throwaway temp dir
 // (removed once parsing finishes, never persisted itself), parsed, and the result written back to

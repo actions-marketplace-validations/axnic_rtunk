@@ -66,11 +66,45 @@ func TestResolve_WithPluginRepo(t *testing.T) {
 	require.Contains(t, cfg.Lint.Definitions, "actionlint")
 	require.Contains(t, cfg.Lint.Definitions, "prettier")
 
+	// actionlint/prettier's own files: (github-workflow/javascript) must survive; "yaml", defined
+	// but never referenced by an enabled linter, must not.
+	assert.Contains(t, cfg.Lint.Files, "github-workflow")
+	assert.Contains(t, cfg.Lint.Files, "javascript")
+	assert.NotContains(t, cfg.Lint.Files, "yaml")
+
 	require.Contains(t, cfg.Actions.Definitions, "commitlint")
 	assert.NotContains(t, cfg.Actions.Definitions, "go-mod-tidy")
 
 	require.Contains(t, cfg.Runtimes.Definitions, "node")
 	assert.Equal(t, config.ShimList{"node", "npm", "npx", "corepack"}, cfg.Runtimes.Definitions["node"].Shims)
+
+	// Environments (from the repo-root plugin.yaml) and Lint.CommentFormats (from linters/
+	// plugin.yaml) are global config, not enableable definitions — they must survive Resolve's
+	// enabled+used trim untouched, unlike everything asserted absent above.
+	require.Len(t, cfg.Environments, 1)
+	assert.Equal(t, "SYSTEM", cfg.Environments[0].Name)
+	assert.ElementsMatch(t, []config.CommentFormat{
+		{Name: "hash", LeadingDelimiter: "#"},
+		{Name: "slashes-inline", LeadingDelimiter: "//"},
+	}, cfg.Lint.CommentFormats)
+}
+
+// TestResolveAll_WithPluginRepo mirrors TestResolve_WithPluginRepo but via ResolveAll: every
+// definition the fixture plugin repo contributes must survive, including eslint/shellcheck
+// (unreferenced tools) and go-mod-tidy (a defined but never-enabled action) that Resolve trims.
+func TestResolveAll_WithPluginRepo(t *testing.T) {
+	cfg, err := config.ResolveAll("testdata/trunk-with-plugins.yaml", t.TempDir())
+	require.NoError(t, err)
+
+	assert.Contains(t, cfg.Tools, "eslint")
+	assert.Contains(t, cfg.Tools, "shellcheck")
+	assert.Contains(t, cfg.Downloads, "shellcheck")
+	assert.Contains(t, cfg.Actions.Definitions, "go-mod-tidy")
+	assert.Contains(t, cfg.Lint.Files, "yaml", "unreferenced but defined file type; Resolve trims it, ResolveAll keeps it")
+
+	require.Len(t, cfg.Environments, 1)
+	assert.Equal(t, "SYSTEM", cfg.Environments[0].Name)
+	assert.Len(t, cfg.Lint.CommentFormats, 2)
 }
 
 // TestResolve_DuplicateResource: two plugin.yaml files under the same local source both define a

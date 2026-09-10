@@ -1,0 +1,21 @@
+version: "0.1"
+lint:
+  comment_formats:
+    - name: hash
+      leading_delimiter: "#"
+    - name: slashes-inline
+      leading_delimiter: "//"
+  files:
+    - name: github-workflow
+      extensions: [yaml, yml]
+      filenames: [".github/workflows/*.yml", ".github/workflows/*.yaml"]
+      comments: [hash]
+    - name: javascript
+      extensions: [js, jsx, mjs, cjs]
+      shebangs: [node]
+      comments: [slashes-inline]
+    # yaml is never referenced by any linter's files: — exercises filterEnabled dropping an
+    # unused file type, same as eslint/shellcheck's unused tools below.
+    - name: yaml
+      extensions: [yaml, yml]
+      comments: [hash]
