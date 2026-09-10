@@ -3,6 +3,7 @@ package cli
 import (
 	"bytes"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"testing"
 
@@ -61,6 +62,28 @@ func TestFindTrunkYAML(t *testing.T) {
 	found, err := findTrunkYAML()
 	require.NoError(t, err)
 	assert.Equal(t, filepath.Join(root, ".trunk", "trunk.yaml"), found)
+}
+
+func TestFindTrunkYAML_BoundedByGitRoot(t *testing.T) {
+	// trunk.yaml sits outside the git repo; the walk must stop at the repo root and not fall
+	// through to it, or a subdirectory of some unrelated repo could pick up a stranger's config.
+	root, err := filepath.EvalSymlinks(t.TempDir())
+	require.NoError(t, err)
+	require.NoError(t, os.MkdirAll(filepath.Join(root, ".trunk"), 0o755))
+	require.NoError(t, os.WriteFile(filepath.Join(root, ".trunk", "trunk.yaml"), []byte("version: \"0.1\"\n"), 0o644))
+
+	repo := filepath.Join(root, "repo")
+	sub := filepath.Join(repo, "a", "b")
+	require.NoError(t, os.MkdirAll(sub, 0o755))
+	require.NoError(t, exec.Command("git", "-C", repo, "init").Run())
+
+	cwd, err := os.Getwd()
+	require.NoError(t, err)
+	t.Cleanup(func() { require.NoError(t, os.Chdir(cwd)) })
+	require.NoError(t, os.Chdir(sub))
+
+	_, err = findTrunkYAML()
+	assert.Error(t, err)
 }
 
 func TestFindTrunkYAML_NotFound(t *testing.T) {
