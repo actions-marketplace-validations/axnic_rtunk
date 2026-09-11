@@ -39,6 +39,15 @@ func TestFetchBlob(t *testing.T) {
 	assert.Equal(t, int64(11), gotTotal)
 }
 
+// TestFetchBlob_RejectsNonHTTPS pins down Fix 5: with no lockfile/--secure mode, a plain HTTP
+// fetch to a non-loopback host lets a network attacker choose the bytes with no other integrity
+// anchor (the TOFU checksum model's only anchor is the URL itself). This must be rejected before
+// any network call -- if it made one, this test would hang or dial a real host.
+func TestFetchBlob_RejectsNonHTTPS(t *testing.T) {
+	_, err := download.FetchBlob(t.TempDir(), "http://example.com/whatever", nil)
+	assert.ErrorContains(t, err, "https")
+}
+
 func TestFetchBlob_HTTPError(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)

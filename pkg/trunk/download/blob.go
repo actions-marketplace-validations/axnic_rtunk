@@ -5,7 +5,9 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 )
@@ -15,18 +17,43 @@ import (
 // (see Event) are responsible for their own synchronization.
 type ProgressFunc func(bytes, total int64)
 
-// FetchBlob downloads url over HTTPS (or HTTP, for tests) into root's content-addressed blob
-// store: streamed through a SHA256 hasher into a temp file, renamed to BlobPath(root, sum) only
-// once the hash is known, so a path is never read unless its name matches its own content (see
-// the spec's "Checksum model"). progress may be nil.
-func FetchBlob(root, url string, progress ProgressFunc) (string, error) {
-	resp, err := http.Get(url) //nolint:noctx // v0.2 has no per-fetch context/cancellation yet
+// requireSecureScheme rejects any blobURL that isn't https:// or loopback http:// (the checksum
+// model is TOFU -- no lockfile, no --secure mode -- so the URL itself is the only integrity
+// anchor; a plain HTTP fetch to a real host lets a network attacker choose the bytes). Loopback
+// stays allowed because the test suite's httptest.Server only ever serves plain HTTP there.
+func requireSecureScheme(blobURL string) error {
+	u, err := url.Parse(blobURL)
 	if err != nil {
-		return "", fmt.Errorf("download: fetch %s: %w", url, err)
+		return fmt.Errorf("download: fetch %s: %w", blobURL, err)
+	}
+	if u.Scheme == "https" {
+		return nil
+	}
+	host := u.Hostname()
+	if host == "localhost" {
+		return nil
+	}
+	if ip := net.ParseIP(host); ip != nil && ip.IsLoopback() {
+		return nil
+	}
+	return fmt.Errorf("download: fetch %s: refusing non-https URL to non-loopback host %q (TOFU checksum model has no other integrity anchor)", blobURL, host)
+}
+
+// FetchBlob downloads blobURL over HTTPS (or HTTP, for loopback -- see requireSecureScheme) into
+// root's content-addressed blob store: streamed through a SHA256 hasher into a temp file, renamed
+// to BlobPath(root, sum) only once the hash is known, so a path is never read unless its name
+// matches its own content (see the spec's "Checksum model"). progress may be nil.
+func FetchBlob(root, blobURL string, progress ProgressFunc) (string, error) {
+	if err := requireSecureScheme(blobURL); err != nil {
+		return "", err
+	}
+	resp, err := http.Get(blobURL) //nolint:noctx // v0.2 has no per-fetch context/cancellation yet
+	if err != nil {
+		return "", fmt.Errorf("download: fetch %s: %w", blobURL, err)
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("download: fetch %s: unexpected status %s", url, resp.Status)
+		return "", fmt.Errorf("download: fetch %s: unexpected status %s", blobURL, resp.Status)
 	}
 
 	blobsDir := filepath.Join(root, "blobs", "sha256")
@@ -60,7 +87,7 @@ func FetchBlob(root, url string, progress ProgressFunc) (string, error) {
 		}
 		if readErr != nil {
 			tmp.Close()
-			return "", fmt.Errorf("download: fetch %s: %w", url, readErr)
+			return "", fmt.Errorf("download: fetch %s: %w", blobURL, readErr)
 		}
 	}
 	if err := tmp.Close(); err != nil {

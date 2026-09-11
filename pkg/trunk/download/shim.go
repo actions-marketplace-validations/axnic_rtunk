@@ -15,6 +15,9 @@ func shimSearchPaths(installDir, name string) []string {
 	return []string{
 		filepath.Join(installDir, name),
 		filepath.Join(installDir, "bin", name),
+		// npm install --prefix <installDir> (installNodePackage) lays its bins out here, not at
+		// <installDir>/bin -- without this a runtime+package tool's FindShimTarget always fails.
+		filepath.Join(installDir, "node_modules", ".bin", name),
 	}
 }
 

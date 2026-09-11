@@ -18,14 +18,30 @@ import (
 // InstallDownload materializes one fetched blob into destDir: a straight copy (chmod +x) for a
 // bare-binary download (entry.Executable), or an extracted archive otherwise, format inferred
 // from url's own extension since blobPath's name is a content hash, not a filename.
+//
+// All work happens inside a scratch temp directory (a sibling of destDir, so the final
+// os.Rename below stays on one filesystem), published into destDir only via finalizeInstall once
+// everything has succeeded (see Fix 3). Without this, destDir existed for the entire
+// download/extract window -- and permanently after any failure -- because it used to be created
+// as this function's very first action; dirNonEmpty(destDir) (fetchRuntimeRef/fetchToolRef's own
+// "already cached" check) would then wrongly report a failed or interrupted install as Cached
+// forever, with no error and no way to detect it short of `rtunk cache clean`.
 func InstallDownload(blobPath, url, destDir string, entry config.DownloadEntry) error {
-	if err := os.MkdirAll(destDir, 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(destDir), 0o755); err != nil {
 		return err
 	}
+	tmpDir, err := os.MkdirTemp(filepath.Dir(destDir), ".tmp-*")
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(tmpDir) // no-op once finalizeInstall renames it into destDir
 
 	if entry.Executable {
 		name := filepath.Base(strings.SplitN(url, "?", 2)[0])
-		return copyFile(blobPath, filepath.Join(destDir, name), 0o755)
+		if err := copyFile(blobPath, filepath.Join(tmpDir, name), 0o755); err != nil {
+			return err
+		}
+		return finalizeInstall(tmpDir, destDir)
 	}
 
 	f, err := os.Open(blobPath)
@@ -41,13 +57,17 @@ func InstallDownload(blobPath, url, destDir string, entry config.DownloadEntry) 
 			return err
 		}
 		defer gz.Close()
-		return extractTar(gz, destDir, entry.StripComponents)
+		if err := extractTar(gz, tmpDir, entry.StripComponents); err != nil {
+			return err
+		}
 	case strings.HasSuffix(url, ".tar.xz"):
 		xr, err := xz.NewReader(f)
 		if err != nil {
 			return err
 		}
-		return extractTar(xr, destDir, entry.StripComponents)
+		if err := extractTar(xr, tmpDir, entry.StripComponents); err != nil {
+			return err
+		}
 	case strings.HasSuffix(url, ".zip"):
 		info, err := f.Stat()
 		if err != nil {
@@ -57,10 +77,29 @@ func InstallDownload(blobPath, url, destDir string, entry config.DownloadEntry) 
 		if err != nil {
 			return err
 		}
-		return extractZip(zr, destDir, entry.StripComponents)
+		if err := extractZip(zr, tmpDir, entry.StripComponents); err != nil {
+			return err
+		}
 	default:
 		return fmt.Errorf("download: %s: unrecognized archive format", url)
 	}
+	return finalizeInstall(tmpDir, destDir)
+}
+
+// finalizeInstall atomically publishes a completed install: tmpDir (scratch work done in a
+// sibling directory of destDir, so this stays on one filesystem -- os.Rename requires that) is
+// renamed into destDir only once every step has already succeeded. If destDir already exists, a
+// concurrent or earlier caller won the race and finished first -- that's success, not a conflict:
+// this caller's tmpDir is discarded and the winner's result is used as-is.
+func finalizeInstall(tmpDir, destDir string) error {
+	if err := os.Rename(tmpDir, destDir); err != nil {
+		if dirNonEmpty(destDir) {
+			_ = os.RemoveAll(tmpDir)
+			return nil
+		}
+		return err
+	}
+	return nil
 }
 
 // extractTar walks a tar stream, stripping the first strip path components off every entry name
@@ -81,6 +120,9 @@ func extractTar(r io.Reader, destDir string, strip int) error {
 			continue // stripped away entirely, or a dir/symlink entry -- v0.2 only needs regular files
 		}
 		dst := filepath.Join(destDir, name)
+		if err := verifyWithinDest(destDir, dst, hdr.Name); err != nil {
+			return err
+		}
 		if err := os.MkdirAll(filepath.Dir(dst), 0o755); err != nil {
 			return err
 		}
@@ -109,6 +151,9 @@ func extractZip(zr *zip.Reader, destDir string, strip int) error {
 			continue
 		}
 		dst := filepath.Join(destDir, name)
+		if err := verifyWithinDest(destDir, dst, f.Name); err != nil {
+			return err
+		}
 		if err := os.MkdirAll(filepath.Dir(dst), 0o755); err != nil {
 			return err
 		}
@@ -128,6 +173,18 @@ func extractZip(zr *zip.Reader, destDir string, strip int) error {
 		}
 		out.Close()
 		rc.Close()
+	}
+	return nil
+}
+
+// verifyWithinDest rejects zip-slip (CWE-22): an archive entry's raw name (e.g. containing "..")
+// can otherwise survive stripPath and make filepath.Join(destDir, name) resolve outside destDir,
+// letting a malicious/corrupt archive write anywhere the process has permission to. name is the
+// entry's original (pre-strip) path, kept only for a debuggable error message.
+func verifyWithinDest(destDir, dst, name string) error {
+	rel, err := filepath.Rel(destDir, dst)
+	if err != nil || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+		return fmt.Errorf("extract: entry %q escapes destination directory", name)
 	}
 	return nil
 }

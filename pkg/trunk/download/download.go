@@ -113,16 +113,20 @@ func fetchOne(cfg config.Config, root string, ref Ref, events chan<- Event) {
 
 // fetchRuntimeRef fetches a "runtimes" ref: a system_version runtime is always Cached (never
 // downloaded, per the spec's "Fetch mechanisms"); otherwise its download: recipe is fetched and
-// extracted like any other download, and its declared Shims are written.
-func fetchRuntimeRef(cfg config.Config, root string, ref Ref, events chan<- Event) {
+// extracted like any other download, and its declared Shims are written. It returns a non-nil
+// error whenever it emitted a Failed event, so fetchToolRef's runtime+package branch can bail out
+// on a real runtime failure instead of proceeding to InstallPackage with no runtime on disk (see
+// Fix 4: that used to surface a confusing "npm not found" instead of the real cause).
+func fetchRuntimeRef(cfg config.Config, root string, ref Ref, events chan<- Event) error {
 	rt, ok := cfg.Runtimes.Definitions[ref.ID]
 	if !ok {
-		events <- Event{Ref: ref, Phase: Failed, Err: fmt.Errorf("download: unknown runtime %q", ref.ID)}
-		return
+		err := fmt.Errorf("download: unknown runtime %q", ref.ID)
+		events <- Event{Ref: ref, Phase: Failed, Err: err}
+		return err
 	}
 	if rt.SystemVersion != "" {
 		events <- Event{Ref: ref, Phase: Cached}
-		return
+		return nil
 	}
 
 	version := ref.Version
@@ -133,29 +137,31 @@ func fetchRuntimeRef(cfg config.Config, root string, ref Ref, events chan<- Even
 	installDir := InstallDir(root, "runtimes", ref.ID, version)
 	if dirNonEmpty(installDir) {
 		events <- Event{Ref: ref, Phase: Cached}
-		return
+		return nil
 	}
 
 	dl, ok := cfg.Downloads[rt.Download]
 	if !ok {
-		events <- Event{Ref: ref, Phase: Failed, Err: fmt.Errorf("download: runtime %q: no download recipe %q", ref.ID, rt.Download)}
-		return
+		err := fmt.Errorf("download: runtime %q: no download recipe %q", ref.ID, rt.Download)
+		events <- Event{Ref: ref, Phase: Failed, Err: err}
+		return err
 	}
 	if err := fetchDownload(root, ref, dl, version, installDir, events); err != nil {
-		return // fetchDownload already emitted the Failed event
+		return err // fetchDownload already emitted the Failed event
 	}
 	for _, name := range rt.Shims {
 		target, err := FindShimTarget(installDir, name)
 		if err != nil {
 			events <- Event{Ref: ref, Phase: Failed, Err: err}
-			return
+			return err
 		}
 		if err := WriteShim(ShimPath(root, "runtimes", ref.ID, version, name), target); err != nil {
 			events <- Event{Ref: ref, Phase: Failed, Err: err}
-			return
+			return err
 		}
 	}
 	events <- Event{Ref: ref, Phase: Done}
+	return nil
 }
 
 // fetchToolRef fetches a "tools" ref: a download-recipe tool follows the same path as a runtime;
@@ -211,7 +217,10 @@ func fetchToolRef(cfg config.Config, root string, ref Ref, events chan<- Event) 
 	runtimeVersion := ResolveVersion(cfg.Runtimes.Enabled, tool.Runtime, rt.KnownGoodVersion)
 	runtimeInstallDir := InstallDir(root, "runtimes", tool.Runtime, runtimeVersion)
 	if !dirNonEmpty(runtimeInstallDir) {
-		fetchRuntimeRef(cfg, root, Ref{Category: "runtimes", ID: tool.Runtime, Version: runtimeVersion}, events)
+		if err := fetchRuntimeRef(cfg, root, Ref{Category: "runtimes", ID: tool.Runtime, Version: runtimeVersion}, events); err != nil {
+			events <- Event{Ref: ref, Phase: Failed, Err: fmt.Errorf("download: tool %q: runtime %q: %w", ref.ID, tool.Runtime, err)}
+			return
+		}
 	}
 
 	events <- Event{Ref: ref, Phase: Started}
