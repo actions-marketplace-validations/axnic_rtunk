@@ -20,6 +20,7 @@ type CLI struct {
 	WhereCmd    whereCmd    `cmd:"" name:"where" help:"Print a cached item's shim path."`
 	ExecCmd     execCmd     `cmd:"" name:"exec" help:"Run a tool/runtime, downloading it first if missing."`
 	XCmd        execCmd     `cmd:"" name:"x" hidden:"" help:"Alias for exec."`
+	CacheCmd    cacheCmd    `cmd:"" name:"cache" help:"Manage the rtunk downloads cache."`
 }
 
 // Run parses args against CLI's grammar and executes the selected command's Run(), writing to
