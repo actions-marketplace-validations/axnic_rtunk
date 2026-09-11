@@ -24,15 +24,57 @@ func TestMatchEntry(t *testing.T) {
 		},
 	}
 
-	entry, osVal, cpuVal, ok := download.MatchEntry(entries, "linux", "arm64")
+	entry, osVal, cpuVal, ok := download.MatchEntry(entries, "linux", "arm64", "")
 	require.True(t, ok)
 	assert.Equal(t, "linux-url", entry.URL)
 	assert.Equal(t, "linux", osVal)
 	assert.Equal(t, "aarch64", cpuVal)
 
-	_, _, _, ok = download.MatchEntry(entries, "windows", "amd64")
+	_, _, _, ok = download.MatchEntry(entries, "windows", "amd64", "")
 	assert.False(t, ok, "no windows entry declared")
 
-	_, _, _, ok = download.MatchEntry(entries, "macos", "arm64")
+	_, _, _, ok = download.MatchEntry(entries, "macos", "arm64", "")
 	assert.False(t, ok, "macos entry only declares x86_64")
+}
+
+// TestMatchEntry_VersionRange pins down a real production bug: python-build-standalone's plugin
+// recipe lists multiple entries for the same OS/CPU, each gated to a version range via
+// DownloadEntry.Version (e.g. "<=3.10.17" pointing at an older dated release, "<=3.14.4" at a
+// newer one) -- MatchEntry used to return the first OS/CPU match regardless of that range,
+// silently picking a release tag that doesn't host the actually-requested version, and 404ing.
+func TestMatchEntry_VersionRange(t *testing.T) {
+	entries := []config.DownloadEntry{
+		{
+			OS:      config.OSSpec{"macos": "apple-darwin"},
+			CPU:     config.OSSpec{"arm_64": "aarch64"},
+			URL:     "https://example.com/20250409/cpython-${version}.tar.gz",
+			Version: "<=3.10.17",
+		},
+		{
+			OS:      config.OSSpec{"macos": "apple-darwin"},
+			CPU:     config.OSSpec{"arm_64": "aarch64"},
+			URL:     "https://example.com/20260414/cpython-${version}.tar.gz",
+			Version: "<=3.14.4",
+		},
+	}
+
+	entry, _, _, ok := download.MatchEntry(entries, "darwin", "arm64", "3.14.4")
+	require.True(t, ok)
+	assert.Equal(t, "https://example.com/20260414/cpython-${version}.tar.gz", entry.URL,
+		"3.14.4 satisfies only the second entry's <=3.14.4 range, not the first's <=3.10.17")
+
+	entry, _, _, ok = download.MatchEntry(entries, "darwin", "arm64", "3.9.1")
+	require.True(t, ok)
+	assert.Equal(t, "https://example.com/20250409/cpython-${version}.tar.gz", entry.URL,
+		"3.9.1 satisfies the first entry's range too, and it comes first -- first-match-wins still applies among satisfying entries")
+
+	_, _, _, ok = download.MatchEntry(entries, "darwin", "arm64", "4.0.0")
+	assert.False(t, ok, "4.0.0 satisfies neither entry's range")
+
+	// An entry with no Version constraint always matches, same as before this fix.
+	unconstrained := []config.DownloadEntry{{
+		OS: config.OSSpec{"linux": "linux"}, CPU: config.OSSpec{"x86_64": "x86_64"}, URL: "linux-url",
+	}}
+	_, _, _, ok = download.MatchEntry(unconstrained, "linux", "amd64", "99.99.99")
+	assert.True(t, ok, "an entry with no Version field must match any version")
 }

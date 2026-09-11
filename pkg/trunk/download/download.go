@@ -249,7 +249,7 @@ func fetchToolRef(cfg config.Config, root string, ref Ref, events chan<- Event) 
 // itself; the caller emits Done (after writing shims) or Failed on a returned error.
 func fetchDownload(root string, ref Ref, dl config.Download, version, installDir string, events chan<- Event) error {
 	events <- Event{Ref: ref, Phase: Started}
-	entry, osVal, cpuVal, ok := MatchEntry(dl.Downloads, runtime.GOOS, runtime.GOARCH)
+	entry, osVal, cpuVal, ok := MatchEntry(dl.Downloads, runtime.GOOS, runtime.GOARCH, version)
 	if !ok {
 		err := fmt.Errorf("download: %s %q: no download entry for %s/%s", ref.Category, ref.ID, runtime.GOOS, runtime.GOARCH)
 		events <- Event{Ref: ref, Phase: Failed, Err: err}
