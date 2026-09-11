@@ -17,6 +17,7 @@ type CLI struct {
 
 	ConfigCmd   configCmd   `cmd:"" name:"config" help:"Query the resolved trunk configuration."`
 	DownloadCmd downloadCmd `cmd:"" name:"download" help:"Download enabled tools/runtimes into the local cache."`
+	WhereCmd    whereCmd    `cmd:"" name:"where" help:"Print a cached item's shim path."`
 }
 
 // Run parses args against CLI's grammar and executes the selected command's Run(), writing to

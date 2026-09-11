@@ -12,4 +12,4 @@ lint:
     - prettier
 actions:
   enabled:
-    - commitlint
+    - commitlint@1.2.3

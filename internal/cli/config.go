@@ -8,6 +8,7 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/xunleii/rtunk/pkg/trunk/config"
+	"github.com/xunleii/rtunk/pkg/trunk/download"
 )
 
 // configCmd is `rtunk config`: currently just print, the fully resolved configuration.
@@ -43,6 +44,25 @@ func resolveConfig(configPath, cacheDir string, all bool) (config.Config, error)
 		return config.ResolveAll(configPath, cacheDir)
 	}
 	return config.Resolve(configPath, cacheDir)
+}
+
+// resolvedVersionFor is the version `where`/`exec` (Tasks 12/13) resolve for category+id when the
+// CLI arg wasn't pinned with @version -- mirrors fetchToolRef/fetchRuntimeRef's own resolution
+// (pkg/trunk/download.Download) so both commands predict the exact cache path Download would use,
+// without invoking it. "actions" has no KnownGoodVersion of its own (only Actions.Enabled's own
+// @version pin, if any); "lint"/"plugins" resolve to a linter/plugin, not a concrete tool or
+// runtime build, so there is no path to predict -- reject rather than guess.
+func resolvedVersionFor(cfg config.Config, category, id string) (string, error) {
+	switch category {
+	case "runtimes":
+		return download.ResolveVersion(cfg.Runtimes.Enabled, id, cfg.Runtimes.Definitions[id].KnownGoodVersion), nil
+	case "tools":
+		return download.ResolveVersion(cfg.Lint.Enabled, id, cfg.Tools[id].KnownGoodVersion), nil
+	case "actions":
+		return download.ResolveVersion(cfg.Actions.Enabled, id, ""), nil
+	default:
+		return "", fmt.Errorf("rtunk: %s has no resolvable version; pin one with %s@<version>", category, id)
+	}
 }
 
 // printValue marshals v as YAML (every definition's field tags, e.g. Linter/Tool/Runtime, are
