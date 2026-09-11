@@ -16,7 +16,10 @@ type execCmd struct {
 	Args     []string `arg:"" optional:"" passthrough:"" help:"Arguments passed to the tool."`
 }
 
-func (c *execCmd) Run(cli *CLI, stdout, stderr io.Writer) error {
+// Run's stderr param is typed Stderr (not io.Writer) so Kong's by-type DI binds it to the
+// separate Stderr binding registered in cli.go, rather than collapsing onto the stdout binding
+// both params would otherwise share.
+func (c *execCmd) Run(cli *CLI, stdout io.Writer, stderr Stderr) error {
 	cfg, err := resolveConfig(cli.Config, cli.CacheDir, false)
 	if err != nil {
 		return err
