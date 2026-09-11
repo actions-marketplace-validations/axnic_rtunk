@@ -117,3 +117,51 @@ func TestDownload_UnknownRef(t *testing.T) {
 	assert.Equal(t, download.Failed, ev.Phase)
 	assert.Error(t, ev.Err)
 }
+
+func TestDownload_LintRef_ExpandsToTools(t *testing.T) {
+	archive := tarGzBytes(t, "tool-1.0.0", "actionlint", "#!/bin/sh\n")
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write(archive)
+	}))
+	defer srv.Close()
+
+	cfg := config.Config{
+		Downloads: map[string]config.Download{
+			"actionlint": {Downloads: []config.DownloadEntry{{
+				OS: config.OSSpec{"linux": "linux", "macos": "macos", "windows": "windows"},
+				CPU: config.OSSpec{"x86_64": "x86_64", "arm_64": "arm_64"},
+				URL: srv.URL + "/actionlint.tar.gz", StripComponents: 1,
+			}}},
+		},
+		Tools: map[string]config.Tool{
+			"actionlint": {Name: "actionlint", Download: "actionlint", KnownGoodVersion: "1.0.0", Shims: []string{"actionlint"}},
+		},
+		Lint: config.LintConfig{
+			CategoryConfig: config.CategoryConfig[config.Linter]{
+				Definitions: map[string]config.Linter{"actionlint": {Name: "actionlint", Tools: []string{"actionlint"}}},
+			},
+		},
+	}
+
+	events, err := download.Download(cfg, t.TempDir(), download.Ref{Category: "lint", ID: "actionlint"})
+	require.NoError(t, err)
+	var sawToolDone bool
+	for ev := range events {
+		require.NoError(t, ev.Err, "event: %+v", ev)
+		if ev.Ref.Category == "tools" && ev.Ref.ID == "actionlint" && ev.Phase == download.Done {
+			sawToolDone = true
+		}
+	}
+	assert.True(t, sawToolDone, "a lint ref must expand into fetching its underlying tool(s)")
+}
+
+func TestDownload_PluginsRef_AlwaysCached(t *testing.T) {
+	cfg := config.Config{Plugins: struct {
+		Sources map[string]config.PluginSource
+	}{Sources: map[string]config.PluginSource{"trunk": {ID: "trunk"}}}}
+
+	events, err := download.Download(cfg, t.TempDir(), download.Ref{Category: "plugins", ID: "trunk"})
+	require.NoError(t, err)
+	ev := <-events
+	assert.Equal(t, download.Cached, ev.Phase, "resolving cfg already fetched every plugin source it references")
+}

@@ -100,6 +100,12 @@ func fetchOne(cfg config.Config, root string, ref Ref, events chan<- Event) {
 		fetchRuntimeRef(cfg, root, ref, events)
 	case "tools":
 		fetchToolRef(cfg, root, ref, events)
+	case "lint":
+		fetchLintRef(cfg, root, ref, events)
+	case "actions":
+		fetchActionRef(cfg, root, ref, events)
+	case "plugins":
+		fetchPluginRef(cfg, ref, events)
 	default:
 		events <- Event{Ref: ref, Phase: Failed, Err: fmt.Errorf("download: unknown category %q", ref.Category)}
 	}
@@ -262,4 +268,44 @@ func fetchDownload(root string, ref Ref, dl config.Download, version, installDir
 func dirNonEmpty(path string) bool {
 	info, err := os.Stat(path)
 	return err == nil && info.IsDir()
+}
+
+// fetchLintRef expands a "lint" ref into its underlying tool(s) (Linter.Tools) -- a linter has no
+// binary of its own to fetch. Events land against Ref{Category: "tools", ...} for each, not this
+// wrapper ref.
+func fetchLintRef(cfg config.Config, root string, ref Ref, events chan<- Event) {
+	l, ok := cfg.Lint.Definitions[ref.ID]
+	if !ok {
+		events <- Event{Ref: ref, Phase: Failed, Err: fmt.Errorf("download: unknown lint definition %q", ref.ID)}
+		return
+	}
+	for _, toolID := range l.Tools {
+		fetchToolRef(cfg, root, Ref{Category: "tools", ID: toolID}, events)
+	}
+}
+
+// fetchActionRef expands an "actions" ref into its runtime, if it names one (some actions, like
+// go-mod-tidy, shell out directly with no runtime: field -- ARCHITECTURE.md "actions:").
+func fetchActionRef(cfg config.Config, root string, ref Ref, events chan<- Event) {
+	a, ok := cfg.Actions.Definitions[ref.ID]
+	if !ok {
+		events <- Event{Ref: ref, Phase: Failed, Err: fmt.Errorf("download: unknown action %q", ref.ID)}
+		return
+	}
+	if a.Runtime == "" {
+		events <- Event{Ref: ref, Phase: Cached}
+		return
+	}
+	fetchRuntimeRef(cfg, root, Ref{Category: "runtimes", ID: a.Runtime}, events)
+}
+
+// fetchPluginRef reports a "plugins" ref as always Cached: by the time cfg exists, resolving it
+// (pkg/trunk/config.Resolve) already fetched every plugin source it references (git.go's own
+// cache) -- there is no separate fetch step left for Download to do.
+func fetchPluginRef(cfg config.Config, ref Ref, events chan<- Event) {
+	if _, ok := cfg.Plugins.Sources[ref.ID]; !ok {
+		events <- Event{Ref: ref, Phase: Failed, Err: fmt.Errorf("download: unknown plugin source %q", ref.ID)}
+		return
+	}
+	events <- Event{Ref: ref, Phase: Cached}
 }
