@@ -15,7 +15,8 @@ type CLI struct {
 	Config   string `help:"Path to trunk.yaml (default: nearest .trunk/trunk.yaml)."`
 	CacheDir string `help:"Plugin cache directory (default: OS cache dir)." env:"RTUNK_CACHE_DIR"`
 
-	ConfigCmd configCmd `cmd:"" name:"config" help:"Query the resolved trunk configuration."`
+	ConfigCmd   configCmd   `cmd:"" name:"config" help:"Query the resolved trunk configuration."`
+	DownloadCmd downloadCmd `cmd:"" name:"download" help:"Download enabled tools/runtimes into the local cache."`
 }
 
 // Run parses args against CLI's grammar and executes the selected command's Run(), writing to
