@@ -61,8 +61,20 @@ func TestCachePrune_KeepsEnabledUsed(t *testing.T) {
 	require.NoError(t, os.MkdirAll(keep, 0o755))
 	require.NoError(t, os.MkdirAll(stale, 0o755))
 
+	// Seed a shim for each item too -- cachePruneCmd.Run's own keep-map construction (not just
+	// pruneUnused's glob/removal logic, already covered by TestPruneUnused) must preserve a kept
+	// item's shim as well as its install dir.
+	keepShim := download.ShimPath(root, "tools", "actionlint", "1.0.0", "actionlint")
+	staleShim := download.ShimPath(root, "tools", "eslint", "1.0.0", "eslint")
+	require.NoError(t, os.MkdirAll(filepath.Dir(keepShim), 0o755))
+	require.NoError(t, os.WriteFile(keepShim, nil, 0o644))
+	require.NoError(t, os.MkdirAll(filepath.Dir(staleShim), 0o755))
+	require.NoError(t, os.WriteFile(staleShim, nil, 0o644))
+
 	_, stderr, err := run2(t, "--config", trunkYAML, "--cache-dir", cacheDir, "cache", "prune")
 	require.NoError(t, err, "stderr: %s", stderr)
 	assert.DirExists(t, keep)
 	assert.NoDirExists(t, stale)
+	assert.FileExists(t, keepShim)
+	assert.NoFileExists(t, staleShim)
 }

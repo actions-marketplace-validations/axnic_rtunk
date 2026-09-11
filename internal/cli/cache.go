@@ -54,7 +54,6 @@ func (c *cachePruneCmd) Run(cli *CLI, stdout io.Writer) error {
 // computed. Callers must key keepPrefixes with both the download.InstallsBase path and its
 // shims/<category>/<id> counterpart for each id to keep, since a surviving install's shim
 // would otherwise never match either glob's keep-check.
-
 func pruneUnused(root string, keepPrefixes map[string]bool) error {
 	for _, pattern := range []string{
 		filepath.Join(root, "installs", "*", "*"),
