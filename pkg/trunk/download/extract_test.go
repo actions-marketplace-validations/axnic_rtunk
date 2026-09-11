@@ -90,6 +90,75 @@ func TestInstallDownload_TarGz_PathTraversal(t *testing.T) {
 	assert.True(t, os.IsNotExist(statErr), "entry must not have been written outside destDir")
 }
 
+// makeTarGzWithSymlink writes a tar.gz wrapped in topDir containing one regular file at
+// targetName and one symlink at linkName pointing at linkTarget (tar-relative, as node.org's real
+// darwin/linux tarballs do for bin/npm -> ../lib/node_modules/npm/bin/npm-cli.js).
+func makeTarGzWithSymlink(t *testing.T, path, topDir, targetName, content, linkName, linkTarget string) {
+	t.Helper()
+	var buf bytes.Buffer
+	gz := gzip.NewWriter(&buf)
+	tw := tar.NewWriter(gz)
+	require.NoError(t, tw.WriteHeader(&tar.Header{
+		Name: topDir + "/" + targetName, Mode: 0o644, Size: int64(len(content)),
+	}))
+	_, err := tw.Write([]byte(content))
+	require.NoError(t, err)
+	require.NoError(t, tw.WriteHeader(&tar.Header{
+		Typeflag: tar.TypeSymlink,
+		Name:     topDir + "/" + linkName,
+		Linkname: linkTarget,
+	}))
+	require.NoError(t, tw.Close())
+	require.NoError(t, gz.Close())
+	require.NoError(t, os.WriteFile(path, buf.Bytes(), 0o644))
+}
+
+// TestInstallDownload_TarGz_PreservesSymlinks pins down a real production bug: node.org's actual
+// darwin/linux tarballs place npm/npx/corepack at bin/npm etc as symlinks into
+// lib/node_modules/npm/bin/npm-cli.js, not as regular files. Before this test, extractTar skipped
+// every non-regular-file entry (dirs and symlinks alike), so a real node runtime install never
+// produced a working npm -- FindShimTarget always failed with "no executable found", reproduced
+// against production node.org tarballs after v0.2 shipped (task-11's tests only ever built
+// synthetic tarballs with regular files, so this never surfaced in CI).
+func TestInstallDownload_TarGz_PreservesSymlinks(t *testing.T) {
+	dir := t.TempDir()
+	blob := filepath.Join(dir, "blob")
+	makeTarGzWithSymlink(t, blob, "node-v22.16.0", "lib/node_modules/npm/bin/npm-cli.js", "#!/usr/bin/env node\n",
+		"bin/npm", "../lib/node_modules/npm/bin/npm-cli.js")
+
+	dest := filepath.Join(dir, "install")
+	entry := config.DownloadEntry{StripComponents: 1}
+	err := download.InstallDownload(blob, "https://nodejs.org/dist/v22.16.0/node-v22.16.0.tar.gz", dest, entry)
+	require.NoError(t, err)
+
+	link := filepath.Join(dest, "bin", "npm")
+	info, err := os.Lstat(link)
+	require.NoError(t, err, "bin/npm must exist as an extracted symlink")
+	assert.NotZero(t, info.Mode()&os.ModeSymlink, "bin/npm must be a symlink, matching node.org's real tarball layout")
+
+	data, err := os.ReadFile(link)
+	require.NoError(t, err, "the symlink must resolve to the real npm-cli.js content")
+	assert.Equal(t, "#!/usr/bin/env node\n", string(data))
+}
+
+// TestInstallDownload_TarGz_SymlinkEscape is TestInstallDownload_TarGz_PathTraversal's symlink
+// equivalent: a symlink entry whose target escapes destDir must be rejected the same way a
+// traversing regular-file entry name already is, otherwise a malicious archive could plant a
+// symlink that later reads/writes anywhere the process can reach.
+func TestInstallDownload_TarGz_SymlinkEscape(t *testing.T) {
+	dir := t.TempDir()
+	blob := filepath.Join(dir, "blob")
+	makeTarGzWithSymlink(t, blob, "top", "regular.txt", "ok", "escape", "../../../../etc/passwd")
+
+	dest := filepath.Join(dir, "install")
+	entry := config.DownloadEntry{StripComponents: 1}
+	err := download.InstallDownload(blob, "https://example.com/archive.tar.gz", dest, entry)
+	assert.Error(t, err)
+
+	_, statErr := os.Lstat(filepath.Join(dest, "escape"))
+	assert.True(t, os.IsNotExist(statErr), "an escaping symlink must not have been created at all")
+}
+
 // makeZip writes a single-file zip archive at path, wrapped in topDir (to exercise
 // strip_components), containing name with the given content.
 func makeZip(t *testing.T, path, topDir, name, content string) {

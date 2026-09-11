@@ -104,7 +104,11 @@ func finalizeInstall(tmpDir, destDir string) error {
 
 // extractTar walks a tar stream, stripping the first strip path components off every entry name
 // (tar-style, matching ARCHITECTURE.md "downloads[].strip_components") and writing files under
-// destDir, preserving each entry's mode (in particular the executable bit).
+// destDir, preserving each entry's mode (in particular the executable bit). Symlink entries are
+// preserved too (not just regular files): node.org's real darwin/linux tarballs place bin/npm,
+// bin/npx, and bin/corepack as symlinks into lib/node_modules/*/bin/*-cli.js, so skipping them (as
+// v0.2 originally did, believing regular files were enough) silently produced a node runtime with
+// no working npm.
 func extractTar(r io.Reader, destDir string, strip int) error {
 	tr := tar.NewReader(r)
 	for {
@@ -116,26 +120,45 @@ func extractTar(r io.Reader, destDir string, strip int) error {
 			return err
 		}
 		name, ok := stripPath(hdr.Name, strip)
-		if !ok || hdr.Typeflag != tar.TypeReg {
-			continue // stripped away entirely, or a dir/symlink entry -- v0.2 only needs regular files
+		if !ok {
+			continue // stripped away entirely (e.g. the top-level dir entry itself)
 		}
-		dst := filepath.Join(destDir, name)
-		if err := verifyWithinDest(destDir, dst, hdr.Name); err != nil {
-			return err
-		}
-		if err := os.MkdirAll(filepath.Dir(dst), 0o755); err != nil {
-			return err
-		}
-		out, err := os.OpenFile(dst, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, os.FileMode(hdr.Mode))
-		if err != nil {
-			return err
-		}
-		if _, err := io.Copy(out, tr); err != nil {
-			out.Close()
-			return err
-		}
-		if err := out.Close(); err != nil {
-			return err
+		switch hdr.Typeflag {
+		case tar.TypeReg:
+			dst := filepath.Join(destDir, name)
+			if err := verifyWithinDest(destDir, dst, hdr.Name); err != nil {
+				return err
+			}
+			if err := os.MkdirAll(filepath.Dir(dst), 0o755); err != nil {
+				return err
+			}
+			out, err := os.OpenFile(dst, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, os.FileMode(hdr.Mode))
+			if err != nil {
+				return err
+			}
+			if _, err := io.Copy(out, tr); err != nil {
+				out.Close()
+				return err
+			}
+			if err := out.Close(); err != nil {
+				return err
+			}
+		case tar.TypeSymlink:
+			dst := filepath.Join(destDir, name)
+			if err := verifyWithinDest(destDir, dst, hdr.Name); err != nil {
+				return err
+			}
+			if err := verifySymlinkWithinDest(destDir, dst, hdr.Linkname, hdr.Name); err != nil {
+				return err
+			}
+			if err := os.MkdirAll(filepath.Dir(dst), 0o755); err != nil {
+				return err
+			}
+			if err := os.Symlink(hdr.Linkname, dst); err != nil {
+				return err
+			}
+		default:
+			continue // dirs and other special entry types -- v0.2 only needs regular files/symlinks
 		}
 	}
 }
@@ -185,6 +208,23 @@ func verifyWithinDest(destDir, dst, name string) error {
 	rel, err := filepath.Rel(destDir, dst)
 	if err != nil || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
 		return fmt.Errorf("extract: entry %q escapes destination directory", name)
+	}
+	return nil
+}
+
+// verifySymlinkWithinDest rejects a symlink entry whose target escapes destDir: an absolute
+// target, or a relative one that resolves outside destDir once joined to the symlink's own
+// directory. Without this, a malicious archive's symlink could point anywhere the process can
+// reach (CWE-59) -- unlike verifyWithinDest, which only guards the symlink's own path, this guards
+// where it points.
+func verifySymlinkWithinDest(destDir, dst, linkname, name string) error {
+	if filepath.IsAbs(linkname) {
+		return fmt.Errorf("extract: symlink entry %q has an absolute target %q", name, linkname)
+	}
+	resolved := filepath.Join(filepath.Dir(dst), linkname)
+	rel, err := filepath.Rel(destDir, resolved)
+	if err != nil || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+		return fmt.Errorf("extract: symlink entry %q target %q escapes destination directory", name, linkname)
 	}
 	return nil
 }
