@@ -21,6 +21,8 @@ func InstallPackage(rt config.Runtime, runtimeInstallDir, pkgInstallDir, pkg, ve
 		return installGoPackage(runtimeInstallDir, pkgInstallDir, pkg, version)
 	case "ruby":
 		return installRubyPackage(runtimeInstallDir, pkgInstallDir, pkg, version)
+	case "rust":
+		return installRustPackage(runtimeInstallDir, pkgInstallDir, pkg, version)
 	default:
 		return fmt.Errorf("download: package-based fetch not yet supported for runtime %q", rt.Type)
 	}
