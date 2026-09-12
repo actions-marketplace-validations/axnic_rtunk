@@ -10,9 +10,8 @@ import (
 // installGoPackage runs `go install pkg@version` using the go toolchain shipped by the
 // already-downloaded go runtime at runtimeInstallDir (never a system go, per AGENTS.md
 // "Reproducibility"). GOBIN is pointed at a scratch bin/ dir so the built binary lands where
-// shimSearchPaths already looks. GOTOOLCHAIN=local pins go to the toolchain version we just
-// downloaded, instead of letting a `go` newer than the target module's go.mod silently fetch and
-// use a completely different toolchain version -- defeating the point of a hermetic runtime.
+// shimSearchPaths already looks. GOTOOLCHAIN=local and GOROOT pin go to the toolchain version
+// we just downloaded, instead of silently using a different one from the caller's environment.
 func installGoPackage(runtimeInstallDir, pkgInstallDir, pkg, version string) error {
 	goBin := filepath.Join(runtimeInstallDir, "bin", "go")
 	if _, err := os.Stat(goBin); err != nil {
@@ -38,6 +37,7 @@ func installGoPackage(runtimeInstallDir, pkgInstallDir, pkg, version string) err
 		"GOBIN="+binDir,
 		"GOPATH="+filepath.Join(tmpDir, "gopath"),
 		"GOCACHE="+filepath.Join(tmpDir, "gocache"),
+		"GOROOT="+runtimeInstallDir,
 		"GOTOOLCHAIN=local",
 	)
 	out, err := cmd.CombinedOutput()
