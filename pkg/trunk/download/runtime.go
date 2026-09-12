@@ -23,6 +23,8 @@ func InstallPackage(rt config.Runtime, runtimeInstallDir, pkgInstallDir, pkg, ve
 		return installRubyPackage(runtimeInstallDir, pkgInstallDir, pkg, version)
 	case "rust":
 		return installRustPackage(runtimeInstallDir, pkgInstallDir, pkg, version)
+	case "php":
+		return installPhpPackage(pkgInstallDir, pkg, version)
 	default:
 		return fmt.Errorf("download: package-based fetch not yet supported for runtime %q", rt.Type)
 	}

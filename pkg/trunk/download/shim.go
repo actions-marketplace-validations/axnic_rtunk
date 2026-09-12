@@ -18,6 +18,9 @@ func shimSearchPaths(installDir, name string) []string {
 		// npm install --prefix <installDir> (installNodePackage) lays its bins out here, not at
 		// <installDir>/bin -- without this a runtime+package tool's FindShimTarget always fails.
 		filepath.Join(installDir, "node_modules", ".bin", name),
+		// composer require --working-dir <installDir> (installPhpPackage) lays its bins out
+		// here (composer's own default bin-dir), not at <installDir>/bin.
+		filepath.Join(installDir, "vendor", "bin", name),
 	}
 }
 
