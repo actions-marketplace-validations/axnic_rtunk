@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"runtime"
 	"sync/atomic"
 	"testing"
@@ -158,6 +159,40 @@ func TestDownload_LintRef_ExpandsToTools(t *testing.T) {
 	assert.True(t, sawToolDone, "a lint ref must expand into fetching its underlying tool(s)")
 }
 
+// buildFakePythonBinary compiles a tiny real executable that stands in for a python interpreter
+// in TestDownload_ToolRuntimePackage_PythonPythonPath: it exits 0 and prints "ok" if PYTHONPATH
+// contains a site-packages path, else exits 1 with a stderr message -- genuinely proving whether
+// the env reached it, the way a real python failing an import would. It must be a real compiled
+// binary, not a shell script (see that test's comment for why a script-as-interpreter doesn't
+// work here).
+func buildFakePythonBinary(t *testing.T) string {
+	t.Helper()
+	src := `package main
+
+import (
+	"fmt"
+	"os"
+	"strings"
+)
+
+func main() {
+	if strings.Contains(os.Getenv("PYTHONPATH"), "site-packages") {
+		fmt.Println("ok")
+		return
+	}
+	fmt.Fprintln(os.Stderr, "no site-packages on PYTHONPATH")
+	os.Exit(1)
+}
+`
+	dir := t.TempDir()
+	srcPath := filepath.Join(dir, "fakepython.go")
+	require.NoError(t, os.WriteFile(srcPath, []byte(src), 0o644))
+	binPath := filepath.Join(dir, "fakepython")
+	out, err := exec.Command("go", "build", "-o", binPath, srcPath).CombinedOutput()
+	require.NoError(t, err, "building fake python helper: %s", out)
+	return binPath
+}
+
 // nodeToolConfig builds a runtime+package "tools" config: a "node" runtime fetched from srv (a
 // tar.gz containing a stub bin/npm) and an "eslint" tool installed through it -- the shape
 // TestDownload_ToolRuntimePackage_* tests exercise end to end.
@@ -226,6 +261,98 @@ chmod +x "$3/node_modules/.bin/eslint"
 	out, err := exec.Command(shimPath).CombinedOutput()
 	require.NoError(t, err, "shim output: %s", out)
 	assert.Equal(t, "ran-eslint\n", string(out))
+}
+
+// pythonToolConfig builds a runtime+package "tools" config: a "python" runtime fetched from srv
+// (a tar.gz containing a stub bin/pip) and a "black" tool installed through it -- the shape
+// TestDownload_ToolRuntimePackage_PythonPythonPath exercises end to end.
+func pythonToolConfig(pythonArchiveURL string) config.Config {
+	return config.Config{
+		Downloads: map[string]config.Download{
+			"python": {Downloads: []config.DownloadEntry{{
+				OS:  config.OSSpec{"linux": "linux", "macos": "macos", "windows": "windows"},
+				CPU: config.OSSpec{"x86_64": "x86_64", "arm_64": "arm_64"},
+				URL: pythonArchiveURL, StripComponents: 1,
+			}}},
+		},
+		Tools: map[string]config.Tool{
+			"black": {Name: "black", Runtime: "python", Package: "black", KnownGoodVersion: "24.0.0", Shims: []string{"black"}},
+		},
+		Runtimes: config.CategoryConfig[config.Runtime]{
+			Definitions: map[string]config.Runtime{
+				"python": {Type: "python", Download: "python", KnownGoodVersion: "3.11.0"},
+			},
+		},
+	}
+}
+
+// TestDownload_ToolRuntimePackage_PythonPythonPath pins down Fix 1: pip install --prefix writes a
+// console-script whose shebang points at the runtime's own python -- but that python has no
+// venv/pyvenv.cfg to find the --prefix'd site-packages at run time. The fake pip below genuinely
+// reproduces this: it writes a fake python whose shebang the console-script points to, and that
+// fake python only succeeds if PYTHONPATH already contains a site-packages dir when it runs --
+// exactly what a real ModuleNotFoundError failure mode looks like. Driving this through the real
+// Download() and then actually exec'ing the resulting shim (not just checking it exists) is the
+// only way to catch this class of bug, per the final review.
+func TestDownload_ToolRuntimePackage_PythonPythonPath(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("pip stub is a POSIX shell script")
+	}
+
+	// The fake python is a small compiled binary (built below), not a written "#!/bin/sh" script:
+	// a script-interpreter shebanged from another script hits ENOEXEC on both Linux and Darwin
+	// (the kernel refuses to chain two levels of "#!"), and a POSIX shell's own silent
+	// fallback-to-/bin/sh-on-ENOEXEC behavior would then make the exec "succeed" vacuously without
+	// ever running the fake python at all -- masking exactly the bug this test exists to catch. A
+	// real compiled binary keeps the shebang a single, kernel-supported hop to a real executable,
+	// exactly like a real pip console-script's "#!/path/to/python".
+	fakePythonBin := buildFakePythonBinary(t)
+
+	pipScript := `#!/bin/sh
+prefix=$3
+rtdir=$(dirname "$(dirname "$0")")
+mkdir -p "$prefix/bin" "$prefix/lib/python3.99/site-packages"
+cp ` + fakePythonBin + ` "$rtdir/bin/python"
+chmod +x "$rtdir/bin/python"
+cat > "$prefix/bin/black" <<EOS
+#!$rtdir/bin/python
+EOS
+chmod +x "$prefix/bin/black"
+`
+	archive := tarGzBytes(t, "python-3.11.0", "bin/pip", pipScript)
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write(archive)
+	}))
+	defer srv.Close()
+
+	cfg := pythonToolConfig(srv.URL + "/python.tar.gz")
+	// A short, explicit /tmp-rooted cacheDir, not t.TempDir(): the fake console-script's shebang
+	// line below must hold the runtime's full absolute python path, and t.TempDir()'s
+	// $TMPDIR/TestName/NNN nesting (very long under macOS's default $TMPDIR) pushes that past the
+	// kernel's shebang-line length limit, causing the exec to silently no-op instead of running --
+	// not a bug in the code under test, just an artifact of test-harness path length.
+	cacheDir, err := os.MkdirTemp("/tmp", "rtunkpy-")
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = os.RemoveAll(cacheDir) })
+
+	events, err := download.Download(cfg, cacheDir, download.Ref{Category: "tools", ID: "black"})
+	require.NoError(t, err)
+
+	var phases []download.Phase
+	for ev := range events {
+		require.NoError(t, ev.Err, "event: %+v", ev)
+		phases = append(phases, ev.Phase)
+	}
+	assert.Contains(t, phases, download.Done)
+
+	root, err := download.Root(cacheDir)
+	require.NoError(t, err)
+	shimPath := download.ShimPath(root, "tools", "black", "24.0.0", "black")
+	require.FileExists(t, shimPath)
+
+	out, err := exec.Command(shimPath).CombinedOutput()
+	require.NoError(t, err, "shim output: %s", out)
+	assert.Equal(t, "ok\n", string(out), "the installed tool's shim must genuinely run, proving PYTHONPATH reached the shebang's python")
 }
 
 // TestDownload_ToolRuntimePackage_RuntimeFetchFailure pins down that a runtime+package tool's

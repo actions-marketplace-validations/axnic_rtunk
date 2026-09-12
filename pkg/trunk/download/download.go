@@ -230,6 +230,12 @@ func fetchToolRef(cfg config.Config, root string, ref Ref, events chan<- Event) 
 	}
 	env := BuildEnv(append(append([]config.EnvironmentEntry{}, rt.LinterEnvironment...), rt.RuntimeEnvironment...),
 		map[string]string{"runtime": runtimeInstallDir, "linter": installDir})
+	extraEnv, err := ExtraToolEnv(rt, installDir)
+	if err != nil {
+		events <- Event{Ref: ref, Phase: Failed, Err: err}
+		return
+	}
+	env = append(env, extraEnv...)
 	for _, name := range tool.Shims {
 		target, err := FindShimTarget(installDir, name)
 		if err != nil {

@@ -16,7 +16,12 @@ import (
 
 // fakeCargo writes a stub `cargo` script into dir/bin that records its own argv to argvFile and
 // creates a fake binary directly under the --root argument's bin/ subdirectory, the way real
-// `cargo install --root` actually lays its output out. Optionally captures CARGO_TARGET_DIR to a file.
+// `cargo install --root` actually lays its output out. Optionally captures CARGO_TARGET_DIR to a
+// file. It also drops a marker file into $CARGO_TARGET_DIR, the way a real `cargo install`
+// actually populates it -- without this, a bugged installRustPackage that points
+// CARGO_TARGET_DIR inside the renamed tmpDir would look identical, on disk, to the fixed version,
+// so this is required to make TestInstallPackage_Rust's directory-listing assertion able to fail
+// pre-fix.
 func fakeCargo(t *testing.T, dir, argvFile string, cargoTargetDirFile ...string) {
 	t.Helper()
 	require.NoError(t, os.MkdirAll(filepath.Join(dir, "bin"), 0o755))
@@ -33,9 +38,10 @@ for arg in "$@"; do
   if [ "$prev" = "--root" ]; then root=$arg; fi
   prev=$arg
 done
-mkdir -p "$root/bin"
+mkdir -p "$root/bin" "$CARGO_TARGET_DIR"
 echo '#!/bin/sh' > "$root/bin/ripgrep"
 chmod +x "$root/bin/ripgrep"
+echo build-target-entry > "$CARGO_TARGET_DIR/marker"
 `
 	require.NoError(t, os.WriteFile(filepath.Join(dir, "bin", "cargo"), []byte(script), 0o755))
 }
@@ -64,6 +70,16 @@ func TestInstallPackage_Rust(t *testing.T) {
 	target, err := download.FindShimTarget(pkgDir, "ripgrep")
 	require.NoError(t, err)
 	assert.Equal(t, filepath.Join(pkgDir, "bin", "ripgrep"), target)
+
+	entries, err := os.ReadDir(pkgDir)
+	require.NoError(t, err)
+	names := make([]string, len(entries))
+	for i, e := range entries {
+		names[i] = e.Name()
+	}
+	assert.Equal(t, []string{"bin"}, names,
+		"pkgDir must contain only the real cargo install output (bin/); CARGO_TARGET_DIR build "+
+			"scratch must never be renamed into the permanent per-tool cache entry")
 }
 
 func TestInstallPackage_Rust_CargoTargetDirHermeticity(t *testing.T) {

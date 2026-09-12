@@ -12,6 +12,14 @@ import (
 // "Reproducibility"). GOBIN is pointed at a scratch bin/ dir so the built binary lands where
 // shimSearchPaths already looks. GOTOOLCHAIN=local and GOROOT pin go to the toolchain version
 // we just downloaded, instead of silently using a different one from the caller's environment.
+//
+// GOPATH/GOCACHE point at their own sibling scratch dir, never at tmpDir (the dir finalizeInstall
+// renames into pkgInstallDir, the PERMANENT per-tool cache entry): tmpDir/bin is the only real
+// output; the module cache and build cache are multi-hundred-MB-to-multi-GB build ephemera that
+// must never be kept forever, and worse, go's module cache is written read-only by design, so a
+// later `os.RemoveAll` on pkgInstallDir (rtunk cache clean/prune) would fail outright the moment
+// any go tool had ever been installed. GOFLAGS=-modcacherw makes that module cache deletable too,
+// so this scratch dir's own unconditional cleanup below doesn't hit the same failure.
 func installGoPackage(runtimeInstallDir, pkgInstallDir, pkg, version string) error {
 	goBin := filepath.Join(runtimeInstallDir, "bin", "go")
 	if _, err := os.Stat(goBin); err != nil {
@@ -31,14 +39,21 @@ func installGoPackage(runtimeInstallDir, pkgInstallDir, pkg, version string) err
 		return err
 	}
 
+	buildDir, err := os.MkdirTemp(filepath.Dir(pkgInstallDir), ".gobuild-*")
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(buildDir)
+
 	cmd := exec.Command(goBin, "install", pkg+"@"+version)
 	cmd.Env = append(os.Environ(),
 		"PATH="+filepath.Join(runtimeInstallDir, "bin")+string(os.PathListSeparator)+os.Getenv("PATH"),
 		"GOBIN="+binDir,
-		"GOPATH="+filepath.Join(tmpDir, "gopath"),
-		"GOCACHE="+filepath.Join(tmpDir, "gocache"),
+		"GOPATH="+filepath.Join(buildDir, "gopath"),
+		"GOCACHE="+filepath.Join(buildDir, "gocache"),
 		"GOROOT="+runtimeInstallDir,
 		"GOTOOLCHAIN=local",
+		"GOFLAGS=-modcacherw",
 	)
 	out, err := cmd.CombinedOutput()
 	if err != nil {

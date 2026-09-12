@@ -27,10 +27,40 @@ func installPythonPackage(runtimeInstallDir, pkgInstallDir, pkg, version string)
 	defer os.RemoveAll(tmpDir) // no-op once finalizeInstall renames it into pkgInstallDir
 
 	cmd := exec.Command(pip, "install", "--prefix", tmpDir, pkg+"=="+version)
-	cmd.Env = append(os.Environ(), "PATH="+filepath.Join(runtimeInstallDir, "bin")+string(os.PathListSeparator)+os.Getenv("PATH"))
+	cmd.Env = append(os.Environ(),
+		"PATH="+filepath.Join(runtimeInstallDir, "bin")+string(os.PathListSeparator)+os.Getenv("PATH"),
+		// Empirically confirmed against real pip 26.1: an inherited PIP_TARGET/PIP_USER makes
+		// `pip install --prefix` fail outright ("Cannot set --home and --prefix together" /
+		// "Can not combine '--user' and '--prefix'"); an inherited PYTHONHOME/PYTHONPATH could
+		// make the runtime's own python load a foreign stdlib or pip/setuptools. Empty-string
+		// overrides here beat an inherited value the same way GOROOT's override does in
+		// runtime_go.go.
+		"PIP_CONFIG_FILE="+os.DevNull,
+		"PYTHONHOME=",
+		"PYTHONPATH=",
+		"PIP_TARGET=",
+		"PIP_USER=",
+	)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("download: pip install %s==%s: %w: %s", pkg, version, err, out)
 	}
 	return finalizeInstall(tmpDir, pkgInstallDir)
+}
+
+// pythonSitePackages returns the site-packages directory pip install --prefix wrote pkg into,
+// under installDir. pip's --prefix scheme writes no venv/pyvenv.cfg, so nothing else lets an
+// installed console-script's shebang (the runtime's own python, not a venv python) find its own
+// package at run time -- without this, every python-based tool's shim fails at exec time with
+// ModuleNotFoundError despite pip install having reported success and the shim existing at the
+// expected path.
+func pythonSitePackages(installDir string) (string, error) {
+	matches, err := filepath.Glob(filepath.Join(installDir, "lib", "python*", "site-packages"))
+	if err != nil {
+		return "", err
+	}
+	if len(matches) == 0 {
+		return "", fmt.Errorf("download: no site-packages found under %s", installDir)
+	}
+	return matches[0], nil
 }

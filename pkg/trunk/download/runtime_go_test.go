@@ -17,6 +17,11 @@ import (
 // fakeGo writes a stub `go` script into dir/bin that records its own argv, GOBIN, and optionally
 // GOROOT env var values to files, then creates a fake binary inside $GOBIN -- mimicking real
 // `go install`'s actual on-disk effect (a binary directly inside GOBIN, no further subdirectory).
+// It also drops a marker file into $GOPATH and $GOCACHE, the way a real `go install` actually
+// populates those directories -- without this, a bugged installGoPackage that points GOPATH/
+// GOCACHE inside the renamed tmpDir would look identical, on disk, to the fixed version (neither
+// fake script writes there otherwise), so this is required to make TestInstallPackage_Go's
+// directory-listing assertion able to fail pre-fix.
 func fakeGo(t *testing.T, dir, argvFile string, gorootFile ...string) {
 	t.Helper()
 	require.NoError(t, os.MkdirAll(filepath.Join(dir, "bin"), 0o755))
@@ -30,6 +35,9 @@ echo "$@ GOBIN=$GOBIN" > ` + argvFile + `
 	script += `mkdir -p "$GOBIN"
 echo '#!/bin/sh' > "$GOBIN/gofumpt"
 chmod +x "$GOBIN/gofumpt"
+mkdir -p "$GOPATH/pkg/mod" "$GOCACHE"
+echo module-cache-entry > "$GOPATH/pkg/mod/marker"
+echo build-cache-entry > "$GOCACHE/marker"
 `
 	require.NoError(t, os.WriteFile(filepath.Join(dir, "bin", "go"), []byte(script), 0o755))
 }
@@ -62,6 +70,16 @@ func TestInstallPackage_Go(t *testing.T) {
 	target, err := download.FindShimTarget(pkgDir, "gofumpt")
 	require.NoError(t, err)
 	assert.Equal(t, filepath.Join(pkgDir, "bin", "gofumpt"), target)
+
+	entries, err := os.ReadDir(pkgDir)
+	require.NoError(t, err)
+	names := make([]string, len(entries))
+	for i, e := range entries {
+		names[i] = e.Name()
+	}
+	assert.Equal(t, []string{"bin"}, names,
+		"pkgDir must contain only the real go install output (bin/); GOPATH/GOCACHE build "+
+			"scratch must never be renamed into the permanent per-tool cache entry")
 }
 
 func TestInstallPackage_Go_GoRootHermeticity(t *testing.T) {

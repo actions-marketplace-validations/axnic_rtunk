@@ -11,9 +11,12 @@ import (
 // shipped by the already-downloaded rust runtime at runtimeInstallDir (never a system cargo, per
 // AGENTS.md "Reproducibility"). cargo's own --root convention places binaries at
 // <root>/bin/<name>, matching shimSearchPaths' existing bin/ check with no further changes.
-// CARGO_TARGET_DIR is pointed at a scratch build directory so cargo's build lock and ephemera
-// stay isolated from any inherited CARGO_TARGET_DIR, preventing lock contention with other cargo
-// processes on the host (see Task 2's GOCACHE pattern for the equivalent Go isolation).
+//
+// CARGO_TARGET_DIR points at its own sibling scratch dir, never at tmpDir (the dir finalizeInstall
+// renames into pkgInstallDir, the PERMANENT per-tool cache entry): tmpDir/bin is the only real
+// output; the build target dir is multi-hundred-MB-to-multi-GB build ephemera that must never be
+// kept forever, and would otherwise make every later `rtunk cache clean`/`prune` on this tool drag
+// that scratch along too.
 func installRustPackage(runtimeInstallDir, pkgInstallDir, pkg, version string) error {
 	cargo := filepath.Join(runtimeInstallDir, "bin", "cargo")
 	if _, err := os.Stat(cargo); err != nil {
@@ -28,10 +31,16 @@ func installRustPackage(runtimeInstallDir, pkgInstallDir, pkg, version string) e
 	}
 	defer os.RemoveAll(tmpDir)
 
+	buildDir, err := os.MkdirTemp(filepath.Dir(pkgInstallDir), ".rustbuild-*")
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(buildDir)
+
 	cmd := exec.Command(cargo, "install", "--root", tmpDir, "--version", version, pkg)
 	cmd.Env = append(os.Environ(),
 		"PATH="+filepath.Join(runtimeInstallDir, "bin")+string(os.PathListSeparator)+os.Getenv("PATH"),
-		"CARGO_TARGET_DIR="+filepath.Join(tmpDir, "target"),
+		"CARGO_TARGET_DIR="+filepath.Join(buildDir, "target"),
 	)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
