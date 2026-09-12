@@ -55,6 +55,6 @@ func TestInstallPackage_Node(t *testing.T) {
 }
 
 func TestInstallPackage_UnsupportedRuntime(t *testing.T) {
-	err := download.InstallPackage(config.Runtime{Type: "python"}, t.TempDir(), t.TempDir(), "black", "24.0.0")
-	assert.ErrorContains(t, err, "python")
+	err := download.InstallPackage(config.Runtime{Type: "java"}, t.TempDir(), t.TempDir(), "checkstyle", "10.0.0")
+	assert.ErrorContains(t, err, "java")
 }

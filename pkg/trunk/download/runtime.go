@@ -15,6 +15,8 @@ func InstallPackage(rt config.Runtime, runtimeInstallDir, pkgInstallDir, pkg, ve
 	switch rt.Type {
 	case "node":
 		return installNodePackage(runtimeInstallDir, pkgInstallDir, pkg, version)
+	case "python":
+		return installPythonPackage(runtimeInstallDir, pkgInstallDir, pkg, version)
 	default:
 		return fmt.Errorf("download: package-based fetch not yet supported for runtime %q", rt.Type)
 	}
