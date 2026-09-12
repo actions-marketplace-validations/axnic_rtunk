@@ -16,13 +16,18 @@ import (
 
 // fakeCargo writes a stub `cargo` script into dir/bin that records its own argv to argvFile and
 // creates a fake binary directly under the --root argument's bin/ subdirectory, the way real
-// `cargo install --root` actually lays its output out.
-func fakeCargo(t *testing.T, dir, argvFile string) {
+// `cargo install --root` actually lays its output out. Optionally captures CARGO_TARGET_DIR to a file.
+func fakeCargo(t *testing.T, dir, argvFile string, cargoTargetDirFile ...string) {
 	t.Helper()
 	require.NoError(t, os.MkdirAll(filepath.Join(dir, "bin"), 0o755))
 	script := `#!/bin/sh
 echo "$@" > ` + argvFile + `
-root=""
+`
+	if len(cargoTargetDirFile) > 0 {
+		script += `echo "CARGO_TARGET_DIR=$CARGO_TARGET_DIR" >> ` + cargoTargetDirFile[0] + `
+`
+	}
+	script += `root=""
 prev=""
 for arg in "$@"; do
   if [ "$prev" = "--root" ]; then root=$arg; fi
@@ -55,6 +60,38 @@ func TestInstallPackage_Rust(t *testing.T) {
 	assert.Contains(t, fields, "14.1.0")
 	assert.Contains(t, fields, "ripgrep")
 
+	assert.DirExists(t, pkgDir, "a successful cargo install must be renamed into pkgDir")
+	target, err := download.FindShimTarget(pkgDir, "ripgrep")
+	require.NoError(t, err)
+	assert.Equal(t, filepath.Join(pkgDir, "bin", "ripgrep"), target)
+}
+
+func TestInstallPackage_Rust_CargoTargetDirHermeticity(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("fakeCargo is a POSIX shell script")
+	}
+	runtimeDir := t.TempDir()
+	argvFile := filepath.Join(t.TempDir(), "argv")
+	cargoTargetDirFile := filepath.Join(t.TempDir(), "cargo_target_dir")
+	fakeCargo(t, runtimeDir, argvFile, cargoTargetDirFile)
+
+	// Set a bogus CARGO_TARGET_DIR in the test process; installRustPackage must override it
+	t.Setenv("CARGO_TARGET_DIR", "/nonexistent/bogus/target")
+
+	pkgDir := filepath.Join(t.TempDir(), "install")
+	err := download.InstallPackage(config.Runtime{Type: "rust"}, runtimeDir, pkgDir, "ripgrep", "14.1.0")
+	require.NoError(t, err, "install must succeed even with a bogus CARGO_TARGET_DIR in the calling environment")
+
+	// Verify the fake cargo script received the correct CARGO_TARGET_DIR override, not the bogus one
+	cargoTargetDirContent, err := os.ReadFile(cargoTargetDirFile)
+	require.NoError(t, err)
+	cargoTargetDirLine := strings.TrimSpace(string(cargoTargetDirContent))
+	assert.True(t, strings.HasPrefix(cargoTargetDirLine, "CARGO_TARGET_DIR="), "cargo target dir should be set")
+	cargoTargetDir := strings.TrimPrefix(cargoTargetDirLine, "CARGO_TARGET_DIR=")
+	assert.NotEqual(t, "/nonexistent/bogus/target", cargoTargetDir, "installRustPackage must override inherited CARGO_TARGET_DIR")
+	assert.True(t, strings.Contains(cargoTargetDir, "target"), "CARGO_TARGET_DIR must contain 'target' in its path")
+
+	// Also verify the install completed successfully and the binary is in place
 	assert.DirExists(t, pkgDir, "a successful cargo install must be renamed into pkgDir")
 	target, err := download.FindShimTarget(pkgDir, "ripgrep")
 	require.NoError(t, err)
