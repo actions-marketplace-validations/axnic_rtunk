@@ -1,0 +1,37 @@
+package download
+
+import (
+	"fmt"
+	"os"
+	"os/exec"
+	"path/filepath"
+)
+
+// installRubyPackage runs `gem install --install-dir <scratch> --bindir <scratch>/bin pkg -v
+// version` using the gem shipped by the already-downloaded ruby runtime at runtimeInstallDir
+// (never a system gem, per AGENTS.md "Reproducibility"). --bindir explicitly controls where the
+// executable lands, matching shimSearchPaths' existing bin/ check with no further changes.
+func installRubyPackage(runtimeInstallDir, pkgInstallDir, pkg, version string) error {
+	gem := filepath.Join(runtimeInstallDir, "bin", "gem")
+	if _, err := os.Stat(gem); err != nil {
+		return fmt.Errorf("download: gem not found at %s: %w", gem, err)
+	}
+	if err := os.MkdirAll(filepath.Dir(pkgInstallDir), 0o755); err != nil {
+		return err
+	}
+	tmpDir, err := os.MkdirTemp(filepath.Dir(pkgInstallDir), ".tmp-*")
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(tmpDir)
+
+	cmd := exec.Command(gem, "install", "--no-document",
+		"--install-dir", tmpDir, "--bindir", filepath.Join(tmpDir, "bin"),
+		pkg, "-v", version)
+	cmd.Env = append(os.Environ(), "PATH="+filepath.Join(runtimeInstallDir, "bin")+string(os.PathListSeparator)+os.Getenv("PATH"))
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("download: gem install %s -v %s: %w: %s", pkg, version, err, out)
+	}
+	return finalizeInstall(tmpDir, pkgInstallDir)
+}

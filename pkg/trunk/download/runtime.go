@@ -19,6 +19,8 @@ func InstallPackage(rt config.Runtime, runtimeInstallDir, pkgInstallDir, pkg, ve
 		return installPythonPackage(runtimeInstallDir, pkgInstallDir, pkg, version)
 	case "go":
 		return installGoPackage(runtimeInstallDir, pkgInstallDir, pkg, version)
+	case "ruby":
+		return installRubyPackage(runtimeInstallDir, pkgInstallDir, pkg, version)
 	default:
 		return fmt.Errorf("download: package-based fetch not yet supported for runtime %q", rt.Type)
 	}
