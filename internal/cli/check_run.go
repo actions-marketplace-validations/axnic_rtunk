@@ -18,12 +18,6 @@ import (
 	"github.com/xunleii/rtunk/pkg/trunk/output"
 )
 
-// checkCmd is `rtunk check`: ROADMAP.md v0.3, running enabled linters read-only. Bare `rtunk check
-// [paths...]` is the default subcommand; listing and enabling linters lives in `rtunk linters`.
-type checkCmd struct {
-	Run checkRunCmd `cmd:"" default:"withargs" help:"Run enabled checks."`
-}
-
 // checkRunCmd is `rtunk check [paths...]`: given paths, or the whole repository if none.
 type checkRunCmd struct {
 	Paths      []string `arg:"" optional:"" help:"Paths to check (default: changed files, see --from)."`
@@ -41,6 +35,7 @@ type checkRunCmd struct {
 	VerifyStable      bool   `help:"With --format-before-check, verify the formatting result is stable instead of a single pass."`
 	Filter            string `help:"Comma-separated linter id allow-list, or --filter=-id,-id... deny-list (trunk compatibility)."`
 	Exclude           string `help:"Comma-separated linter id deny-list; shorthand for an inverse --filter (trunk compatibility)."`
+	SecurityOnly      bool   `help:"Run only commands tagged is_security: true, skipping every other check."`
 	// NoFix is accepted for trunk compatibility and has no effect: check's default (neither
 	// --fix nor --format-before-check) already applies no fix. Note: --fix wins if both are
 	// given.
@@ -53,7 +48,7 @@ type checkRunCmd struct {
 func (c *checkRunCmd) Run(cli *CLI, stdout io.Writer, stderr Stderr, argv Argv) error {
 	configPath := cli.Config
 	if configPath == "" {
-		found, err := findTrunkYAML()
+		found, err := findConfig()
 		if err != nil {
 			return err
 		}
@@ -70,7 +65,7 @@ func (c *checkRunCmd) Run(cli *CLI, stdout io.Writer, stderr Stderr, argv Argv) 
 	if err != nil {
 		return err
 	}
-	// configPath is <repoRoot>/.rtunk/rtunk.yaml or <repoRoot>/.trunk/trunk.yaml (findTrunkYAML's
+	// configPath is <repoRoot>/.rtunk/rtunk.yaml or <repoRoot>/.trunk/trunk.yaml (findConfig's
 	// only supported layouts) -- repoRoot is two directories up either way.
 	repoRoot := filepath.Dir(filepath.Dir(configPath))
 
@@ -134,7 +129,9 @@ func (c *checkRunCmd) Run(cli *CLI, stdout io.Writer, stderr Stderr, argv Argv) 
 
 	started := time.Now()
 	r := newRenderer(c.Format, stdout, stderr, render.Check, progressOpts{c.NoProgress, c.ASCII, c.LiveHeight})
-	checkPredicate := func(cmd config.Command) bool { return !cmd.Formatter && !cmd.InPlace }
+	checkPredicate := func(cmd config.Command) bool {
+		return !cmd.Formatter && !cmd.InPlace && (!c.SecurityOnly || cmd.IsSecurity)
+	}
 	events, err := engine.Run(context.Background(), env, files, checkPredicate)
 	if err != nil {
 		return err
@@ -187,7 +184,11 @@ func (c *checkRunCmd) Run(cli *CLI, stdout io.Writer, stderr Stderr, argv Argv) 
 		if err != nil {
 			return err
 		}
-		fixR := newRenderer("human", io.Discard, stderr, render.Fmt, progressOpts{c.NoProgress, c.ASCII, c.LiveHeight})
+		// fixR exists only to detect a Failed event below (its Close summary is discarded) -- it
+		// must never itself print to stderr: r (still open, see the comment above pass 1) already
+		// owns stderr for this whole run, and a second live-capable renderer fighting r over the
+		// same region is exactly the rendering bug this NoProgress:true avoids.
+		fixR := newRenderer("human", io.Discard, stderr, render.Fmt, progressOpts{NoProgress: true, ASCII: c.ASCII, LiveHeight: c.LiveHeight})
 		onFixCmd := func(ev engine.Event) {
 			fixR.Event(ev)
 			if ev.Phase == engine.Failed {

@@ -19,6 +19,7 @@ import (
 	"time"
 
 	"github.com/xunleii/rtunk/pkg/cache/download"
+	"github.com/xunleii/rtunk/pkg/ignore"
 	"github.com/xunleii/rtunk/pkg/run/engine/security"
 	"github.com/xunleii/rtunk/pkg/run/runlog"
 	"github.com/xunleii/rtunk/pkg/trunk/config"
@@ -72,6 +73,7 @@ type Event struct {
 	Linter       string
 	Phase        Phase
 	Findings     []output.Finding // Done only
+	Suppressed   int              // Done only -- findings an rtunk-ignore/trunk-ignore directive dropped, already excluded from Findings
 	ChangedFiles []string         // Done only, InPlace commands only -- repoRoot-relative paths this linter actually rewrote (content differed before/after)
 	Note         string           // Skipped (why) or Failed (which command)
 	Err          error            // Failed only
@@ -95,7 +97,7 @@ var supportedOutputFormats = map[string]bool{
 	"sarif": true, "sarif_uri": true, "pass_fail": true,
 	"actionlint": true, "bandit": true, "buildifier": true, "cfnlint": true,
 	"eslint": true, "hadolint": true, "haml_lint": true, "markdownlint": true,
-	"pylint": true, "rubocop": true, "stylelint": true, "taplo": true, "regex": true,
+	"pylint": true, "rubocop": true, "shellcheck": true, "stylelint": true, "taplo": true, "regex": true,
 	// rewrite/shfmt: real catalog formatter commands (gofmt, black, rustfmt, isort, autopep8,
 	// rubocop's fix-layout, stylelint's fix) with nothing to parse -- success is decided purely
 	// by ErrorCodes; the caller learns what changed via Event.ChangedFiles instead.
@@ -145,6 +147,7 @@ type linterState struct {
 	mu           sync.Mutex
 	remaining    int
 	findings     []output.Finding
+	suppressed   int // findings an rtunk-ignore/trunk-ignore directive dropped
 	changedFiles []string
 	terminalSent bool
 	failed       bool // once true, workers skip any not-yet-started job for this linter
@@ -203,6 +206,17 @@ func Run(ctx context.Context, env Env, paths []string, include func(config.Comma
 	}
 
 	concurrency := max(env.Concurrency, 1)
+
+	// commentLeaders is every comment-opening delimiter this config's catalog knows, passed to
+	// ignore.Filter so it can tell a real rtunk-ignore/trunk-ignore directive from a
+	// directive-shaped string literal -- see ignore.hasCommentLeader's own doc for why this is
+	// the whole set, not one resolved per file type.
+	commentLeaders := make([]string, 0, len(env.Cfg.Lint.CommentFormats))
+	for _, cf := range env.Cfg.Lint.CommentFormats {
+		if cf.LeadingDelimiter != "" {
+			commentLeaders = append(commentLeaders, cf.LeadingDelimiter)
+		}
+	}
 
 	_ = download.RecordUsage(env.CacheDir, repoRoot, env.Cfg) // best-effort; see RecordUsage's own doc comment
 
@@ -309,7 +323,7 @@ func Run(ctx context.Context, env Env, paths []string, include func(config.Comma
 					if ctx.Err() != nil {
 						return
 					}
-					runJob(ctx, j, states[j.linterName], repoRoot, &inPlaceMu, prepareRunOnce, cmdSems, events, env.Log)
+					runJob(ctx, j, states[j.linterName], repoRoot, commentLeaders, &inPlaceMu, prepareRunOnce, cmdSems, events, env.Log)
 				}
 			})
 		}
@@ -559,7 +573,7 @@ func findUnsupportedParserVar(run string) (string, bool) {
 // marks the linter failed (any of its not-yet-started jobs are then skipped, best-effort: a job
 // already picked up by a worker still runs to completion), and the linter's single terminal event
 // fires exactly once, the moment its last job finishes.
-func runJob(ctx context.Context, j job, state *linterState, repoRoot string, inPlaceMu *sync.Mutex, prepareRunOnce map[string]*prepareRunState, cmdSems map[string]chan struct{}, events chan<- Event, log *runlog.Writer) {
+func runJob(ctx context.Context, j job, state *linterState, repoRoot string, commentLeaders []string, inPlaceMu *sync.Mutex, prepareRunOnce map[string]*prepareRunState, cmdSems map[string]chan struct{}, events chan<- Event, log *runlog.Writer) {
 	state.mu.Lock()
 	if state.failed {
 		state.mu.Unlock()
@@ -571,6 +585,10 @@ func runJob(ctx context.Context, j job, state *linterState, repoRoot string, inP
 	id := log.NextID()
 	findings, changedFiles, err := runBatch(ctx, j, repoRoot, inPlaceMu, prepareRunOnce, cmdSems, log, id)
 	events <- Event{Linter: j.linterName, Phase: JobDone, File: strings.Join(j.batch, ", ")}
+	var suppressed int
+	if err == nil && len(findings) > 0 {
+		findings, suppressed = ignore.Filter(repoRoot, commentLeaders, findings)
+	}
 	if err == nil && len(findings) > 0 {
 		log.Emit(runlog.Event{T: runlog.KindFindings, ID: id, Linter: j.linterName, Findings: findings})
 	}
@@ -590,10 +608,11 @@ func runJob(ctx context.Context, j job, state *linterState, repoRoot string, inP
 	}
 
 	state.findings = append(state.findings, findings...)
+	state.suppressed += suppressed
 	state.changedFiles = dedupeStrings(append(state.changedFiles, changedFiles...))
 	if state.remaining == 0 {
 		state.terminalSent = true
-		events <- Event{Linter: j.linterName, Phase: Done, Findings: state.findings, ChangedFiles: state.changedFiles, Files: j.files}
+		events <- Event{Linter: j.linterName, Phase: Done, Findings: state.findings, Suppressed: state.suppressed, ChangedFiles: state.changedFiles, Files: j.files}
 	}
 }
 
@@ -877,6 +896,8 @@ func runBatch(ctx context.Context, j job, repoRoot string, inPlaceMu *sync.Mutex
 		findings, err = output.ParsePylint([]byte(out), j.linterName)
 	case "rubocop":
 		findings, err = output.ParseRubocop([]byte(out), j.linterName)
+	case "shellcheck":
+		findings, err = output.ParseShellcheck([]byte(out), j.linterName)
 	case "stylelint":
 		findings, err = output.ParseStylelint([]byte(out), j.linterName)
 	case "taplo":

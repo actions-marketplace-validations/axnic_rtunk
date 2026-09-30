@@ -45,10 +45,44 @@ func TestCheckRunCmd_SkipsUnsupportedFormats(t *testing.T) {
 	assert.NotContains(t, stderr, "formatter-only", "formatter-only produces no event at all")
 }
 
+// TestCheckRunCmd_SecurityOnly: --security-only keeps commands tagged is_security: true and
+// drops every other command entirely -- "secure" always reports a finding (pass_fail, exit 1,
+// is_security: true), "plain" always reports one too (pass_fail, exit 1, no is_security tag).
+func TestCheckRunCmd_SecurityOnly(t *testing.T) {
+	cfgPath, repoRoot := writeLinterFixture(t, []string{"secure", "plain"}, `    - name: secure
+      description: Security linter
+      files: [ALL]
+      commands:
+        - name: check
+          run: "false"
+          output: pass_fail
+          is_security: true
+    - name: plain
+      description: Non-security linter
+      files: [ALL]
+      commands:
+        - name: check
+          run: "false"
+          output: pass_fail
+`)
+	require.NoError(t, os.MkdirAll(filepath.Join(repoRoot, "work"), 0o755))
+	require.NoError(t, os.WriteFile(filepath.Join(repoRoot, "work", "file.txt"), []byte("hi\n"), 0o644))
+
+	cacheDir := t.TempDir()
+	stdout, _, err := run2(t, "--config", cfgPath, "--cache-dir", cacheDir, "check", filepath.Join(repoRoot, "work"))
+	require.Error(t, err)
+	assert.Contains(t, stdout, "work/file.txt  (2)\n", "without --security-only, both linters report")
+
+	stdout, _, err = run2(t, "--config", cfgPath, "--cache-dir", cacheDir, "check", filepath.Join(repoRoot, "work"), "--security-only")
+	require.Error(t, err)
+	assert.Contains(t, stdout, "work/file.txt  (1)\n  0:0  high    file did not pass  secure [security]\n")
+	assert.NotContains(t, stdout, "plain", "--security-only must drop the non-security linter entirely")
+}
+
 // writeLinterFixture builds a trunk.yaml + local plugin source under t.TempDir(), laid out the
-// way findTrunkYAML/checkRunCmd expect a real repo (<repoRoot>/.trunk/trunk.yaml, repoRoot two
+// way findConfig/checkRunCmd expect a real repo (<repoRoot>/.trunk/trunk.yaml, repoRoot two
 // directories up): enabled lists the linter ids to turn on, and lintYAML is the raw `lint:
-// definitions:` block content (everything checkRunCmd/checkListCmd need -- names, descriptions,
+// definitions:` block content (everything checkRunCmd/lintersListCmd need -- names, descriptions,
 // files, commands). Returns the trunk.yaml path and repoRoot.
 func writeLinterFixture(t *testing.T, enabled []string, lintYAML string) (cfgPath, repoRoot string) {
 	t.Helper()
@@ -74,24 +108,6 @@ lint:
 	require.NoError(t, os.WriteFile(filepath.Join(repoRoot, "pluginrepo", "linters", "fixture", "plugin.yaml"),
 		[]byte("lint:\n  definitions:\n"+lintYAML), 0o644))
 	return filepath.Join(repoRoot, ".trunk", "trunk.yaml"), repoRoot
-}
-
-// TestCheckListCmd_ShowsDisabledLinters covers item 6: ROADMAP.md promises `rtunk linters list`
-// shows every linter available for the configuration, not only enabled ones. Before the fix,
-// checkListCmd.Run resolved enabled+used only (config.Resolve), so a defined-but-disabled linter
-// (here "beta") could never appear, and the "*" enabled marker was always "*" -- dead code.
-func TestCheckListCmd_ShowsDisabledLinters(t *testing.T) {
-	cfgPath, _ := writeLinterFixture(t, []string{"alpha"}, `    - name: alpha
-      description: Alpha linter
-      files: [ALL]
-    - name: beta
-      description: Beta linter
-      files: [ALL]
-`)
-	stdout, stderr, err := run2(t, "--config", cfgPath, "linters", "list")
-	require.NoError(t, err, "stderr: %s", stderr)
-	assert.Contains(t, stdout, "Enabled\n  ✔ alpha")
-	assert.Contains(t, stdout, "Available for this repo (not enabled)\n  ◯ beta")
 }
 
 // TestCheckRunCmd_FailedLinterKeepsOtherFindings covers item 4: a Failed event used to return
@@ -433,6 +449,37 @@ func TestCheckRunCmd_Fix_AppliesFixCommand(t *testing.T) {
 	assert.Contains(t, stdout, "✔ no issues\n", "the report must reflect pass 2, not the already-fixed pass 1 finding")
 	got, _ := os.ReadFile(f)
 	assert.Equal(t, "FIXED", string(got), "the fix command must have run")
+}
+
+// TestCheckRunCmd_Fix_FixCommandRenderIsSilent guards against a real rendering bug: --fix's own
+// internal renderer for the fix-commands pass (check_run.go's fixR, opened purely to detect a
+// Failed event -- its Close summary is discarded and its stdout is io.Discard) used to inherit
+// the user's real --no-progress setting, so by default it printed its own progress line
+// ("<linter> done <n> file(s) changed") to stderr on top of the real report's own line for the
+// same linter -- a leak of internal machinery output, and on a real terminal a second concurrent
+// live view fighting the main one over the same region. fixR must always render silently: only
+// the report renderer (r) may write to stderr.
+func TestCheckRunCmd_Fix_FixCommandRenderIsSilent(t *testing.T) {
+	cfgPath, repoRoot := writeLinterFixture(t, []string{"fixer"}, `    - name: fixer
+      files: [ALL]
+      commands:
+        - name: check
+          run: test "$(cat ${target})" = FIXED
+          output: pass_fail
+        - name: fix
+          run: printf FIXED > ${target}
+          output: pass_fail
+          in_place: true
+          success_codes: [0]
+`)
+	f := filepath.Join(repoRoot, "needsfix.txt")
+	require.NoError(t, os.WriteFile(f, []byte("broken"), 0o644))
+
+	_, stderr, err := run2(t, "--config", cfgPath, "check", "--fix", f)
+	require.NoError(t, err, "stderr: %s", stderr)
+	assert.Equal(t, 1, strings.Count(stderr, "fixer"),
+		"fixer must appear exactly once (pass 2's own report line) -- fixR must not also print one: stderr: %q", stderr)
+	assert.NotContains(t, stderr, "file changed", "fixR's own doneDetail must never reach stderr")
 }
 
 func TestCheckRunCmd_Fix_AppliesFindingLevelFix(t *testing.T) {
