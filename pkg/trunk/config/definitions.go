@@ -283,11 +283,6 @@ type Action struct {
 	Run          string        `yaml:"run,omitempty"`
 	Triggers     []Trigger     `yaml:"triggers,omitempty"`
 	Interactive  Interactivity `yaml:"interactive,omitempty"`
-	// NotifyOnError is nil when the plugin.yaml omits it -- every real trunk-io/plugins action
-	// that sets it explicitly sets it to false (to suppress the implied default), so nil is
-	// treated as "true" by pkg/run/actions.Run, mirroring Command.Enabled's own *bool
-	// "unset vs. explicit false" convention.
-	NotifyOnError *bool `yaml:"notify_on_error,omitempty"`
 	// Environment contributes extra process env vars beyond runtime/PATH (real catalog example:
 	// actions/git/plugin.yaml's git-lfs action passes SSH_AUTH_SOCK/SSH_AGENT_PID through this
 	// way). Resolved via download.BuildEnv, same as Runtime.RuntimeEnvironment/LinterEnvironment.

@@ -3,7 +3,6 @@ module github.com/xunleii/rtunk
 go 1.27.0
 
 require (
-	github.com/0xAX/notificator v0.0.0-20220220101646-ee9b8921e557
 	github.com/alecthomas/kong v1.16.1
 	github.com/stretchr/testify v1.11.1
 	github.com/ulikunitz/xz v0.5.16

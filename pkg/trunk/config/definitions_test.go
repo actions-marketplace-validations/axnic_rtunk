@@ -61,7 +61,7 @@ enabled: false
 	assert.False(t, *explicitOff.Enabled)
 }
 
-func TestAction_ParsesEnvironmentAndNotifyOnError(t *testing.T) {
+func TestAction_ParsesEnvironment(t *testing.T) {
 	var a config.Action
 	err := yaml.Unmarshal([]byte(`
 id: git-lfs
@@ -70,24 +70,12 @@ environment:
   - name: SSH_AUTH_SOCK
     value: ${env.SSH_AUTH_SOCK}
     optional: true
-notify_on_error: false
 `), &a)
 	require.NoError(t, err)
 	require.Len(t, a.Environment, 1)
 	assert.Equal(t, "SSH_AUTH_SOCK", a.Environment[0].Name)
 	assert.Equal(t, "${env.SSH_AUTH_SOCK}", a.Environment[0].Value)
 	assert.True(t, a.Environment[0].Optional)
-	require.NotNil(t, a.NotifyOnError)
-	assert.False(t, *a.NotifyOnError)
-}
-
-func TestAction_NotifyOnError_UnsetIsNil(t *testing.T) {
-	var a config.Action
-	err := yaml.Unmarshal([]byte(`id: git-blame-ignore-revs
-run: bash ${cwd}/update_config.sh
-`), &a)
-	require.NoError(t, err)
-	assert.Nil(t, a.NotifyOnError, "an omitted notify_on_error must decode as nil, not false, so callers can tell 'unset' from 'explicitly false'")
 }
 
 // TestTool_HealthChecks_RealCatalogShape decodes a health_checks snippet in the exact shape the

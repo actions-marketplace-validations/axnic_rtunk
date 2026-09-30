@@ -12,8 +12,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/0xAX/notificator"
-
 	"github.com/xunleii/rtunk/pkg/cache/download"
 	"github.com/xunleii/rtunk/pkg/run/runlog"
 	"github.com/xunleii/rtunk/pkg/trunk/config"
@@ -120,20 +118,6 @@ func resolvePackagesFileBinDir(cfg config.Config, cacheDir, repoRoot, root, acti
 		}
 	}
 	return download.ActionPackagesBinDir(cfg, root, actionID)
-}
-
-func notifyOnError(action config.Action) bool {
-	return action.NotifyOnError == nil || *action.NotifyOnError
-}
-
-// notifier sends the native OS notification -- darwin (osascript/terminal-notifier), linux
-// (notify-send), and windows (SnoreToast) are each handled by the notificator package itself.
-var notifier = notificator.New(notificator.Options{AppName: "rtunk"})
-
-// notify is a best-effort native notification -- failures are silently swallowed, since a
-// notification that can't be shown must never fail the action run that triggered it.
-func notify(title, body string) {
-	_ = notifier.Push(title, body, "", notificator.UR_NORMAL)
 }
 
 // Run executes action's Run string once: substituting template vars, resolving its Runtime/
@@ -261,9 +245,6 @@ func Run(ctx context.Context, cfg config.Config, action config.Action, opts RunO
 
 	res := finish()
 	if result.ExitCode != 0 {
-		if notifyOnError(action) {
-			notify(fmt.Sprintf("rtunk action %s failed", action.ID), fmt.Sprintf("exit code %d", result.ExitCode))
-		}
 		return res, fmt.Errorf("actions: %s: exit code %d", action.ID, result.ExitCode)
 	}
 	return res, nil

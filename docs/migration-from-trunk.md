@@ -32,11 +32,11 @@ covered by the guarantee above.
 
 ## Behavioral differences to expect
 
-Items 1 and 3–5 are [ROADMAP.md](../ROADMAP.md#deliberate-divergences-from-trunk)'s own closed
+Items 1, 3–5, and 6 are [ROADMAP.md](../ROADMAP.md#deliberate-divergences-from-trunk)'s own closed
 list of deliberate divergences — recorded there so none of them is ever mistaken for an open bug.
 Item 2 is not a separate ROADMAP entry; it is the current, already-implemented flag-level
 consequence of item 1's decision, surfaced here because it changes how an existing `trunk check
---fix` invocation needs to be rewritten. None of the five is something `rtunk` is still working
+--fix` invocation needs to be rewritten. None of the six is something `rtunk` is still working
 toward matching trunk on — all are shipped, current behavior. Full rationale for each is in
 [docs/architecture/inconsistencies.md](./architecture/inconsistencies.md).
 
@@ -116,6 +116,19 @@ toward matching trunk on — all are shipped, current behavior. Full rationale f
 - **Migration impact**: an action configuration that relies on either trigger kind needs an
   external scheduler (cron, a CI schedule trigger, a file-watcher wrapper) invoking `rtunk actions
 run`/`rtunk check` instead — `rtunk` will not do the watching or waiting itself.
+
+### 6. A failed action never raises a desktop notification
+
+- **trunk**: an action can set `notify_on_error: true|false`, surfacing a native OS notification
+  when its command exits non-zero.
+- **rtunk**: does not parse `notify_on_error` at all, and never raises a notification on action
+  failure. The failure is still visible in the command's own output, its exit code, and `rtunk
+  logs`.
+- **Why**: maintaining a native OS notification integration (and its darwin/linux/windows backend
+  differences) was judged not worth the ongoing surface for a CLI tool
+  ([inconsistencies.md](./architecture/inconsistencies.md#19-desktop-notifications-on-action-failure-are-not-implemented)).
+- **Migration impact**: a workflow relying on `notify_on_error` for failure visibility needs
+  another surface for that — the process's own exit code (CI), or `rtunk logs` (local).
 
 ## Not a difference: exit codes
 

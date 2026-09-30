@@ -213,8 +213,8 @@ An action definition is a git-hook-triggered or file-change-triggered automation
 runtime kind it runs under, an invocation template (which can reference trigger-supplied arguments
 and a temporary file holding the hook's own standard input), a set of alternative triggers (a list
 of git hook names, a list of file-change globs, or a periodic schedule — schedules are otherwise
-inert, since the system deliberately has no background process to act on them), whether it needs
-an interactive terminal, and whether a failure should raise a desktop notification.
+inert, since the system deliberately has no background process to act on them), and whether it
+needs an interactive terminal.
 
 A single shared query goes from "the currently enabled action set" to "actions relevant to a given
 git hook name" — both the git hooks manager (deciding which hook points need a shim script at all)

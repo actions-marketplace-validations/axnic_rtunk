@@ -338,7 +338,6 @@ Fields:
     background trigger. The bare form is shorthand for `{interval: <duration>}` (e.g. `schedule:
 24h`, github.com/trunk-io/plugins, `actions/git-blame-ignore-revs/plugin.yaml`).
 - `interactive: true|optional` — whether the action needs a TTY.
-- `notify_on_error: true|false` — whether a failure surfaces a notification.
 
 ### `runtimes:`
 

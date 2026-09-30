@@ -514,6 +514,23 @@ indication why.
 
 **Severity**: compatibility.
 
+### 19. Desktop notifications on action failure are not implemented
+
+**Status**: decision — intentional divergence.
+
+**What**: trunk's action schema declares `notify_on_error: true|false`, surfacing a native OS
+notification when an action's command exits non-zero. rtunk previously parsed this field and sent
+a notification via `github.com/0xAX/notificator` on a failed action, but that code path has been
+removed: the field is no longer parsed at all, and no notification is ever raised on action
+failure.
+
+**Direction**: none — this is the recorded scope decision, not a gap to close. A failure is
+already visible in the command's own output, its exit code, and `rtunk logs`; maintaining a native
+OS notification integration (and its darwin/linux/windows backend differences) was judged not
+worth the ongoing surface for a CLI tool.
+
+**Severity**: compatibility (recorded as a decision so it is not mistaken for an oversight later).
+
 ## File selection
 
 ### 19. No-upstream file selection is narrower than "changes since the last commit"

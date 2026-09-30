@@ -301,6 +301,9 @@ open bugs later. Full rationale for each is in
 - **Actions can't trigger on file changes or a schedule.** Both trigger kinds require a background
   daemon, and rtunk refuses to run as one; such an action's configuration is rejected outright
   rather than silently never firing.
+- **A failed action never raises a desktop notification.** rtunk's config never parses
+  `notify_on_error`, and no code path acts on it; a failure stays visible on the terminal/CI output
+  alone, with no native OS notification integration to manage.
 
 ## Later / not scheduled
 
