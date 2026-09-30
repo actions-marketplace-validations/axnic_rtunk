@@ -1,5 +1,15 @@
 # rtunk
 
+> [!IMPORTANT]
+> **This project is 100% vibe-coded.** Every line of code, commit, and doc was written by an AI
+> coding agent (Claude Code); the author's own contribution is direction, architecture review, and
+> code review, not code. The project serves two goals at once: a working, auditable alternative to
+> `trunk` (below), and a personal experiment on whether vibecoding is practical in 2026 — the
+> setup cost, the friction still present, and how the result holds up against vibeconded 2025-era
+> projects. The author overrode the agent's own suggestions on several architectural and technical
+> decisions and reworked a handful of simple features by hand. Findings from that experiment are a
+> personal opinion and are deliberately not published in this repository.
+
 [![Go version](https://img.shields.io/github/go-mod/go-version/xunleii/rtunk)](go.mod)
 [![License: MIT](https://img.shields.io/github/license/xunleii/rtunk)](LICENSE)
 
