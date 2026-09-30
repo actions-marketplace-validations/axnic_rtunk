@@ -10,6 +10,17 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// TestLintersEnableCmd_NoID_NonTerminal_ErrorsInsteadOfHanging: `linters enable` with no id args
+// falls into the interactive picker, which must refuse to run (not block reading raw key bytes
+// from stdin) when stdin/stdout aren't a real terminal -- the case in every test and CI run.
+func TestLintersEnableCmd_NoID_NonTerminal_ErrorsInsteadOfHanging(t *testing.T) {
+	path := writeScratchTrunkYAML(t, "version: \"0.1\"\nlint:\n  enabled: []\n")
+
+	_, _, err := run2(t, "--config", path, "linters", "enable")
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "terminal")
+}
+
 func TestLintersEnableCmd_AddsAndPreservesComments(t *testing.T) {
 	path := writeScratchTrunkYAML(t, "version: \"0.1\"\n# a leading comment, must survive\nlint:\n  enabled: []\n")
 

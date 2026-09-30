@@ -9,10 +9,32 @@ import (
 
 // editActionsEnabled keeps actions.enabled/actions.disabled in sync in one file write: enabling
 // adds to enabled and removes from disabled (and vice versa for disabling), mirroring what the
-// user's own real trunk CLI does to this repo's .trunk/trunk.yaml. Reuses linters_edit.go's own
-// findOrCreateMapKey/detectIndentWidth/addEnabled/removeEnabled (same package, unexported) rather
-// than editEnabled itself, which only ever touches one list.
+// user's own real trunk CLI does to this repo's .trunk/trunk.yaml.
 func editActionsEnabled(cli *CLI, ids []string, enable bool) error {
+	return editActionsLists(cli, func(enabledList, disabledList []string) ([]string, []string) {
+		if enable {
+			return addEnabled(enabledList, ids), removeEnabled(disabledList, ids)
+		}
+		return removeEnabled(enabledList, ids), addEnabled(disabledList, ids)
+	})
+}
+
+// editActionsInteractive applies an interactiveChecklist result: toEnable/toDisable are the ids
+// whose checked state changed (see diffSelection) -- everything else in actions.enabled/disabled
+// is left untouched.
+func editActionsInteractive(cli *CLI, toEnable, toDisable []string) error {
+	return editActionsLists(cli, func(enabledList, disabledList []string) ([]string, []string) {
+		enabledList = addEnabled(removeEnabled(enabledList, toDisable), toEnable)
+		disabledList = addEnabled(removeEnabled(disabledList, toEnable), toDisable)
+		return enabledList, disabledList
+	})
+}
+
+// editActionsLists loads the trunk.yaml in effect, hands actions.enabled/disabled (as plain
+// string slices) to mutate, and writes its result back to the same file. Reuses linters_edit.go's
+// own findOrCreateMapKey/detectIndentWidth/addEnabled/removeEnabled (same package, unexported)
+// rather than editEnabled itself, which only ever touches one list.
+func editActionsLists(cli *CLI, mutate func(enabledList, disabledList []string) (newEnabled, newDisabled []string)) error {
 	configPath := cli.Config
 	if configPath == "" {
 		found, err := findConfig()
@@ -41,19 +63,10 @@ func editActionsEnabled(cli *CLI, ids []string, enable bool) error {
 	enabledNode := findOrCreateSeqKey(catNode, "enabled")
 	disabledNode := findOrCreateSeqKey(catNode, "disabled")
 
-	enabledList := nodeStrings(enabledNode)
-	disabledList := nodeStrings(disabledNode)
+	newEnabled, newDisabled := mutate(nodeStrings(enabledNode), nodeStrings(disabledNode))
 
-	if enable {
-		enabledList = addEnabled(enabledList, ids)
-		disabledList = removeEnabled(disabledList, ids)
-	} else {
-		disabledList = addEnabled(disabledList, ids)
-		enabledList = removeEnabled(enabledList, ids)
-	}
-
-	setNodeStrings(enabledNode, enabledList)
-	setNodeStrings(disabledNode, disabledList)
+	setNodeStrings(enabledNode, newEnabled)
+	setNodeStrings(disabledNode, newDisabled)
 
 	var buf bytes.Buffer
 	enc := yaml.NewEncoder(&buf)

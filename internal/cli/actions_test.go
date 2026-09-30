@@ -19,6 +19,16 @@ func seedHistoryForTest(cacheDir, repoRoot string) error {
 	return actions.AppendHistory(cacheDir, repoRoot, actions.Result{ActionID: "seeded-action", StartedAt: time.Now()})
 }
 
+// TestActionsEnableCmd_NoID_NonTerminal_ErrorsInsteadOfHanging: same guard as linters enable's
+// own interactive picker -- must refuse rather than block when stdin/stdout aren't a real TTY.
+func TestActionsEnableCmd_NoID_NonTerminal_ErrorsInsteadOfHanging(t *testing.T) {
+	path := writeScratchTrunkYAML(t, "version: \"0.1\"\nactions:\n  enabled: []\n  disabled: []\n")
+
+	_, _, err := run2(t, "--config", path, "actions", "enable")
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "terminal")
+}
+
 func TestActionsEnableCmd_AddsToEnabledAndRemovesFromDisabled(t *testing.T) {
 	path := writeScratchTrunkYAML(t, "version: \"0.1\"\nactions:\n  enabled: []\n  disabled: [commitlint]\n")
 	_, stderr, err := run2(t, "--config", path, "actions", "enable", "commitlint")

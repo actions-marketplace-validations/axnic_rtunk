@@ -446,6 +446,23 @@ type listing struct {
 	Other     []listItem `json:"other"`
 }
 
+// flattenListing merges a listing's three buckets into one ID-sorted slice -- the same full
+// catalog `* list --all` shows -- plus the set of currently-enabled ids, for
+// interactiveChecklist's flat checkbox view.
+func flattenListing(l listing) ([]listItem, map[string]bool) {
+	items := make([]listItem, 0, len(l.Enabled)+len(l.Available)+len(l.Other))
+	items = append(items, l.Enabled...)
+	items = append(items, l.Available...)
+	items = append(items, l.Other...)
+	sort.Slice(items, func(i, j int) bool { return items[i].ID < items[j].ID })
+
+	checked := make(map[string]bool, len(l.Enabled))
+	for _, it := range l.Enabled {
+		checked[it.ID] = true
+	}
+	return items, checked
+}
+
 // enabledVersions maps bare id -> pinned version ("" when unpinned) for an enabled: list.
 func enabledVersions(enabled []string) map[string]string {
 	out := map[string]string{}
