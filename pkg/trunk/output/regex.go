@@ -17,8 +17,7 @@ var ErrEmptyPattern = errors.New("output: empty ParseRegex pattern")
 
 // ParseFromRegex parses data using pattern's named capture groups, straight from the real
 // trunk-io catalog's own Command.ParseRegex field -- the same mechanism trunk's own closed-source
-// engine uses for every "regex"-output linter (see docs/superpowers/specs/
-// 2026-09-12-check-engine-refactor-design.md). A fixed name->Finding-field table does the mapping
+// engine uses for every "regex"-output linter. A fixed name->Finding-field table does the mapping
 // -- nothing else, no linter-specific logic anywhere in this function. A name the table has no
 // entry for is simply never looked up: it isn't mapped to anything, on principle, not detected and
 // aliased to its closest match (trunk's own catalog has at least one real inconsistency of this

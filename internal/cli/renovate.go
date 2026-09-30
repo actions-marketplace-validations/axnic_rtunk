@@ -11,8 +11,7 @@ import (
 )
 
 // renovateCmd is `rtunk renovate`: ROADMAP.md's v1.1 addition, generating Renovate
-// annotations for trunk.yaml's version pins (see
-// docs/superpowers/specs/2026-09-17-renovate-annotations-design.md). enable/disable turn the
+// annotations for trunk.yaml's version pins. enable/disable turn the
 // annotations on or off and warn when the Renovate regexManager is missing.
 type renovateCmd struct {
 	Enable  renovateAnnotateCmd `cmd:"" help:"Annotate trunk.yaml's version pins for Renovate."`

@@ -34,7 +34,7 @@ non-live one. Final mockup:
 ```text
 Checking  39% ⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀ 12/31 · 3.2s
   markdownlint   ⣿⣿⣷⠀⠀ 7/47
-    ⠋ docs/superpowers/plans/2026-09-26-run-logs.md
+    ⠋ docs/architecture/cache.md
     ⠙ pkg/trunk/config/ARCHITECTURE.md
   golangci-lint  ⠹
     pkg/trunk/actions/run.go, pkg/trunk/actions/run_log.go (+151)

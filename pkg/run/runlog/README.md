@@ -1,8 +1,7 @@
 # pkg/trunk/runlog
 
 Persists one JSONL log per rtunk run that executes tools (`check`, `fmt`, `actions run`), detailed
-enough to replay by hand what happened and to see how raw tool output became findings. Design:
-docs/superpowers/specs/2026-09-26-run-logs-design.md.
+enough to replay by hand what happened and to see how raw tool output became findings.
 
 ## Layout
 

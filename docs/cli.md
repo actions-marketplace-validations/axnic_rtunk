@@ -1,8 +1,7 @@
 # CLI reference and behavioral rules
 
 This document is the authoritative target design for rtunk's command surface and the run
-semantics of `check`, `fmt` and `run`. It is authoritative over older specs under
-`docs/superpowers/`. Terminal rendering lives in [ux.md](./ux.md); staging lives in
+semantics of `check`, `fmt` and `run`. Terminal rendering lives in [ux.md](./ux.md); staging lives in
 [ROADMAP.md](../ROADMAP.md); project principles live in [AGENTS.md](../AGENTS.md).
 
 This file's audience is now contributors and maintainers verifying implementation status against
@@ -122,9 +121,8 @@ measured on trunk 1.25.0 (throwaway repo, shfmt linter):
 | `fmt` without change                                        | `0`  |
 | `fmt` that fixes files                                      | `0`  |
 
-Only `0` and `1` exist, with no distinction between "findings" and "error" (consistent with
-`docs/superpowers/specs/2026-09-12-check-v0.3-design.md`). A `fmt` that fixes files does not return
-an error. For `run` and `fmt` with a failing tool (not measured on trunk): `0` on success, non-zero
+Only `0` and `1` exist, with no distinction between "findings" and "error". A `fmt` that fixes files
+does not return an error. For `run` and `fmt` with a failing tool (not measured on trunk): `0` on success, non-zero
 on error. Verified: `cmd/rtunk/main.go` exits `1` on any returned error and `0` otherwise; a `fmt`
 that fixes files exits `0`. (Implemented.)
 
@@ -231,8 +229,7 @@ repository file matched against the linter's `files:` criteria.
 - **`rtunk init`**: initialize a repository that has neither `.trunk` nor `.rtunk`.
 - **`rtunk deinit`**: remove rtunk's configuration and installed artifacts (the inverse of `init`).
 - **`rtunk logs list [<file>...]`**, **`rtunk logs show <uid>|latest [<file>...]`**,
-  **`rtunk logs clean`**: inspect and clean per-run logs (see
-  `docs/superpowers/specs/2026-09-26-run-logs-design.md`). Implemented in
+  **`rtunk logs clean`**: inspect and clean per-run logs. Implemented in
   internal/cli/logs_list.go, logs_show.go, logs_clean.go.
 
 ## Renovate
@@ -272,8 +269,6 @@ Last verified 2026-09-28: found `koalaman/shellcheck` pinned at `v0.7.0` → Ren
 ## Download integrity
 
 ### Current model
-
-Specified in `docs/superpowers/specs/2026-09-10-v0.2-download-design.md` ("Checksum model"):
 
 - HTTPS-only fetch (`http` rejected, redirects included);
 - stream passed through a SHA256 hasher into a temporary file;

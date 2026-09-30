@@ -35,8 +35,6 @@ not detected.
 
 This is a known, documented limitation — not a vulnerability to report. See
 [AGENTS.md](AGENTS.md#non-negotiable-design-rules) ("Checksum-verified
-downloads") and
-`docs/superpowers/specs/2026-09-10-v0.2-download-design.md` ("Checksum
-model") for the current design and its rationale. The planned hardening is
+downloads") for the current design and its rationale. The planned hardening is
 `rtunk.lock` (pinned, verifiable checksums per artifact), tracked on the
 project roadmap and not yet implemented.

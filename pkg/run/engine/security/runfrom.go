@@ -19,9 +19,6 @@ var runFromWithRegexRE = regexp.MustCompile(`^\$\{root_or_parent_with_regex\((.+
 // directConfigs is the owning Linter's DirectConfigs, consulted only for
 // "${root_or_parent_with_any_config}". ok is false for any value this project doesn't recognize
 // (e.g. "${compile_command}", a bare literal like "apps") -- the caller treats that as Skipped.
-//
-// See docs/superpowers/specs/2026-09-12-check-v0.3.2-runfrom-sandbox-design.md for the real
-// trunk-io catalog data and reasoning behind each form, especially "${parent}" (below).
 func ResolveRunFrom(runFrom, target, repoRoot string, directConfigs []string) (dir string, ok bool) {
 	switch runFrom {
 	case "", "${parent}":

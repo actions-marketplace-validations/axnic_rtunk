@@ -95,16 +95,14 @@ rtunk is, and will remain, a 100% local tool.
   rejected, redirects included), streamed through a SHA256 hasher into a temporary file, and moved
   to `blobs/sha256/<hex>` only once the hash is known. trunk plugin `downloads:` recipes carry no
   upstream checksum, so the model is trust-on-first-use (TOFU): the first download of an artifact
-  is accepted as is, and a source compromised at that moment is not detected. See
-  docs/superpowers/specs/2026-09-10-v0.2-download-design.md ("Checksum model"). The planned
+  is accepted as is, and a source compromised at that moment is not detected. The planned
   hardening is `rtunk.lock` (see "Download integrity roadmap" below).
 
 ## Behavioral decisions
 
 Detail lives in [docs/cli.md](./docs/cli.md) (commands and run semantics) and
-[docs/ux.md](./docs/ux.md) (terminal UX). They are the target design, authoritative over older
-specs under `docs/superpowers/`. Everything through `v0.9` is implemented today; `v1.1`
-(`rtunk.lock`) remains planned.
+[docs/ux.md](./docs/ux.md) (terminal UX); they are the authoritative target design. Everything
+through `v0.9` is implemented today; `v1.1` (`rtunk.lock`) remains planned.
 
 - **Project root.** `check`, `fmt` and `run` refuse to run without a `.trunk`/`.rtunk` ancestor.
 - **Changed files by default.** No-path `check`/`fmt` process only changed files (merge-base diff,

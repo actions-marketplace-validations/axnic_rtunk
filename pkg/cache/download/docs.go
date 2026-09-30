@@ -1,7 +1,6 @@
 // Package download implements ROADMAP.md's v0.2 milestone: fetching the tool/runtime binaries a
 // resolved pkg/trunk/config.Config references, hermetically and reproducibly, into a
-// content-addressed local cache. See
-// docs/superpowers/specs/2026-09-10-v0.2-download-design.md for the full design.
+// content-addressed local cache.
 //
 // lock.go implements ROADMAP.md v0.11's "concurrent installs fail fast, by name": a
 // per-install-item file lock so a second rtunk process racing to install the same item never

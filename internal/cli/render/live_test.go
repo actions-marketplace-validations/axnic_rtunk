@@ -189,10 +189,10 @@ func TestFirstOversizedBlockIsTrimmed(t *testing.T) {
 }
 
 func TestShortenPath(t *testing.T) {
-	p := "docs/superpowers/plans/2026-09-26-run-logs.md"
+	p := "docs/architecture/plans/2026-09-26-run-logs.md"
 	assert.Equal(t, p, shortenPath(p, 100, false))
-	assert.Equal(t, "docs/superpowers…/2026-09-26-run-logs.md", shortenPath(p, 40, false))
-	assert.Equal(t, "docs/superpowers.../2026-09-26-run-logs.md", shortenPath(p, 42, true))
+	assert.Equal(t, "docs/architectur…/2026-09-26-run-logs.md", shortenPath(p, 40, false))
+	assert.Equal(t, "docs/architectur.../2026-09-26-run-logs.md", shortenPath(p, 42, true))
 	assert.LessOrEqual(t, utf8.RuneCountInString(shortenPath(p, 10, false)), 10)
 }
 

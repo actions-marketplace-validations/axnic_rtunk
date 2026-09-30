@@ -63,8 +63,7 @@ type CLI struct {
 	// ToolboxCmd is `rtunk toolbox`: internal commands (download, exec, where), hidden from
 	// the default help.
 	ToolboxCmd toolboxCmd `cmd:"" name:"toolbox" hidden:"" help:"Internal commands: download, exec, where." group:"commands"`
-	// LogsCmd is `rtunk logs`: reads back the run logs check, fmt and actions run write (see
-	// docs/superpowers/specs/2026-09-26-run-logs-design.md).
+	// LogsCmd is `rtunk logs`: reads back the run logs check, fmt and actions run write.
 	LogsCmd logsCmd `cmd:"" name:"logs" help:"List, show and clean the logs of past runs." group:"commands"`
 }
 
