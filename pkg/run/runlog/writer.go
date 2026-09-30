@@ -92,6 +92,17 @@ func open(o StartOpts) (*Writer, error) {
 	return &Writer{f: f, enc: enc, warn: o.Warn, start: time.Now(), name: strings.TrimSuffix(name, ".jsonl")}, nil
 }
 
+// Dir is <cache>/logs/<sha256(repoRoot)>, the per-repository directory Start/List/Find read and
+// write. Exported for callers (e.g. `rtunk toolbox link`) that need the path itself without
+// opening a Writer.
+func Dir(cacheDir, repoRoot string) (string, error) {
+	root, err := logsRoot(cacheDir)
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(root, repoKey(repoRoot)), nil
+}
+
 // logsRoot is <cache>/logs, a sibling of download.Root's <cache>/downloads: `rtunk cache clean`
 // removes the whole shared cache root (this included), and logs have their own `rtunk logs clean`.
 func logsRoot(cacheDir string) (string, error) {

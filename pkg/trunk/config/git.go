@@ -31,14 +31,9 @@ import (
 // any *DuplicateError found while parsing (only possible on a cold fetch: a cache hit returns the
 // already-deduplicated result, so there's nothing left to report).
 func fetchGitSource(cacheDir string, src PluginSource) (defs sourceDefs, dupErrs []error, err error) {
-	if cacheDir == "" {
-		dir, err := os.UserCacheDir()
-		if err != nil {
-			return sourceDefs{}, nil, &FetchError{SourceID: src.ID, URI: src.URI, Ref: src.Ref, Err: err}
-		}
-		cacheDir = filepath.Join(dir, "rtunk", "plugins")
-	} else {
-		cacheDir = filepath.Join(cacheDir, "plugins")
+	cacheDir, err = PluginsCacheRoot(cacheDir)
+	if err != nil {
+		return sourceDefs{}, nil, &FetchError{SourceID: src.ID, URI: src.URI, Ref: src.Ref, Err: err}
 	}
 
 	cacheDir, err = filepath.Abs(cacheDir)

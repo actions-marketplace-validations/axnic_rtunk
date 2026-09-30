@@ -64,6 +64,21 @@ func SourceHash(src PluginSource) string {
 	return hex.EncodeToString(sum[:])
 }
 
+// PluginsCacheRoot resolves the plugin-sources cache root: cacheDir/plugins if cacheDir is set
+// (mirrors pkg/cache/download's own Root), or the OS-default os.UserCacheDir()/rtunk/plugins
+// otherwise. Exported so callers outside this package (e.g. `rtunk toolbox link`, building a symlink to
+// one source's checkout) can find a source's directory without duplicating this resolution.
+func PluginsCacheRoot(cacheDir string) (string, error) {
+	if cacheDir != "" {
+		return filepath.Join(cacheDir, "plugins"), nil
+	}
+	dir, err := os.UserCacheDir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(dir, "rtunk", "plugins"), nil
+}
+
 // cacheFilePath returns where src's parsed-definitions cache lives: keyed by uri+ref, since a
 // pinned ref never changes content.
 func cacheFilePath(cacheDir string, src PluginSource) string {
@@ -74,6 +89,14 @@ func cacheFilePath(cacheDir string, src PluginSource) string {
 // keyed the same way as cacheFilePath, since a pinned ref never changes content.
 func checkoutDirPath(cacheDir string, src PluginSource) string {
 	return filepath.Join(cacheDir, "checkouts", SourceHash(src))
+}
+
+// CheckoutDir is checkoutDirPath's exported form, for callers outside this package (e.g. `rtunk
+// toolbox link`) that need a git plugin source's checkout directory without re-deriving the
+// "checkouts" layout themselves. pluginsCacheRoot is PluginsCacheRoot's return value, not a raw
+// --cache-dir.
+func CheckoutDir(pluginsCacheRoot string, src PluginSource) string {
+	return checkoutDirPath(pluginsCacheRoot, src)
 }
 
 // loadSourceCache reads path's cached sourceDefs, rejecting (as a decode failure, same as

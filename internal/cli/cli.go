@@ -58,11 +58,11 @@ type CLI struct {
 	RunCmd actionsRunCmd `cmd:"" name:"run" help:"Run a specified action (shortcut for 'actions run')." group:"commands"`
 	// RenovateCmd is `rtunk renovate`: ROADMAP.md v0.12 promoted this out of the hidden `toolbox`
 	// group -- generating the annotations Renovate needs is a real, user-facing capability, not an
-	// internal/debugging tool like toolbox's other commands (download, exec, where).
+	// internal/debugging tool like toolbox's other commands (download, exec, where, link).
 	RenovateCmd renovateCmd `cmd:"" name:"renovate" help:"Manage Renovate annotations for trunk.yaml's version pins." group:"commands"`
-	// ToolboxCmd is `rtunk toolbox`: internal commands (download, exec, where), hidden from
+	// ToolboxCmd is `rtunk toolbox`: internal commands (download, exec, where, link), hidden from
 	// the default help.
-	ToolboxCmd toolboxCmd `cmd:"" name:"toolbox" hidden:"" help:"Internal commands: download, exec, where." group:"commands"`
+	ToolboxCmd toolboxCmd `cmd:"" name:"toolbox" hidden:"" help:"Internal commands: download, exec, where, link." group:"commands"`
 	// LogsCmd is `rtunk logs`: reads back the run logs check, fmt and actions run write.
 	LogsCmd logsCmd `cmd:"" name:"logs" help:"List, show and clean the logs of past runs." group:"commands"`
 }

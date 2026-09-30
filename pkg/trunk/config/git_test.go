@@ -104,6 +104,26 @@ func TestResolve_GitSource(t *testing.T) {
 		"the persisted checkout must contain real files, not an empty directory")
 }
 
+// TestCheckoutDir_MatchesFetchedSource guards the contract `rtunk link` relies on: CheckoutDir,
+// given PluginsCacheRoot's own return value and the same PluginSource, must resolve to exactly
+// where Resolve's own fetch actually persisted the checkout -- not a path that merely looks
+// plausible.
+func TestCheckoutDir_MatchesFetchedSource(t *testing.T) {
+	src := gitFixture(t, "testdata/pluginrepo")
+	cacheDir := t.TempDir()
+	trunkYAML := trunkYAMLFor(t, src, []string{"actionlint"}, nil, nil)
+
+	cfg, err := config.Resolve(trunkYAML, cacheDir)
+	require.NoError(t, err)
+
+	pluginsRoot, err := config.PluginsCacheRoot(cacheDir)
+	require.NoError(t, err)
+	checkoutDir := config.CheckoutDir(pluginsRoot, src)
+
+	assert.Equal(t, checkoutDir, cfg.Lint.Definitions["actionlint"].SourceRoot)
+	assert.DirExists(t, checkoutDir)
+}
+
 // TestResolve_GitSource_DuplicateResource proves duplicate detection also fires for a git source
 // (not just a local one, see TestResolve_DuplicateResource): two plugin.yaml files in the same
 // fixture repo both define a tool named "foo", and the later one must win.

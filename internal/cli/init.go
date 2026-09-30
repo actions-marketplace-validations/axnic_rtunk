@@ -29,7 +29,7 @@ type initCmd struct {
 	Force bool `help:"Overwrite an existing .rtunk/rtunk.yaml."`
 }
 
-func (c *initCmd) Run(stdout io.Writer, stderr Stderr) error {
+func (c *initCmd) Run(cli *CLI, stdout io.Writer, stderr Stderr) error {
 	cwd, err := os.Getwd()
 	if err != nil {
 		return err
@@ -67,5 +67,9 @@ func (c *initCmd) Run(stdout io.Writer, stderr Stderr) error {
 
 	_, _ = fmt.Fprintf(stdout, "initialized rtunk at %s\n", configPath)
 	_, _ = fmt.Fprintln(stdout, "next: rtunk linters enable <linter>, rtunk actions enable <action>, rtunk git-hooks sync")
+
+	if err := (&linkCmd{}).Run(&CLI{Config: configPath, CacheDir: cli.CacheDir}, stdout); err != nil {
+		_, _ = fmt.Fprintf(stderr, "warning: could not link .rtunk/{logs,tools,plugins}: %v\n", err)
+	}
 	return nil
 }
