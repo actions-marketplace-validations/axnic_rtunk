@@ -24,7 +24,7 @@ func (c *lintersEnableCmd) Run(cli *CLI, stdout io.Writer, stderr Stderr) error 
 			return err
 		}
 		reportEnabled(stdout, c.ID, nil)
-		warnOverrides(cli, stderr, c.ID, nil)
+		added = warnOverrides(cli, stderr, c.ID, nil)
 	} else {
 		var err error
 		if added, err = interactiveLintersEnable(cli, stdout, stderr); err != nil {
@@ -49,17 +49,21 @@ func reportEnabled(w io.Writer, added, removed []string) {
 
 // warnOverrides says, on w, what an edit of the shared config file could not change because a
 // local override file decides otherwise: a linter lint.disabled keeps off after being enabled,
-// and one an override enables that stays on after being disabled. Best effort: a config that no
-// longer resolves just prints nothing.
-func warnOverrides(cli *CLI, w io.Writer, added, removed []string) {
+// and one an override enables that stays on after being disabled. It returns added without the
+// linters that stay off. Best effort: a config that no longer resolves prints nothing and
+// returns added whole.
+func warnOverrides(cli *CLI, w io.Writer, added, removed []string) (enabled []string) {
 	cfg, err := resolveConfig(cli.Config, cli.CacheDir, true)
 	if err != nil {
-		return
+		return added
 	}
-	for _, id := range bareIDs(added) {
-		if file, ok := cfg.Lint.DisabledFrom[id]; ok {
+	for _, e := range added {
+		id, _, _ := cutVersion(e)
+		if file, off := cfg.Lint.DisabledFrom[id]; off {
 			_, _ = fmt.Fprintf(w, "warning: %s stays disabled: %s lists it under lint.disabled\n", id, file)
+			continue
 		}
+		enabled = append(enabled, e)
 	}
 	on := enabledVersions(cfg.Lint.Enabled)
 	for _, id := range bareIDs(removed) {
@@ -68,6 +72,7 @@ func warnOverrides(cli *CLI, w io.Writer, added, removed []string) {
 			_, _ = fmt.Fprintf(w, "warning: %s stays enabled: %s enables it (remove it there, or list it under lint.disabled)\n", id, file)
 		}
 	}
+	return enabled
 }
 
 // bareIDs is ids without their @version suffix.
@@ -80,7 +85,7 @@ func bareIDs(ids []string) []string {
 }
 
 // interactiveLintersEnable runs the picker, writes the selection and reports it, returning the
-// newly enabled ids.
+// newly enabled ids that really are (see warnOverrides).
 func interactiveLintersEnable(cli *CLI, stdout io.Writer, stderr Stderr) ([]string, error) {
 	cfg, err := resolveConfig(cli.Config, cli.CacheDir, true)
 	if err != nil {
@@ -108,8 +113,7 @@ func interactiveLintersEnable(cli *CLI, stdout io.Writer, stderr Stderr) ([]stri
 		return nil, err
 	}
 	reportEnabled(stdout, toAdd, toRemove)
-	warnOverrides(cli, stderr, toAdd, toRemove)
-	return toAdd, nil
+	return warnOverrides(cli, stderr, toAdd, toRemove), nil
 }
 
 // rejectUnknownIDs errors, naming every id (version suffix ignored) no plugin defines, when

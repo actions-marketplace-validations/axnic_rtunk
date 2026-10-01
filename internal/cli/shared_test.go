@@ -718,9 +718,14 @@ func TestLintersList_ShowsWhereOverridesDecide(t *testing.T) {
 func TestLintersEnableDisable_WarnWhenAnOverrideDecidesOtherwise(t *testing.T) {
 	cfgPath := overrideFixture(t)
 
-	_, stderr, err := run2(t, "--config", cfgPath, "linters", "enable", "mdlint")
+	stdout, stderr, err := run2(t, "--config", cfgPath, "linters", "enable", "mdlint")
 	require.NoError(t, err)
 	assert.Contains(t, stderr, "warning: mdlint stays disabled: user.yaml lists it under lint.disabled")
+	assert.NotContains(t, stdout, "rtunk download", "no download hint for a linter that stays off")
+
+	stdout, _, err = run2(t, "--config", cfgPath, "linters", "enable", "mdlint", "yamllint")
+	require.NoError(t, err)
+	assert.Contains(t, stdout, "rtunk download lint yamllint\n", "the hint keeps the linters that really get enabled")
 
 	_, stderr, err = run2(t, "--config", cfgPath, "linters", "disable", "vet")
 	require.NoError(t, err)

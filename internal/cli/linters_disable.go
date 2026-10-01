@@ -11,6 +11,6 @@ func (c *lintersDisableCmd) Run(cli *CLI, stderr Stderr) error {
 	}); err != nil {
 		return err
 	}
-	warnOverrides(cli, stderr, nil, c.ID)
+	_ = warnOverrides(cli, stderr, nil, c.ID)
 	return nil
 }
