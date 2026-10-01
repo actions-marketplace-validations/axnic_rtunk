@@ -1,9 +1,12 @@
 package config
 
 import (
+	"cmp"
 	"errors"
 	"os"
 	"path/filepath"
+	"slices"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
@@ -27,7 +30,8 @@ type trunkFile struct {
 		Enabled []string `yaml:"enabled"`
 	} `yaml:"runtimes"`
 	Lint struct {
-		Enabled []string `yaml:"enabled"`
+		Enabled  []string `yaml:"enabled"`
+		Disabled []string `yaml:"disabled"` // dropped from Enabled by readLayered, whichever file enabled them
 	} `yaml:"lint"`
 	Actions struct {
 		Enabled  []string `yaml:"enabled"`
@@ -97,7 +101,7 @@ func resolveMerged(file, cacheDir string) (cfg Config, err error) {
 	cfg.Actions.Definitions = map[string]Action{}
 
 	// 1. Lecture
-	tf, err := readTrunkFile(file)
+	tf, err := readLayered(file)
 	if err != nil {
 		return cfg, err
 	}
@@ -147,6 +151,71 @@ func readTrunkFile(path string) (trunkFile, error) {
 		return tf, &ParseError{Path: path, Err: err}
 	}
 	return tf, nil
+}
+
+// overrideFiles are the local override files read, in this order, from the directory of the
+// config file: trunk's own user_trunk.yaml and user.yaml, then rtunk.local.yaml. They are meant to
+// stay out of version control (rtunk init's .rtunk/.gitignore lists them).
+var overrideFiles = []string{"user_trunk.yaml", "user.yaml", "rtunk.local.yaml"}
+
+// readLayered reads path, merges every override file next to it over it (the last one wins), then
+// drops what lint.disabled turns off.
+func readLayered(path string) (trunkFile, error) {
+	tf, err := readTrunkFile(path)
+	if err != nil {
+		return tf, err
+	}
+	for _, name := range overrideFiles {
+		over, err := readTrunkFile(filepath.Join(filepath.Dir(path), name))
+		if errors.Is(err, os.ErrNotExist) {
+			continue
+		}
+		if err != nil {
+			return tf, err
+		}
+		tf.merge(over)
+	}
+	off := enabledIDs(tf.Lint.Disabled)
+	tf.Lint.Enabled = slices.DeleteFunc(tf.Lint.Enabled, func(e string) bool {
+		id, _, _ := strings.Cut(e, "@")
+		_, disabled := off[id]
+		return disabled
+	})
+	return tf, nil
+}
+
+// merge applies an override file: its scalars replace the base's when set, its plugin sources
+// merge by id, and its lists add to the base's (see mergeEnabled).
+func (tf *trunkFile) merge(o trunkFile) {
+	tf.Version = cmp.Or(o.Version, tf.Version)
+	tf.CLI.Version = cmp.Or(o.CLI.Version, tf.CLI.Version)
+	for _, src := range o.Plugins.Sources {
+		if i := slices.IndexFunc(tf.Plugins.Sources, func(e PluginSource) bool { return e.ID == src.ID }); i >= 0 {
+			tf.Plugins.Sources[i] = src
+		} else {
+			tf.Plugins.Sources = append(tf.Plugins.Sources, src)
+		}
+	}
+	tf.Runtimes.Enabled = mergeEnabled(tf.Runtimes.Enabled, o.Runtimes.Enabled)
+	tf.Lint.Enabled = mergeEnabled(tf.Lint.Enabled, o.Lint.Enabled)
+	tf.Lint.Disabled = append(tf.Lint.Disabled, o.Lint.Disabled...)
+	tf.Actions.Enabled = mergeEnabled(tf.Actions.Enabled, o.Actions.Enabled)
+	tf.Actions.Disabled = append(tf.Actions.Disabled, o.Actions.Disabled...)
+}
+
+// mergeEnabled adds extra's entries to base, one per bare id (the part before "@"): an id already
+// in base keeps its position but takes the later entry, so an override can re-pin a version.
+func mergeEnabled(base, extra []string) []string {
+	for _, e := range extra {
+		id, _, _ := strings.Cut(e, "@")
+		i := slices.IndexFunc(base, func(b string) bool { bid, _, _ := strings.Cut(b, "@"); return bid == id })
+		if i >= 0 {
+			base[i] = e
+		} else {
+			base = append(base, e)
+		}
+	}
+	return base
 }
 
 // mergePluginRepo walks every plugin.yaml under dir's category subdirs and merges its

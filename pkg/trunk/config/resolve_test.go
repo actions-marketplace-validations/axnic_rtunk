@@ -178,3 +178,70 @@ func TestResolve_ActionsDisabledList_Parsed(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, []string{"trunk-announce"}, cfg.Actions.Disabled)
 }
+
+// writeConfigDir writes files (name -> body) into a fresh dir and returns the path of its
+// trunk.yaml, for the override-file tests below.
+func writeConfigDir(t *testing.T, files map[string]string) string {
+	t.Helper()
+	dir := t.TempDir()
+	require.NoError(t, os.MkdirAll(filepath.Join(dir, "sub"), 0o755))
+	for name, body := range files {
+		require.NoError(t, os.WriteFile(filepath.Join(dir, name), []byte(body), 0o644))
+	}
+	return filepath.Join(dir, "trunk.yaml")
+}
+
+func TestResolve_OverrideFiles_ListsAddUpAndLastFileWins(t *testing.T) {
+	path := writeConfigDir(t, map[string]string{
+		"trunk.yaml":       "lint:\n  enabled: [gofmt@1.0.0, yamllint]\n",
+		"user_trunk.yaml":  "lint:\n  enabled: [shellcheck]\n",
+		"user.yaml":        "lint:\n  enabled: [gofmt@2.0.0]\n",
+		"rtunk.local.yaml": "lint:\n  enabled: [shfmt]\nactions:\n  enabled: [hook]\n  disabled: [noisy]\n",
+	})
+
+	cfg, err := config.ResolveAll(path, t.TempDir())
+	require.NoError(t, err)
+	assert.Equal(t, []string{"gofmt@2.0.0", "yamllint", "shellcheck", "shfmt"}, cfg.Lint.Enabled,
+		"ids added, a later pin replaces the earlier one in place")
+	assert.Equal(t, []string{"hook"}, cfg.Actions.Enabled)
+	assert.Equal(t, []string{"noisy"}, cfg.Actions.Disabled)
+}
+
+func TestResolve_LintDisabledDropsAnyEnabledEntry(t *testing.T) {
+	path := writeConfigDir(t, map[string]string{
+		"trunk.yaml":       "lint:\n  enabled: [gofmt, yamllint@1.0.0, shellcheck]\n",
+		"user.yaml":        "lint:\n  enabled: [shfmt]\n",
+		"rtunk.local.yaml": "lint:\n  disabled: [yamllint, shfmt]\n",
+	})
+
+	cfg, err := config.ResolveAll(path, t.TempDir())
+	require.NoError(t, err)
+	assert.Equal(t, []string{"gofmt", "shellcheck"}, cfg.Lint.Enabled)
+}
+
+func TestResolve_OverrideSourcesMergeByIDAndScalarsReplace(t *testing.T) {
+	path := writeConfigDir(t, map[string]string{
+		"trunk.yaml":       "version: \"0.1\"\nplugins:\n  sources:\n    - id: a\n      local: .\n    - id: b\n      local: .\n",
+		"rtunk.local.yaml": "version: \"0.2\"\nplugins:\n  sources:\n    - id: a\n      local: sub\n    - id: c\n      local: sub\n",
+	})
+
+	cfg, err := config.ResolveAll(path, t.TempDir())
+	require.NoError(t, err)
+	assert.Equal(t, "0.2", cfg.Version)
+	assert.Equal(t, "sub", cfg.Plugins.Sources["a"].Local, "same id: the override replaces the source")
+	assert.Equal(t, ".", cfg.Plugins.Sources["b"].Local)
+	assert.Contains(t, cfg.Plugins.Sources, "c", "a new id is added")
+}
+
+func TestResolve_InvalidOverrideReportsItsOwnPath(t *testing.T) {
+	path := writeConfigDir(t, map[string]string{
+		"trunk.yaml": "version: \"0.1\"\n",
+		"user.yaml":  "version: [not-a-mapping\n",
+	})
+
+	_, err := config.ResolveAll(path, t.TempDir())
+
+	var parseErr *config.ParseError
+	require.ErrorAs(t, err, &parseErr)
+	assert.Equal(t, filepath.Join(filepath.Dir(path), "user.yaml"), parseErr.Path)
+}

@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/xunleii/rtunk/pkg/cache/download"
 	"github.com/xunleii/rtunk/pkg/run/runlog"
@@ -118,13 +119,35 @@ func relink(path, target string) error {
 	return os.Symlink(target, path)
 }
 
-// writeLinkGitignore ensures .rtunk/.gitignore exists, ignoring everything link creates and the
-// local user overrides -- only rtunk.yaml, configs/ and this .gitignore belong in version control.
+// linkIgnored is what .rtunk/.gitignore must list: what link creates and the local override files
+// (see config.overrideFiles) -- only rtunk.yaml, configs/ and the .gitignore itself are tracked.
+var linkIgnored = []string{"logs", "tools", "plugins", "user_trunk.yaml", "user.yaml", "rtunk.local.yaml"}
+
+// writeLinkGitignore ensures .rtunk/.gitignore lists every linkIgnored entry, appending the
+// missing ones to an existing file (one written by an earlier rtunk, or edited by hand) and
+// keeping the rest of it as is.
 func writeLinkGitignore(rtunkDir string) error {
 	path := filepath.Join(rtunkDir, ".gitignore")
-	if _, err := os.Stat(path); err == nil {
+	existing, err := os.ReadFile(path)
+	if err != nil && !os.IsNotExist(err) {
+		return err
+	}
+	have := map[string]bool{}
+	for line := range strings.SplitSeq(string(existing), "\n") {
+		have[strings.TrimSpace(line)] = true
+	}
+	out := string(existing)
+	if out != "" && !strings.HasSuffix(out, "\n") {
+		out += "\n"
+	}
+	for _, name := range linkIgnored {
+		if !have[name] {
+			out += name + "\n"
+		}
+	}
+	if out == string(existing) {
 		return nil
 	}
 	//nolint:gosec // .rtunk/.gitignore is repo-tracked, readable like every other tracked path
-	return os.WriteFile(path, []byte("logs\ntools\nplugins\nuser_trunk.yaml\nuser.yaml\n"), 0o644)
+	return os.WriteFile(path, []byte(out), 0o644)
 }

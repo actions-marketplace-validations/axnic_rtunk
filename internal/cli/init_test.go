@@ -100,7 +100,7 @@ func TestInitCmd_MigratesTrunkDir(t *testing.T) {
 	for name, body := range map[string]string{
 		"trunk.yaml":                trunkYAML,
 		"configs/.yamllint.yaml":    "rules: {}\n",
-		"user_trunk.yaml":           "local\n",
+		"user_trunk.yaml":           "lint:\n  enabled: [shellcheck]\n",
 		"plugins/trunk/plugin.yaml": "checkout\n",
 		".gitignore":                "*out\n",
 	} {

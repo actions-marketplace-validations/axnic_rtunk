@@ -34,6 +34,23 @@ func TestLinkCmd_CreatesLogsAndPerToolSymlinks(t *testing.T) {
 	assert.Contains(t, string(gitignore), "logs")
 	assert.Contains(t, string(gitignore), "tools")
 	assert.Contains(t, string(gitignore), "plugins")
+	assert.Contains(t, string(gitignore), "rtunk.local.yaml\n")
+}
+
+func TestWriteLinkGitignore_CompletesAnExistingFileWithoutRewritingIt(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, ".gitignore")
+	require.NoError(t, os.WriteFile(path, []byte("logs\nmine\ntools"), 0o644)) // no trailing newline
+
+	require.NoError(t, writeLinkGitignore(dir))
+	got, err := os.ReadFile(path)
+	require.NoError(t, err)
+	assert.Equal(t, "logs\nmine\ntools\nplugins\nuser_trunk.yaml\nuser.yaml\nrtunk.local.yaml\n", string(got))
+
+	require.NoError(t, writeLinkGitignore(dir))
+	again, err := os.ReadFile(path)
+	require.NoError(t, err)
+	assert.Equal(t, string(got), string(again), "idempotent")
 }
 
 // TestLinkCmd_LocalPluginSource_NoPluginsSymlink: a `local:` plugin source is already a real
