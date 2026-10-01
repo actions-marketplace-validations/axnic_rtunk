@@ -35,6 +35,7 @@ func (c *linkCmd) Run(cli *CLI, stdout io.Writer) error {
 	}
 
 	rtunkDir := filepath.Join(repoRoot, ".rtunk")
+	//nolint:gosec // .rtunk/ is created repo-readable, same as in `rtunk init`
 	if err := os.MkdirAll(rtunkDir, 0o755); err != nil {
 		return err
 	}
@@ -66,6 +67,7 @@ func (c *linkCmd) Run(cli *CLI, stdout io.Writer) error {
 // shims/tools cache tree, which buries every tool under <id>/<version>/<platform>/.
 func linkTools(rtunkDir, cacheDir string, cfg config.Config) error {
 	toolsDir := filepath.Join(rtunkDir, "tools")
+	//nolint:gosec // lives under .rtunk/, which is repo-readable
 	if err := os.MkdirAll(toolsDir, 0o755); err != nil {
 		return err
 	}
@@ -90,6 +92,7 @@ func linkTools(rtunkDir, cacheDir string, cfg config.Config) error {
 // checkout. A `local:` source is already a real directory in the repo -- nothing to link.
 func linkPluginSources(rtunkDir, cacheDir string, cfg config.Config) error {
 	pluginsDir := filepath.Join(rtunkDir, "plugins")
+	//nolint:gosec // lives under .rtunk/, which is repo-readable
 	if err := os.MkdirAll(pluginsDir, 0o755); err != nil {
 		return err
 	}

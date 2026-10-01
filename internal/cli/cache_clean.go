@@ -124,7 +124,8 @@ func newCleanModel(rows []*cleanRow) *cleanModel {
 }
 
 func (m *cleanModel) Init() tea.Cmd {
-	cmds := []tea.Cmd{m.spin.Tick}
+	cmds := make([]tea.Cmd, 0, 1+len(m.rows))
+	cmds = append(cmds, m.spin.Tick)
 	for _, r := range m.rows {
 		cmds = append(cmds, func() tea.Msg {
 			size, err := removeMeasured(r.path)
