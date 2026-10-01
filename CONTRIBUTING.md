@@ -80,6 +80,8 @@ in the same commit. Page inventory, templates and writing rules:
 3. Commit following "Commit conventions" above: GPG-signed, `Assisted-by:` if AI-assisted, never
    `--signoff`.
 4. Open a pull request against `main` using the repository's pull request template
-   (`.github/PULL_REQUEST_TEMPLATE.md`).
-5. A maintainer re-runs "Tests and lint" during review — there's no CI to do it automatically yet.
-   Passing all four locally before opening the PR is what keeps review fast.
+   (`.github/PULL_REQUEST_TEMPLATE.md`). `main` is protected: changes land through a pull request
+   only, never by a direct push.
+5. CI re-runs lint, commit-message validation, build and tests (with a coverage floor) on every
+   pull request; the same gate runs locally with `mise run ci`. Passing "Tests and lint" locally
+   before opening the PR is what keeps review fast.
