@@ -95,11 +95,13 @@ run logs are not affected.
   terminal and `NO_COLOR` is empty; stderr progress lines are never colored. Output outside a
   terminal is uncolored.
 - `json`: one document on stdout: `{version: 1, command: "check"|"fmt", elapsed_ms, run_log,
-files_checked, linters, issues: [{file, line, column, severity, message, linter, rule, url}],
-failures: [{linter, error}], skipped: [], changed: []}`. All keys are always present, empty arrays
-  are `[]` (never `null`), `line`/`column` are `0` when unknown.
+files_checked, linters, suppressed, issues: [{file, line, column, severity, message, linter, rule,
+url}], failures: [{linter, error}], skipped: [], changed: []}`. All keys are always present, empty
+  arrays are `[]` (never `null`), `line`/`column` are `0` when unknown; `suppressed` counts findings
+  hidden by `rtunk-ignore`/`trunk-ignore` comments (see [Ignoring-Issues.md](Ignoring-Issues.md)).
 - `sarif`: SARIF 2.1.0 for CI, `check` only: one run, `tool.driver` `rtunk`, deduplicated rules, one
-  result per issue, failures as `toolExecutionNotifications` with `executionSuccessful: false`.
+  result per issue, failures as `toolExecutionNotifications` with `executionSuccessful: false`; the
+  run carries `properties.suppressed` when at least one finding was suppressed.
   `fmt --format sarif` is refused with `--format sarif is only supported by check` (exit `1`)
   before anything runs.
 
