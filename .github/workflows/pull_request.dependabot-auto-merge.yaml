@@ -11,13 +11,13 @@
 #   1. Reads the update's semver level and any associated GHSA advisory via
 #      dependabot/fetch-metadata.
 #   2. For patch updates, or a security update at any semver level - approves
-#      the PR and enables GitHub's native auto-merge (squash), with an
+#      the PR and enables GitHub's native auto-merge (merge commit), with an
 #      explicit subject that follows .commitlintrc.js (`^[deps]: Bump ...`):
 #      Dependabot's own commit/PR-title text never matches the
 #      `type[scope]: Subject` convention, so this builds the subject itself
 #      rather than trusting Dependabot's title. The PR's own raw commits skip
-#      commitlint validation (see ci.yaml) - this squashed message is what
-#      actually lands on main and gets re-validated there.
+#      commitlint validation (see ci.yaml) - this merge-commit subject is what
+#      actually lands on main and gets re-validated there (push runs --last).
 #   3. Minor/major, non-security updates are left untouched - they stay open
 #      for manual review, per .github/dependabot.yml's policy.
 #   4. github-actions ecosystem updates are approved but never auto-merged:
@@ -87,6 +87,6 @@ jobs:
           PREVIOUS_VERSION: ${{ steps.metadata.outputs.previous-version }}
           NEW_VERSION: ${{ steps.metadata.outputs.new-version }}
         run: |
-          gh pr merge "$PR_URL" --auto --squash \
+          gh pr merge "$PR_URL" --auto --merge \
             --subject "^[deps]: Bump $DEPENDENCY_NAMES from $PREVIOUS_VERSION to $NEW_VERSION" \
             --body ""

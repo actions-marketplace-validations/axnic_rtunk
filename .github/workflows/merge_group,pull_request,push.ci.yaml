@@ -4,17 +4,15 @@
 # CI — Pull-request, merge-queue & main quality gate
 # =============================================================================
 # Validates every PR (and merge-queue entry) before it lands on main, and every
-# direct push to main - rtunk takes commits directly on main without a PR, so
-# the push trigger is what actually validates them (merge_group/pull_request
-# never fire for a direct push):
+# push to main (main only accepts merged PRs, so a push is the merge commit):
 #
 #   lint        — golangci-lint (drives .golangci.yml)
-#   commitlint  — rtunk commit convention on every commit in the PR (or, on a
-#                 direct push, every commit introduced by that push). Skipped
+#   commitlint  — rtunk commit convention on every commit in the PR. Skipped
 #                 for Dependabot PRs: its own commit messages never follow the
 #                 `type[scope]: Subject` convention; the dependabot-auto-merge
-#                 workflow sets a compliant subject at squash-merge time, and
-#                 the push step below re-validates that squashed commit.
+#                 workflow sets a compliant subject on the merge commit, and on
+#                 push only that merge commit (--last) is validated, since the
+#                 PR's own commits were already checked (or exempted) above.
 #   build       — rtunk binary
 #   test        — unit tests with the race detector + a coverage floor
 #
@@ -51,12 +49,13 @@ jobs:
       - name: ⬇️ Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      # Installs only the tools this job needs from .mise.toml.
+      # Restores/saves the mise cache under one key shared by every job; the key hashes the mise
+      # config files, including mise.lock, so it changes only when a tool version changes.
       - name: 🔧 Install tools via mise
         uses: jdx/mise-action@7e36c90d9ab29c415a2384db3006f3ec8a8cc654 # v4.2.4
         with:
           cache: true
-          install_args: go golangci-lint
+          cache_key: "mise-v1-{{platform}}-{{file_hash}}"
 
       - name: 🔍 Run golangci-lint
         run: mise run lint
@@ -81,7 +80,7 @@ jobs:
         uses: jdx/mise-action@7e36c90d9ab29c415a2384db3006f3ec8a8cc654 # v4.2.4
         with:
           cache: true
-          install_args: node npm:@commitlint/cli
+          cache_key: "mise-v1-{{platform}}-{{file_hash}}"
 
       - name: ✅ Validate commit messages
         if: github.event_name != 'push' && github.actor != 'dependabot[bot]'
@@ -92,10 +91,7 @@ jobs:
 
       - name: ✅ Validate commit messages (push to main)
         if: github.event_name == 'push'
-        run: |
-          mise run commitlint -- \
-            --from ${{ github.event.before }} \
-            --to   ${{ github.event.after }}
+        run: mise run commitlint -- --last
 
   # ---------------------------------------------------------------------------
   # build — rtunk binary
@@ -114,7 +110,7 @@ jobs:
         uses: jdx/mise-action@7e36c90d9ab29c415a2384db3006f3ec8a8cc654 # v4.2.4
         with:
           cache: true
-          install_args: go
+          cache_key: "mise-v1-{{platform}}-{{file_hash}}"
 
       - name: 🏗️ Build rtunk
         run: mise run build
@@ -136,7 +132,7 @@ jobs:
         uses: jdx/mise-action@7e36c90d9ab29c415a2384db3006f3ec8a8cc654 # v4.2.4
         with:
           cache: true
-          install_args: go
+          cache_key: "mise-v1-{{platform}}-{{file_hash}}"
 
       - name: 🧪 Run tests and enforce minimum coverage
         run: mise run coverage
