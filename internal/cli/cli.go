@@ -60,6 +60,9 @@ type CLI struct {
 	// group -- generating the annotations Renovate needs is a real, user-facing capability, not an
 	// internal/debugging tool like toolbox's other commands (download, exec, where, link).
 	RenovateCmd renovateCmd `cmd:"" name:"renovate" help:"Manage Renovate annotations for trunk.yaml's version pins." group:"commands"`
+	// DownloadCmd is `rtunk download`: fetches enabled linters' tools and runtimes ahead of time
+	// (check/fmt/run otherwise download them lazily). Same downloadCmd as `toolbox download`.
+	DownloadCmd downloadCmd `cmd:"" name:"download" help:"Download enabled tools and runtimes now (all of them, or the given ids)." group:"commands"`
 	// ToolboxCmd is `rtunk toolbox`: internal commands (download, exec, where, link), hidden from
 	// the default help.
 	ToolboxCmd toolboxCmd `cmd:"" name:"toolbox" hidden:"" help:"Internal commands: download, exec, where, link." group:"commands"`

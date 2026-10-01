@@ -84,12 +84,30 @@ func TestDownloadCmd_Targeted(t *testing.T) {
 	defer srv.Close()
 
 	configPath := writeNodeFixture(t, srv)
-	stdout, stderr, err := run2(t, "--config", configPath, "--cache-dir", t.TempDir(), "toolbox", "download", "runtime", "node")
+	cacheDir := t.TempDir()
+	stdout, stderr, err := run2(t, "--config", configPath, "--cache-dir", cacheDir, "toolbox", "download", "runtime", "node")
 	require.NoError(t, err, "stderr: %s", stderr)
-	assert.Contains(t, stdout, "runtimes node: done")
+	assert.Contains(t, stderr, "installing runtimes/node", "plain progress off a terminal")
+	assert.Equal(t, "Downloaded 1 item(s).\n", stdout)
+
+	stdout, _, err = run2(t, "--config", configPath, "--cache-dir", cacheDir, "download", "runtime", "node")
+	require.NoError(t, err)
+	assert.Equal(t, "Everything is already downloaded.\n", stdout)
+}
+
+func TestDownloadCmd_UnknownIDErrors(t *testing.T) {
+	_, _, err := run2(t, "--config", trunkYAML, "download", "tools", "no-such-tool")
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), `unknown id "no-such-tool"`)
 }
 
 func TestDownloadCmd_UnknownCategory(t *testing.T) {
 	_, _, err := run2(t, "--config", trunkYAML, "toolbox", "download", "bogus", "whatever")
 	assert.Error(t, err)
+}
+
+func TestDownloadCmd_CategoryWithoutIDErrors(t *testing.T) {
+	_, _, err := run2(t, "--config", trunkYAML, "download", "lint")
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "at least one id")
 }

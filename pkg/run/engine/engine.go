@@ -1193,10 +1193,10 @@ func prefetch(cfg config.Config, root, cacheDir, repoRoot string, refs []downloa
 		var shim string
 		switch tool, rt := cfg.Tools[r.ID], cfg.Runtimes.Definitions[r.ID]; r.Category {
 		case "tools":
-			shim = download.ShimPath(root, "tools", r.ID, download.ResolveVersion(cfg.Lint.Enabled, r.ID, tool.KnownGoodVersion), r.ID)
+			shim = download.ShimPath(root, "tools", r.ID, cmp.Or(r.Version, download.ResolveVersion(cfg.Lint.Enabled, r.ID, tool.KnownGoodVersion)), r.ID)
 		case "runtimes":
 			if len(rt.Shims) > 0 {
-				shim = download.ShimPath(root, "runtimes", r.ID, download.ResolveVersion(cfg.Runtimes.Enabled, r.ID, rt.KnownGoodVersion), rt.Shims[0])
+				shim = download.ShimPath(root, "runtimes", r.ID, cmp.Or(r.Version, download.ResolveVersion(cfg.Runtimes.Enabled, r.ID, rt.KnownGoodVersion)), rt.Shims[0])
 			}
 		}
 		if _, err := os.Stat(shim); shim == "" || err != nil {
@@ -1218,6 +1218,18 @@ func prefetch(cfg config.Config, root, cacheDir, repoRoot string, refs []downloa
 		return failed
 	}
 	return forwardInstallAll(evs, emit, true)
+}
+
+// Install is prefetch for `rtunk download`: every tools/runtimes ref not installed yet is
+// downloaded, reported through emit with the same Install* events check and fmt show before a run
+// (InstallPlanned first, nothing at all when everything is installed). It returns each failed
+// item's error keyed by "category/id".
+func Install(cfg config.Config, cacheDir, repoRoot string, refs []download.Ref, emit func(Event)) (map[string]error, error) {
+	root, err := download.Root(cacheDir)
+	if err != nil {
+		return nil, err
+	}
+	return prefetch(cfg, root, cacheDir, repoRoot, refs, emit), nil
 }
 
 // resolveShimDirs resolves (downloading first if not already cached) every tool id's shim, and
