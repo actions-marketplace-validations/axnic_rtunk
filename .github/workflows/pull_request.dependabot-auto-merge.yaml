@@ -1,0 +1,92 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+#
+# =============================================================================
+# Dependabot auto-merge — patch & security updates only
+# =============================================================================
+# Triggered by pull_request events, filtered to Dependabot's own PRs
+# (github.actor). Runs with pull_request (not pull_request_target) since
+# Dependabot PRs are same-repo, never a fork.
+#
+# What it does:
+#   1. Reads the update's semver level and any associated GHSA advisory via
+#      dependabot/fetch-metadata.
+#   2. For patch updates, or a security update at any semver level - approves
+#      the PR and enables GitHub's native auto-merge (squash), with an
+#      explicit subject that follows .commitlintrc.js (`^[deps]: Bump ...`):
+#      Dependabot's own commit/PR-title text never matches the
+#      `type[scope]: Subject` convention, so this builds the subject itself
+#      rather than trusting Dependabot's title. The PR's own raw commits skip
+#      commitlint validation (see ci.yaml) - this squashed message is what
+#      actually lands on main and gets re-validated there.
+#   3. Minor/major, non-security updates are left untouched - they stay open
+#      for manual review, per .github/dependabot.yml's policy.
+#   4. github-actions ecosystem updates are approved but never auto-merged:
+#      their diff always edits a workflow file's `uses:` line, and the built-in
+#      GITHUB_TOKEN can never merge a commit that touches .github/workflows/**
+#      (a hard GitHub restriction no `permissions:` block can grant). These
+#      stay open for a human to merge, which also isn't a bad thing:
+#      action-version bumps touch CI's security surface directly.
+#
+# GitHub's native auto-merge only takes effect once the required status checks
+# (Lint, Commit Messages, Build, Tests) report success, so this can run
+# immediately without waiting on those jobs itself.
+#
+# One-time setup this depends on: repo setting "Allow auto-merge" enabled, and
+# main's required status checks configured.
+# =============================================================================
+
+name: Dependabot auto-merge
+
+on:
+  pull_request:
+    branches: [main]
+
+# Minimal top-level permissions — the job declares what it needs.
+permissions: {}
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # auto-merge — approve and enable auto-merge for patch/security updates
+  # ---------------------------------------------------------------------------
+  auto-merge:
+    if: github.actor == 'dependabot[bot]'
+    name: 🤖 Approve & auto-merge
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: 🔎 Fetch Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          alert-lookup: true
+
+      - name: ✅ Approve
+        if: |
+          steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
+          steps.metadata.outputs.ghsa-id != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: |
+          gh pr review "$PR_URL" --approve \
+            --body "Auto-approved: patch/security dependency update."
+
+      - name: 🔀 Enable auto-merge
+        if: |
+          (steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
+           steps.metadata.outputs.ghsa-id != '') &&
+          steps.metadata.outputs.package-ecosystem != 'github_actions'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          DEPENDENCY_NAMES: ${{ steps.metadata.outputs.dependency-names }}
+          PREVIOUS_VERSION: ${{ steps.metadata.outputs.previous-version }}
+          NEW_VERSION: ${{ steps.metadata.outputs.new-version }}
+        run: |
+          gh pr merge "$PR_URL" --auto --squash \
+            --subject "^[deps]: Bump $DEPENDENCY_NAMES from $PREVIOUS_VERSION to $NEW_VERSION" \
+            --body ""
