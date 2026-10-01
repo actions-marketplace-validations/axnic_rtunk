@@ -34,7 +34,7 @@ func gitFixture(t *testing.T, srcDir string) config.PluginSource {
 	}
 	run("init", "-q")
 	run("add", "-A")
-	run("commit", "-q", "-m", "fixture")
+	run("commit", "-q", "--no-gpg-sign", "-m", "fixture") // the global gitconfig may sign through an agent that is not always up
 	// -m/--no-sign: the user's global gitconfig may have tag.gpgSign=true, which turns a bare
 	// `git tag` into an annotated+signed tag needing both a message and a working GPG setup —
 	// neither of which this hermetic fixture should depend on.

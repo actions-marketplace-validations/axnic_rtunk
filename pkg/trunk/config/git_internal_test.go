@@ -30,7 +30,7 @@ func gitFixtureInternal(t *testing.T) PluginSource {
 	}
 	run("init", "-q")
 	run("add", "-A")
-	run("commit", "-q", "-m", "fixture")
+	run("commit", "-q", "--no-gpg-sign", "-m", "fixture") // the global gitconfig may sign through an agent that is not always up
 	run("tag", "-m", "fixture", "--no-sign", "v1.0.0")
 
 	return PluginSource{ID: "fixture", URI: dir, Ref: "v1.0.0"}
