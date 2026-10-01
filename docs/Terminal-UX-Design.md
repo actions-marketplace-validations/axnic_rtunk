@@ -197,16 +197,17 @@ Enabled
 Available for this repo (not enabled)
   ◯ golangci-lint           153 go files
   ◯ gitleaks                230 files
-(97 other linters don't match any file here — rtunk linters list --all)
+(97 other linters — rtunk linters list --all)
 
 Enable one with: rtunk linters enable <id>
 ```
 
 - **Groups.** `Enabled` (`✔`, `id@version` with the pinned version, shown even with 0 matching
   files), then `Available for this repo (not enabled)` (`◯`, linters matching at least one
-  repository file). With `--all`, a third group `Other (no matching file)` replaces the
-  parenthetical, which otherwise reads `(N other linters don't match any file here — rtunk
-linters list --all)`.
+  repository file, or suggested by `suggest_if`). Groups are separated by a blank line. With
+  `--all`, a third group `Other` (linters matching no file, and linters matching files that
+  `suggest_if` does not suggest) replaces the parenthetical, which otherwise reads `(N other
+  linters — rtunk linters list --all)` (`linter` for N = 1).
 - **Counts.** From every file of the repository (`git ls-files -co --exclude-standard` in git, a
   walk skipping `.git` otherwise), matched with the linter's `files:` criteria. The label is
   `N <type> files` for a linter with a single non-`ALL` file type (`2 go files`, `1 markdown
@@ -216,7 +217,14 @@ file`), else `N files`. Names are padded to align.
 - **`--format json`** prints `{"enabled": [...], "available": [...], "other": [...]}`, entries being
   `{id, version, files, description}`; `other` is only filled with `--all`, arrays are never
   `null`, and `files` is omitted for actions.
-- No color and no ASCII fallback.
+- **Color.** Only on a terminal and without `NO_COLOR`: bold headers, green enabled marks, dimmed
+  linters matching 0 files. Plain text when piped. No ASCII fallback.
+- **Interactive picker** (`linters enable` / `actions enable` without id). Full-screen on the
+  alternate screen (terminal restored on exit), same groups as `list` with blank lines between.
+  Scrolls to the terminal height and follows resizes; `↓ N more` counts items below the viewport.
+  Type to filter on id (backspace edits; `filter:` line shows `(visible/total)`), up/down move, space
+  toggles, enter confirms, esc or ctrl-c cancels (`q` is typed into the filter). 0-file linters are
+  dimmed.
 
 ## Implementation order
 

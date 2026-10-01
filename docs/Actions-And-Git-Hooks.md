@@ -44,7 +44,7 @@ actions:
     - go-mod-tidy
 ```
 
-As with linters, `rtunk actions enable` without ids opens an interactive picker (terminal only).
+As with linters, `rtunk actions enable` without ids opens the same full-screen interactive picker (terminal only; type to filter, space toggles, enter confirms, esc or ctrl-c cancels).
 
 ## Install git hooks
 

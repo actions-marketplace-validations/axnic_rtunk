@@ -9,6 +9,7 @@ the CLI's shape and its run semantics, see [CLI Design](CLI-Design.md).
 | [`rtunk check`](#rtunk-check) | Run enabled checks against source files (read-only). |
 | [`rtunk fmt`](#rtunk-fmt) | Run configured formatters against source files. |
 | [`rtunk run`](#rtunk-run) | Run an action (shortcut for `actions run`). |
+| [`rtunk download`](#rtunk-download) | Download enabled tools and runtimes ahead of time. |
 | [`rtunk config print`](#rtunk-config-print) | Print the fully resolved configuration. |
 | [`rtunk plugins print`](#rtunk-plugins-print) | Print everything available across all plugins. |
 | [`rtunk linters list`](#rtunk-linters-list) | List linters available for the current configuration. |
@@ -23,7 +24,7 @@ the CLI's shape and its run semantics, see [CLI Design](CLI-Design.md).
 | [`rtunk git-hooks unsync`](#rtunk-git-hooks-unsync) | Remove rtunk-installed git hooks. |
 | [`rtunk init`](#rtunk-init) | Initialize rtunk in this repository. |
 | [`rtunk deinit`](#rtunk-deinit) | Remove rtunk's configuration and installed artifacts. |
-| [`rtunk cache clean`](#rtunk-cache-clean) | Remove the entire rtunk cache. |
+| [`rtunk cache clean`](#rtunk-cache-clean) | Remove the rtunk cache subtrees (downloads, plugins, logs, registry). |
 | [`rtunk cache prune`](#rtunk-cache-prune) | Remove cache entries no repository currently needs. |
 | [`rtunk logs list`](#rtunk-logs-list) | List this repository's recent runs. |
 | [`rtunk logs show`](#rtunk-logs-show) | Show one run's log. |
@@ -31,7 +32,7 @@ the CLI's shape and its run semantics, see [CLI Design](CLI-Design.md).
 | [`rtunk renovate enable`](#rtunk-renovate-enable) | Annotate `trunk.yaml`'s version pins for Renovate. |
 | [`rtunk renovate disable`](#rtunk-renovate-disable) | Remove the Renovate annotations. |
 | [`rtunk renovate config`](#rtunk-renovate-config) | Print the Renovate `regexManagers` config to add. |
-| [`rtunk toolbox download`](#rtunk-toolbox-download) | Download a runtime or tool into the cache. |
+| [`rtunk toolbox download`](#rtunk-download) | Alias of `rtunk download`. |
 | [`rtunk toolbox where`](#rtunk-toolbox-where) | Print a cached item's install directory. |
 | [`rtunk toolbox exec`](#rtunk-toolbox-exec-alias-x) | Run a command from a runtime or tool. |
 | [`rtunk toolbox link`](#rtunk-toolbox-link) | Rebuild the `.rtunk/{logs,tools,plugins}` symlinks. |
@@ -147,6 +148,41 @@ Arguments:
 rtunk run <action-id>
 ```
 
+### `rtunk download`
+
+Download enabled tools and runtimes into the local cache now. `check`, `fmt` and `run` otherwise
+download lazily. Items already installed are skipped; runtimes a tool needs are installed too.
+
+```text
+rtunk download [<category> [<id>...]]
+```
+
+Arguments:
+
+- `<category>`: one of `runtime`, `tools` or `lint` (a linter id, expanded to the linter's tools).
+  Omit to download every enabled tool and runtime in use. With a category, ids resolve against the
+  full catalog, so a just-enabled linter matching no file can be downloaded; an unknown id fails
+  with `download <category>: unknown id "<id>"`.
+- `<id>...`: resource id(s), each optionally `@version`. At least one is required with a category;
+  a category alone is an error.
+
+Progress: on a terminal (stderr is a TTY, `TERM` not `dumb`) the same live install view as `check`
+and `fmt` (header `Installing N% <bar> done/total · elapsed`, one row per item downloading). Off a
+terminal, one `installing <category>/<id>` line per item on stderr. Then on stdout, `Downloaded N
+item(s).`, or `Everything is already downloaded.` when nothing was missing. Each failure prints
+`✖ <category>/<id>: <err>` on stderr and the command exits non-zero with `N of M download(s)
+failed`.
+
+`rtunk toolbox download` is the same command.
+
+Only the global flags apply.
+
+```bash
+rtunk download
+rtunk download lint shellcheck shfmt
+rtunk download tools shellcheck@0.10.0
+```
+
 ## Configuration inspection
 
 The resolved configuration and the plugin catalog behind it; see [Managing
@@ -200,7 +236,7 @@ rtunk linters list [flags]
 
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |
-| `--all` | flag | — | Also list the linters that match no file in this repository. |
+| `--all` | flag | — | Also show the `Other` group: linters matching no file, or not suggested by `suggest_if`. |
 | `--format` | string | `human` | Output format: `human` or `json`. |
 
 ```bash
@@ -209,8 +245,8 @@ rtunk linters list --all
 
 ### `rtunk linters enable`
 
-Enable one or more linters. With no id, opens an interactive checklist over the full catalog (the
-items `linters list --all` shows) and applies the selection.
+Enable one or more linters. With no id, opens a full-screen interactive checklist over the full
+catalog (the items `linters list --all` shows, in the same groups) and applies the selection.
 
 ```text
 rtunk linters enable [<id>...]
@@ -221,6 +257,12 @@ Arguments:
 - `<id>...`: linter id(s) to enable, optionally `@version`. Omit for an interactive picker.
 
 Unknown ids are rejected with an error and a non-zero exit; the configuration is left unchanged.
+
+Afterwards prints `Enabled: <ids>` and/or `Disabled: <ids>` and, if anything was enabled, the hint
+`rtunk download lint <ids>`.
+
+Picker keys: type to filter on id (backspace edits), up/down move, space toggles, enter confirms,
+esc or ctrl-c cancels (`q` is typed into the filter).
 
 Only the global flags apply.
 
@@ -264,7 +306,8 @@ rtunk actions list
 
 ### `rtunk actions enable`
 
-Enable one or more actions. With no id, opens an interactive picker.
+Enable one or more actions. With no id, opens the same full-screen interactive picker (keys as in
+`linters enable`).
 
 ```text
 rtunk actions enable [<id>...]
@@ -412,7 +455,11 @@ Where the cache lives and what a run log contains: [Cache and Logs](Cache-And-Lo
 
 ### `rtunk cache clean`
 
-Remove the entire rtunk cache: downloads, plugin sources, and logs.
+Remove the rtunk cache: the `downloads`, `plugins`, `logs` and `registry` subtrees of the cache
+root, and nothing else in it. On a terminal, one line per existing subtree with a spinner that turns
+into a green `✔ <name>  <size> freed` (red `✖` with the error on failure); removals run in parallel
+and the result stays on screen. Off a terminal, `removed <name> (<size>)` per subtree. When none
+exists, prints `The cache is already empty.`
 
 ```text
 rtunk cache clean
@@ -539,26 +586,8 @@ rtunk renovate config
 ## Toolbox (internal commands)
 
 `toolbox` is callable but absent from the default `rtunk --help`; `rtunk help --all` lists it. The
-`<category>` argument of `download`, `where` and `exec` is `runtime` or `tools`.
-
-### `rtunk toolbox download`
-
-Download one runtime or tool into the local cache.
-
-```text
-rtunk toolbox download <category> <id>
-```
-
-Arguments:
-
-- `<category>`: resource category, one of `runtime` or `tools`.
-- `<id>`: resource id, optionally `@version`.
-
-Only the global flags apply.
-
-```bash
-rtunk toolbox download tools shellcheck@0.10.0
-```
+`<category>` argument of `where` and `exec` is `runtime` or `tools`. `toolbox download` is the
+public [`rtunk download`](#rtunk-download).
 
 ### `rtunk toolbox where`
 

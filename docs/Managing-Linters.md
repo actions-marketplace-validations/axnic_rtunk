@@ -10,7 +10,9 @@ rtunk linters enable shellcheck
 ## List linters
 
 `rtunk linters list` groups linters as enabled, available for this repository, and (with `--all`)
-the rest. A linter counts as available when it matches at least one file in the repository.
+the rest. A linter counts as available when its `suggest_if` says so: by default (`files_present`, or
+unset) when it matches at least one file in the repository, with `config_present` when one of its
+`direct_configs` exists, never with `never`. Groups are separated by a blank line.
 
 ```console
 $ rtunk linters list
@@ -23,13 +25,18 @@ Available for this repo (not enabled)
   ◯ shfmt           1 shell file
   ◯ trufflehog      4 files
   ◯ yamllint        1 yaml file
-(121 other linters don't match any file here — rtunk linters list --all)
+(121 other linters — rtunk linters list --all)
 
 Enable one with: rtunk linters enable <id>
 ```
 
-Pass `--all` to include the linters that match no file, or `--format json` for machine-readable
-output (`enabled` and `available` arrays with `id`, `version`, `files` and `description`).
+Pass `--all` to show the remaining linters as a third group, `Other` (linters matching no file, and
+linters matching files that `suggest_if` does not suggest), or `--format json` for machine-readable
+output (`enabled`, `available` and `other` arrays with `id`, `version`, `files` and `description`).
+
+On a terminal, group headers are bold, enabled marks are green and linters matching no file are
+dimmed; piped output, or any output with `NO_COLOR` set, is plain text. The collapsed hint reads
+`(1 other linter — ...)` for a single linter.
 
 ## Enable linters
 
@@ -55,9 +62,27 @@ lint:
     - shfmt@3.7.0
 ```
 
-Without ids, `rtunk linters enable` opens an interactive picker over the available linters. The
-picker needs a terminal; without one the command stops with `interactive mode requires a terminal;
-pass explicit id(s) instead`.
+Either way, the command then prints what changed and how to fetch the tools:
+
+```console
+$ rtunk linters enable shellcheck shfmt@3.7.0
+Enabled: shellcheck, shfmt
+
+Download them now with:
+  rtunk download lint shellcheck shfmt
+```
+
+`Disabled: <ids>` is printed when the picker unchecks enabled linters; the download hint appears only
+if something was enabled. Downloading is optional: `check`, `fmt` and `run` download lazily.
+
+Without ids, `rtunk linters enable` opens a full-screen interactive picker (alternate screen, the
+terminal is restored on exit) over the same groups as `linters list --all`, separated by blank
+lines. The list scrolls to the terminal height and follows resizes; `↓ N more` counts the items
+below the viewport. Typing filters on the id (backspace edits; a `filter:` line shows
+`(visible/total)`), up/down move, space toggles, enter confirms, esc or ctrl-c cancels. `q` does not
+cancel: it is typed into the filter. Linters matching no file are dimmed. The picker needs a
+terminal; without one the command stops with `interactive mode requires a terminal; pass explicit
+id(s) instead`.
 
 > [!NOTE]
 > `enable` rejects ids no plugin defines (the part before any `@version`): `rtunk linters enable nope`

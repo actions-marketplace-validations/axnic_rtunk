@@ -180,10 +180,18 @@ rtunk check [--from <ref>] [--no-progress] [--ascii] [--live-height <n>] [--form
 The originally planned `config {plugins,lint,actions,tools,runtimes} list|show` were never shipped
 and stay dropped: `linters`/`actions` listing and `plugins print` cover the need.
 
+## Downloads
+
+- **`rtunk download [<category> [<id>[@version]...]]`**: download ahead of time what `check`, `fmt`
+  and `run` otherwise fetch lazily. No argument downloads every enabled tool and runtime.
+  `<category>` is `runtime`, `tools` or `lint` (a linter id, expanded to its tools) and requires at
+  least one id. Skips installed items, prints `Downloaded N item(s).` or `Everything is already
+  downloaded.`, and shows the live install view on a terminal. Same command as `rtunk toolbox download`. Printed by `linters enable` as a hint.
+
 ## Internal commands (advanced, hidden)
 
-- **`rtunk toolbox download {runtime,tools} <id>[@version]`**: download one specific runtime or
-  tool. The item is required; there is no bare download-everything.
+- **`rtunk toolbox download [{runtime,tools,lint} <id>[@version]...]`**: alias of the public
+  `rtunk download`.
 - **`rtunk toolbox where {runtime,tools} <id>[@version]`**: absolute path of the item's install
   directory (not its shim).
 - **`rtunk toolbox exec|x {runtime,tools} <id>[@version] -- <cmd> [<args>...]`**: run `<cmd>`, which
@@ -192,15 +200,16 @@ and stay dropped: `linters`/`actions` listing and `plugins print` cover the need
   otherwise stdin is unbound.
 - **`rtunk lock`**: see "Download integrity" below (planned, `v1.1`).
 
-`toolbox download`, `exec` and `where` are implemented and replace the former top-level `download`,
-`exec|x` and `where` (`v0.2`), narrowed to `{runtime,tools}`; the old names are removed, with no
-compat aliases.
+`toolbox exec` and `where` are implemented and replace the former top-level `exec|x` and `where`
+(`v0.2`), narrowed to `{runtime,tools}`; the old names are removed, with no compat aliases.
+`download` has since been made public again (see above).
 
 ## Administration
 
 ### Cache
 
-- **`rtunk cache clean`**: remove the entire cache root: downloads, plugin sources, and logs alike.
+- **`rtunk cache clean`**: remove the `downloads`, `plugins`, `logs` and `registry` subtrees of the cache root (not the whole
+  directory, which may be shared); per-subtree progress and space freed on a terminal.
   (Implemented.)
 - **`rtunk cache prune`**: removes cache entries no currently-existing, currently-configured
   repository still needs. Driven by a per-repository usage registry (`download.RecordUsage`,

@@ -40,10 +40,10 @@ rtunk cache clean
 | Command             | Effect                                                            |
 | ------------------- | ----------------------------------------------------------------- |
 | `rtunk cache prune` | Removes entries no existing, configured repository needs any more |
-| `rtunk cache clean` | Removes the entire cache: downloads, plugin sources and logs      |
+| `rtunk cache clean` | Removes the downloads, plugins, logs and registry subtrees        |
 
-Both succeed silently. `prune` has no age option: an entry is kept while a repository that still
-exists on disk lists it. `clean` empties the cache root; the next run downloads everything again.
+`prune` succeeds silently. `clean` shows one line per removed subtree with the space freed (`removed <name> (<size>)` when piped), or `The cache is already empty.` `prune` has no age option: an entry is kept while a repository that still
+exists on disk lists it. `clean` removes only those four subtrees, leaving other files in the cache directory alone; the next run downloads everything again.
 
 > [!WARNING]
 > `cache clean` also deletes the run logs of every repository.
