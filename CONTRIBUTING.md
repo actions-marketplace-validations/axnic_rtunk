@@ -65,6 +65,13 @@ Full type/scope tables, the commitlint rules commits are checked against, and th
 workflow: [`.agents/skills/git-commit/SKILL.md`](.agents/skills/git-commit/SKILL.md) — the
 canonical reference; this section is a summary, not a substitute.
 
+## Documentation
+
+`docs/` is the source of the project's GitHub Wiki: flat `Title-Case.md` pages, `docs/README.md`
+as Home, `_Sidebar.md` for navigation. A change to a command, flag or config key updates its page
+in the same commit. Page inventory, templates and writing rules:
+[`.agents/skills/wiki-docs/SKILL.md`](.agents/skills/wiki-docs/SKILL.md).
+
 ## Submitting a change
 
 1. Fork the repository and branch off `main` — the project's only active integration branch;
