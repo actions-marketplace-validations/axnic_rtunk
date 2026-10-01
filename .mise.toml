@@ -54,6 +54,10 @@ echo "Total statement coverage: ${total}%"
 awk -v total="$total" -v floor="$COVERAGE_FLOOR" 'BEGIN { if (total + 0 < floor + 0) { print "coverage " total "% is below the " floor "% floor"; exit 1 } }'
 '''
 
+[tasks."test:scripts"]
+description = "Run the tests of the release tooling in scripts/ (Node's built-in runner)"
+run = 'node --test "scripts/*.test.mjs"'
+
 [tasks.commitlint]
 description = "Validate commit messages in a range (usage: mise run commitlint -- --from <sha> --to <sha>)"
 run = "commitlint --verbose"
@@ -64,4 +68,4 @@ run = "govulncheck ./..."
 
 [tasks.ci]
 description = "Local equivalent of the CI quality gate (commit messages excluded)"
-depends = ["lint", "build", "coverage"]
+depends = ["lint", "build", "coverage", "test:scripts"]
