@@ -1,11 +1,16 @@
 # =============================================================================
 # rtunk Development Environment Configuration
 # =============================================================================
-# mise manages the toolchain needed to build and lint rtunk.
+# mise manages the toolchain needed to build, lint, test and release rtunk, and
+# defines the tasks shared by local development and CI (.github/workflows/*).
+# CI never calls the tools directly: it runs `mise run <task>`, so a green
+# local `mise run ci` is the same gate a pull request goes through.
 #
 # Usage:
-#   mise install   # Install all tools
-#   mise trust     # Trust this configuration (if prompted)
+#   mise install     # Install all tools
+#   mise trust       # Trust this configuration (if prompted)
+#   mise tasks       # List the available tasks
+#   mise run ci      # Run lint + build + test, as the CI quality gate does
 # =============================================================================
 
 [tools]
@@ -14,3 +19,49 @@ go = "latest"    # rtunk is implemented in Go (see AGENTS.md)
 trunk = "latest" # Metalinter/formatter, drives .trunk/trunk.yaml
 
 "go:golang.org/x/tools/gopls" = "latest" # Go language server, used by editors/agents (Serena)
+
+golangci-lint = "latest"                                 # Go linter, drives .golangci.yml (`mise run lint`)
+"go:golang.org/x/vuln/cmd/govulncheck" = "latest"        # Known-CVE scan of Go dependencies (security workflow)
+goreleaser = "latest"                                    # Cross-platform release builds, drives .goreleaser.yml
+node = "lts"                                             # Runtime for commitlint
+"npm:@commitlint/cli" = "latest"                         # Commit convention check, drives .commitlintrc.js
+
+# =============================================================================
+# Tasks
+# =============================================================================
+
+[tasks.lint]
+description = "Run golangci-lint"
+run = "golangci-lint run ./..."
+
+[tasks.build]
+description = "Build the rtunk binary"
+run = "go build -o rtunk ./cmd/rtunk"
+
+[tasks.test]
+description = "Run the unit tests with a coverage profile"
+run = "go test -race -covermode=atomic -coverprofile=coverage.txt ./..."
+
+# A floor, not a target: it catches coverage regressions without pinning today's exact number.
+# Raise it as coverage improves; never lower it to make a failing PR pass.
+[tasks.coverage]
+description = "Fail if total statement coverage is below the floor (default 80%)"
+depends = ["test"]
+env = { COVERAGE_FLOOR = "80" }
+run = '''
+total=$(go tool cover -func=coverage.txt | tail -1 | awk '{print $NF}' | tr -d '%')
+echo "Total statement coverage: ${total}%"
+awk -v total="$total" -v floor="$COVERAGE_FLOOR" 'BEGIN { if (total + 0 < floor + 0) { print "coverage " total "% is below the " floor "% floor"; exit 1 } }'
+'''
+
+[tasks.commitlint]
+description = "Validate commit messages in a range (usage: mise run commitlint -- --from <sha> --to <sha>)"
+run = "commitlint --verbose"
+
+[tasks.vulncheck]
+description = "Scan Go dependencies for known vulnerabilities"
+run = "govulncheck ./..."
+
+[tasks.ci]
+description = "Local equivalent of the CI quality gate (commit messages excluded)"
+depends = ["lint", "build", "coverage"]

@@ -1,0 +1,34 @@
+version: 2
+project_name: rtunk
+builds:
+  - id: rtunk
+    main: ./cmd/rtunk
+    binary: rtunk
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s
+      - -w
+      - -X main.version={{.Tag}}
+archives:
+  - id: archive
+    name_template: "{{ .ProjectName }}-{{ .Tag }}-{{ .Os }}-{{ .Arch }}"
+checksum:
+  name_template: checksums.txt
+snapshot:
+  version_template: "{{ .Tag }}-SNAPSHOT"
+changelog:
+  use: github
+release:
+  disable: false
+  # Draft so the generated notes can be reviewed before publishing.
+  draft: true
+  # Tags with a semver prerelease segment (e.g. v1.0.0-rc.1) are marked as GitHub prereleases
+  # automatically - one config handles both cases.
+  prerelease: auto

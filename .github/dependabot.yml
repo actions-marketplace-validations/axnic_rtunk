@@ -1,0 +1,30 @@
+# Dependabot — routine + security updates
+#
+# Every ecosystem below opens routine version-update PRs (weekly). What
+# happens to a PR after that is decided by
+# .github/workflows/pull_request.dependabot-auto-merge.yaml, not here:
+#   - Patch updates and any security update (any semver level) are
+#     auto-approved and auto-merged once CI is green.
+#   - Minor and major (non-security) updates are left open for manual
+#     review.
+# No `commit-message:` prefix/scope config here on purpose - Dependabot's
+# own subject text doesn't follow .commitlintrc.js's `type[scope]: Subject`
+# convention, so the auto-merge workflow builds a compliant subject itself
+# at merge time instead of relying on Dependabot's title. Not grouping
+# updates either, so each PR carries exactly one dependency and one semver
+# level - grouping a patch with a minor in the same PR would force it into
+# the "manual review" bucket above.
+
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+
+  - package-ecosystem: gomod
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
