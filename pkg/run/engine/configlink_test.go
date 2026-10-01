@@ -35,3 +35,19 @@ func TestLinkDirectConfigs(t *testing.T) {
 	assert.NoFileExists(t, filepath.Join(repo, ".shared.yaml"))
 	assert.FileExists(t, filepath.Join(repo, ".own.yaml"), "a file we did not create is never removed")
 }
+
+func TestLinkDirectConfigs_RtunkConfigsWinOverTrunk(t *testing.T) {
+	repo, dir := t.TempDir(), t.TempDir()
+	for _, d := range []string{".rtunk", ".trunk"} {
+		require.NoError(t, os.MkdirAll(filepath.Join(repo, d, "configs"), 0o755))
+		require.NoError(t, os.WriteFile(filepath.Join(repo, d, "configs", ".both.yaml"), []byte(d+"\n"), 0o644))
+	}
+	require.NoError(t, os.WriteFile(filepath.Join(repo, ".trunk", "configs", ".legacy.yaml"), []byte("trunk\n"), 0o644))
+
+	defer linkDirectConfigs(repo, dir, []string{".both.yaml", ".legacy.yaml"})()
+
+	got, err := os.ReadFile(filepath.Join(dir, ".both.yaml"))
+	require.NoError(t, err)
+	assert.Equal(t, ".rtunk\n", string(got))
+	assert.FileExists(t, filepath.Join(dir, ".legacy.yaml"), ".trunk/configs is still read as a fallback")
+}

@@ -14,7 +14,8 @@ var configLinks = struct {
 	refs map[string]int
 }{refs: map[string]int{}}
 
-// linkDirectConfigs makes the linter's config files kept in <repoRoot>/.trunk/configs visible
+// linkDirectConfigs makes the linter's config files kept in <repoRoot>/.rtunk/configs (or
+// .trunk/configs, for a repository still laid out for trunk) visible
 // to a tool running in dir, by symlinking each of names there -- what trunk does, and what
 // tools like yamllint and markdownlint need since they only look in their cwd and its parents.
 // A file of the same name already present in dir (the project's own config) always wins and is
@@ -24,9 +25,12 @@ func linkDirectConfigs(repoRoot, dir string, names []string) (cleanup func()) {
 	configLinks.Lock()
 	defer configLinks.Unlock()
 	for _, name := range names {
-		src := filepath.Join(repoRoot, ".trunk", "configs", name)
+		src := filepath.Join(repoRoot, ".rtunk", "configs", name)
 		if _, err := os.Stat(src); err != nil {
-			continue
+			src = filepath.Join(repoRoot, ".trunk", "configs", name)
+			if _, err := os.Stat(src); err != nil {
+				continue
+			}
 		}
 		dst := filepath.Join(dir, name)
 		if configLinks.refs[dst] == 0 {

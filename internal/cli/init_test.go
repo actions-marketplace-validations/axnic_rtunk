@@ -93,16 +93,47 @@ func TestInitCmd_ScaffoldIsActuallyFoundByFindConfig(t *testing.T) {
 	assert.Equal(t, filepath.Join(repo, ".rtunk", "rtunk.yaml"), found)
 }
 
-func TestInitCmd_WarnsWhenShadowingExistingTrunkYAML(t *testing.T) {
+func TestInitCmd_MigratesTrunkDir(t *testing.T) {
 	repo := initGitRepo(t)
-	require.NoError(t, os.MkdirAll(filepath.Join(repo, ".trunk"), 0o755))
-	require.NoError(t, os.WriteFile(filepath.Join(repo, ".trunk", "trunk.yaml"), []byte("version: \"0.1\"\n"), 0o644))
+	trunkDir := filepath.Join(repo, ".trunk")
+	trunkYAML := "version: \"0.1\"\n# kept as is\n"
+	for name, body := range map[string]string{
+		"trunk.yaml":                trunkYAML,
+		"configs/.yamllint.yaml":    "rules: {}\n",
+		"user_trunk.yaml":           "local\n",
+		"plugins/trunk/plugin.yaml": "checkout\n",
+		".gitignore":                "*out\n",
+	} {
+		require.NoError(t, os.MkdirAll(filepath.Dir(filepath.Join(trunkDir, name)), 0o755))
+		require.NoError(t, os.WriteFile(filepath.Join(trunkDir, name), []byte(body), 0o644))
+	}
+	require.NoError(t, os.Symlink(t.TempDir(), filepath.Join(trunkDir, "logs")))
 	chdir(t, repo)
 
-	_, stderr, err := run2(t, "init")
+	stdout, stderr, err := run2(t, "init")
 	require.NoError(t, err, "stderr: %s", stderr)
-	assert.Contains(t, stderr, filepath.Join(repo, ".trunk", "trunk.yaml"))
-	assert.Contains(t, stderr, "already exists")
+	assert.Contains(t, stdout, "migrated .trunk/trunk.yaml -> .rtunk/rtunk.yaml")
+	assert.Contains(t, stdout, "removed .trunk/")
+
+	data, err := os.ReadFile(filepath.Join(repo, ".rtunk", "rtunk.yaml"))
+	require.NoError(t, err)
+	assert.Equal(t, trunkYAML, string(data), "content migrated unchanged, not the scaffold")
+	assert.FileExists(t, filepath.Join(repo, ".rtunk", "configs", ".yamllint.yaml"))
+	assert.FileExists(t, filepath.Join(repo, ".rtunk", "user_trunk.yaml"))
+	assert.NoDirExists(t, trunkDir)
+
+	ignore, err := os.ReadFile(filepath.Join(repo, ".rtunk", ".gitignore"))
+	require.NoError(t, err)
+	assert.Contains(t, string(ignore), "user_trunk.yaml\n", "the migrated local override stays untracked")
+}
+
+func TestInitCmd_NonTerminal_PrintsNextSteps(t *testing.T) {
+	repo := initGitRepo(t)
+	chdir(t, repo)
+
+	stdout, stderr, err := run2(t, "init")
+	require.NoError(t, err, "stderr: %s", stderr)
+	assert.Contains(t, stdout, "next: rtunk linters enable, rtunk actions enable, rtunk download")
 }
 
 func TestInitCmd_NoWarningWhenNoExistingTrunkYAML(t *testing.T) {

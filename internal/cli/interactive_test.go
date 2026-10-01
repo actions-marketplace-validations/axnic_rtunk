@@ -201,16 +201,8 @@ func TestFlattenListing_GroupsBySectionAndMarksEnabled(t *testing.T) {
 	assert.Equal(t, map[string]bool{"beta": true}, checked)
 }
 
-func TestReportEnabled_SummaryAndDownloadHint(t *testing.T) {
+func TestReportEnabled_Summary(t *testing.T) {
 	var out strings.Builder
 	reportEnabled(&out, []string{"yamlfmt@1.0.0", "actionlint"}, []string{"checkov"})
-	assert.Equal(t, "Enabled: yamlfmt, actionlint\n"+
-		"Disabled: checkov\n"+
-		"\n"+
-		"Download them now with:\n"+
-		"  rtunk download lint yamlfmt actionlint\n", out.String())
-
-	out.Reset()
-	reportEnabled(&out, nil, []string{"checkov"})
-	assert.Equal(t, "Disabled: checkov\n", out.String(), "nothing enabled: no download hint")
+	assert.Equal(t, "Enabled: yamlfmt, actionlint\nDisabled: checkov\n", out.String())
 }

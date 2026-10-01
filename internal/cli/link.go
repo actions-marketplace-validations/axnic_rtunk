@@ -118,13 +118,13 @@ func relink(path, target string) error {
 	return os.Symlink(target, path)
 }
 
-// writeLinkGitignore ensures .rtunk/.gitignore exists, ignoring everything link creates -- only
-// rtunk.yaml (and this .gitignore itself) belong in version control.
+// writeLinkGitignore ensures .rtunk/.gitignore exists, ignoring everything link creates and the
+// local user overrides -- only rtunk.yaml, configs/ and this .gitignore belong in version control.
 func writeLinkGitignore(rtunkDir string) error {
 	path := filepath.Join(rtunkDir, ".gitignore")
 	if _, err := os.Stat(path); err == nil {
 		return nil
 	}
 	//nolint:gosec // .rtunk/.gitignore is repo-tracked, readable like every other tracked path
-	return os.WriteFile(path, []byte("logs\ntools\nplugins\n"), 0o644)
+	return os.WriteFile(path, []byte("logs\ntools\nplugins\nuser_trunk.yaml\nuser.yaml\n"), 0o644)
 }
