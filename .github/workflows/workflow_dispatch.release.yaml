@@ -19,6 +19,11 @@
 #   rc-patch / rc-minor / rc-major → release candidate; increments the RC
 #                                    counter if one already exists for the target
 #
+# Version override:
+#   Setting `version` (e.g. 0.13.0 or 0.13.0-rc.1, no leading "v") releases exactly that
+#   version and ignores `bump`. Use it when the computed bump can't express the wanted version,
+#   e.g. for the first tag of a repo whose milestones are already numbered (v0.13.0).
+#
 # The release is created as a draft so its notes can be reviewed before
 # publishing. The tag is pushed with GITHUB_TOKEN, which never triggers other
 # workflows, so goreleaser runs in this same workflow rather than on a
@@ -41,6 +46,10 @@ on:
           - rc-patch
           - rc-minor
           - rc-major
+      version:
+        description: Exact version to release, without the leading "v" (overrides bump; e.g. 0.13.0)
+        required: false
+        type: string
 
 # Minimal top-level permissions — the job declares what it needs.
 permissions: {}
@@ -54,7 +63,7 @@ jobs:
   # release — version, verify, tag, build and publish
   # ---------------------------------------------------------------------------
   release:
-    name: 🚀 Create release (${{ inputs.bump }})
+    name: 🚀 Create release (${{ inputs.version || inputs.bump }})
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -77,7 +86,23 @@ jobs:
         id: version
         env:
           BUMP: ${{ inputs.bump }}
+          VERSION_OVERRIDE: ${{ inputs.version }}
         run: |
+          # Explicit version: validate it, make sure it is new, and skip the bump computation.
+          if [[ -n "$VERSION_OVERRIDE" ]]; then
+            if [[ ! "$VERSION_OVERRIDE" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-rc\.[0-9]+)?$ ]]; then
+              echo "::error::Invalid version '${VERSION_OVERRIDE}' (expected X.Y.Z or X.Y.Z-rc.N, no leading v)"
+              exit 1
+            fi
+            if git rev-parse -q --verify "refs/tags/v${VERSION_OVERRIDE}" >/dev/null; then
+              echo "::error::Tag v${VERSION_OVERRIDE} already exists"
+              exit 1
+            fi
+            echo "version=${VERSION_OVERRIDE}" >> "$GITHUB_OUTPUT"
+            echo "::notice::New version: v${VERSION_OVERRIDE} (override)"
+            exit 0
+          fi
+
           # All semver-style tags, newest first
           ALL_TAGS=$(git tag -l 'v[0-9]*' --sort=-version:refname)
 
