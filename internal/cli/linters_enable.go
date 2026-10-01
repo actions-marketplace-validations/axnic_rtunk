@@ -13,7 +13,7 @@ type lintersEnableCmd struct {
 }
 
 func (c *lintersEnableCmd) Run(cli *CLI, stdout io.Writer, stderr Stderr) error {
-	added := c.ID
+	var added []string
 	if len(c.ID) > 0 {
 		if err := rejectUnknownIDs(cli, "linter", c.ID); err != nil {
 			return err

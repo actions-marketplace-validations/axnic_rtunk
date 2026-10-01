@@ -2,6 +2,7 @@
 // git-backed file selection, linter filtering, renderer construction, the run log, and the
 // `linters list`/`actions list` rendering. Anything scoped to a single command tree lives next to
 // that command's own file(s) instead.
+
 package cli
 
 import (
