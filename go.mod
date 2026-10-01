@@ -9,7 +9,7 @@ require (
 	github.com/alecthomas/kong v1.16.1
 	github.com/charmbracelet/x/ansi v0.11.8
 	github.com/stretchr/testify v1.12.1
-	github.com/ulikunitz/xz v0.5.16
+	github.com/ulikunitz/xz v0.5.17
 	golang.org/x/term v0.46.0
 	gopkg.in/yaml.v3 v3.0.1
 )
