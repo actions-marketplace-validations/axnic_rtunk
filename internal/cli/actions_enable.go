@@ -22,7 +22,7 @@ func interactiveActionsEnable(cli *CLI) error {
 		return err
 	}
 
-	items, checked := flattenListing(buildActionsList(cfg))
+	items, checked := flattenListing(buildActionsList(cfg), "action")
 	selected, ok, err := interactiveChecklist("Select actions to enable:", items, checked)
 	if err != nil || !ok {
 		return err

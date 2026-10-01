@@ -355,10 +355,11 @@ func TestLintersList_GroupsAndCounts(t *testing.T) {
 		"Enabled\n"+
 		"  ✔ gofmt@1.2.3  2 go files\n"+
 		"  ✔ mdlint       1 markdown file\n"+
+		"\n"+
 		"Available for this repo (not enabled)\n"+
 		"  ◯ gitleaks     5 files\n"+
 		"  ◯ vet          2 go files\n"+
-		"(1 other linter doesn't match any file here — rtunk linters list --all)\n"+
+		"(1 other linter — rtunk linters list --all)\n"+
 		"\n"+
 		"Enable one with: rtunk linters enable <id>\n", stdout)
 }
@@ -367,7 +368,7 @@ func TestLintersList_AllAddsTheRest(t *testing.T) {
 	cfgPath := listFixture(t, true)
 	stdout, _, err := run2(t, "--config", cfgPath, "linters", "list", "--all")
 	require.NoError(t, err)
-	assert.Contains(t, stdout, "Other (no matching file)\n  ◯ yamllint     0 yaml files\n")
+	assert.Contains(t, stdout, "Other\n  ◯ yamllint     0 yaml files\n")
 	assert.NotContains(t, stdout, "rtunk linters list --all")
 }
 

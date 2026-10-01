@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+	"io"
 	"strings"
 )
 
@@ -11,19 +12,41 @@ type lintersEnableCmd struct {
 	ID []string `arg:"" optional:"" help:"Linter id(s) to enable, optionally @version. Omit for an interactive picker."`
 }
 
-func (c *lintersEnableCmd) Run(cli *CLI) error {
+func (c *lintersEnableCmd) Run(cli *CLI, stdout io.Writer) error {
 	if len(c.ID) > 0 {
 		if err := rejectUnknownIDs(cli, "linter", c.ID); err != nil {
 			return err
 		}
-		return editEnabled(cli, "lint", func(existing []string) []string {
+		if err := editEnabled(cli, "lint", func(existing []string) []string {
 			return addEnabled(existing, c.ID)
-		})
+		}); err != nil {
+			return err
+		}
+		reportEnabled(stdout, c.ID, nil)
+		return nil
 	}
-	return interactiveLintersEnable(cli)
+	return interactiveLintersEnable(cli, stdout)
 }
 
-func interactiveLintersEnable(cli *CLI) error {
+// reportEnabled prints what enabling changed and, for newly enabled linters, the command that
+// downloads their tools now instead of on the first check.
+func reportEnabled(w io.Writer, added, removed []string) {
+	bare := make([]string, len(added))
+	for i, id := range added {
+		bare[i], _, _ = cutVersion(id)
+	}
+	if len(added) > 0 {
+		_, _ = fmt.Fprintf(w, "Enabled: %s\n", strings.Join(bare, ", "))
+	}
+	if len(removed) > 0 {
+		_, _ = fmt.Fprintf(w, "Disabled: %s\n", strings.Join(removed, ", "))
+	}
+	if len(added) > 0 {
+		_, _ = fmt.Fprintf(w, "\nDownload them now with:\n  rtunk download lint %s\n", strings.Join(bare, " "))
+	}
+}
+
+func interactiveLintersEnable(cli *CLI, stdout io.Writer) error {
 	cfg, err := resolveConfig(cli.Config, cli.CacheDir, true)
 	if err != nil {
 		return err
@@ -37,16 +60,20 @@ func interactiveLintersEnable(cli *CLI) error {
 		return err
 	}
 
-	items, checked := flattenListing(buildLintersList(cfg, repoRoot, files))
+	items, checked := flattenListing(buildLintersList(cfg, repoRoot, files), "linter")
 	selected, ok, err := interactiveChecklist("Select linters to enable:", items, checked)
 	if err != nil || !ok {
 		return err
 	}
 
 	toAdd, toRemove := diffSelection(checked, selected)
-	return editEnabled(cli, "lint", func(existing []string) []string {
+	if err := editEnabled(cli, "lint", func(existing []string) []string {
 		return addEnabled(removeEnabled(existing, toRemove), toAdd)
-	})
+	}); err != nil {
+		return err
+	}
+	reportEnabled(stdout, toAdd, toRemove)
+	return nil
 }
 
 // rejectUnknownIDs errors, naming every id (version suffix ignored) no plugin defines, when

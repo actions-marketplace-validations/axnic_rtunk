@@ -17,6 +17,8 @@ import (
 
 	"gopkg.in/yaml.v3"
 
+	"charm.land/lipgloss/v2"
+
 	"github.com/xunleii/rtunk/internal/cli/render"
 	"github.com/xunleii/rtunk/pkg/cache/download"
 	"github.com/xunleii/rtunk/pkg/git"
@@ -429,7 +431,11 @@ type listItem struct {
 	Files       *int   `json:"files,omitempty"`
 	Description string `json:"description"`
 	label       string // human text after the name: "2 go files", or the action's description
+	section     string // interactiveChecklist group header, set by flattenListing
 }
+
+// unused reports a linter matching no file here, shown dimmed.
+func (i listItem) unused() bool { return i.Files != nil && *i.Files == 0 }
 
 func (i listItem) name() string {
 	if i.Version != "" {
@@ -446,15 +452,37 @@ type listing struct {
 	Other     []listItem `json:"other"`
 }
 
-// flattenListing merges a listing's three buckets into one ID-sorted slice -- the same full
-// catalog `* list --all` shows -- plus the set of currently-enabled ids, for
-// interactiveChecklist's flat checkbox view.
-func flattenListing(l listing) ([]listItem, map[string]bool) {
+// listGroup is one titled bucket of a listing, as `* list` prints it and the picker shows it.
+type listGroup struct {
+	title string
+	items []listItem
+}
+
+// listingGroups is l's buckets in display order with their titles; noun is "linter" or
+// "action", showOther adds the Other bucket (--all).
+func listingGroups(l listing, noun string, showOther bool) []listGroup {
+	available := "Available for this repo (not enabled)"
+	if noun != "linter" {
+		available = "Available (not enabled)"
+	}
+	groups := []listGroup{{"Enabled", l.Enabled}, {available, l.Available}}
+	if showOther {
+		groups = append(groups, listGroup{"Other", l.Other})
+	}
+	return groups
+}
+
+// flattenListing merges a listing's buckets, in order and each tagged with its group title,
+// into one slice -- the same full catalog `* list --all` shows -- plus the set of
+// currently-enabled ids, for interactiveChecklist's grouped checkbox view.
+func flattenListing(l listing, noun string) ([]listItem, map[string]bool) {
 	items := make([]listItem, 0, len(l.Enabled)+len(l.Available)+len(l.Other))
-	items = append(items, l.Enabled...)
-	items = append(items, l.Available...)
-	items = append(items, l.Other...)
-	sort.Slice(items, func(i, j int) bool { return items[i].ID < items[j].ID })
+	for _, g := range listingGroups(l, noun, true) {
+		for _, it := range g.items {
+			it.section = g.title
+			items = append(items, it)
+		}
+	}
 
 	checked := make(map[string]bool, len(l.Enabled))
 	for _, it := range l.Enabled {
@@ -604,6 +632,35 @@ func buildActionsList(cfg config.Config) listing {
 	return l
 }
 
+// st holds the colors of `* list` and the picker. Styles always emit ANSI; the writer
+// downsamples them (lipgloss.Fprint, or bubbletea for the picker) to what the terminal supports,
+// plain text when it is not a terminal or NO_COLOR is set.
+var st = struct{ header, checked, faint, cursor, bold, filter lipgloss.Style }{
+	header:  lipgloss.NewStyle().Bold(true),
+	checked: lipgloss.NewStyle().Foreground(lipgloss.Green),
+	faint:   lipgloss.NewStyle().Faint(true),
+	cursor:  lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Cyan),
+	bold:    lipgloss.NewStyle().Bold(true),
+	filter:  lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Yellow),
+}
+
+// listLine is one item row as `* list` and the picker draw it: pointer, check mark, name padded
+// to width, label. The cursor row is highlighted; a linter matching no file is dimmed.
+func listLine(cursor, checked bool, it listItem, width int) string {
+	pointer, mark := " ", st.faint.Render("◯")
+	if checked {
+		mark = st.checked.Render("✔")
+	}
+	name, label := fmt.Sprintf("%-*s", width, it.name()), it.label
+	switch {
+	case cursor:
+		pointer, name = st.cursor.Render(">"), st.bold.Render(name)
+	case it.unused():
+		name, label = st.faint.Render(name), st.faint.Render(label)
+	}
+	return pointer + " " + mark + " " + name + "  " + label
+}
+
 // writeListing renders l as human text or JSON. noun/hintCmd name the kind ("linter", "linters
 // enable"); showOther prints the Other group (--all), otherwise it is only counted.
 func writeListing(w io.Writer, l listing, format string, noun, hintCmd string, showOther bool) error {
@@ -617,25 +674,8 @@ func writeListing(w io.Writer, l listing, format string, noun, hintCmd string, s
 		return enc.Encode(l)
 	}
 
+	groups := listingGroups(l, noun, showOther)
 	width := 0
-	groups := []struct {
-		title string
-		mark  string
-		items []listItem
-	}{
-		{"Enabled", "✔", l.Enabled},
-		{"Available for this repo (not enabled)", "◯", l.Available},
-	}
-	if noun != "linter" {
-		groups[1].title = "Available (not enabled)"
-	}
-	if showOther {
-		groups = append(groups, struct {
-			title string
-			mark  string
-			items []listItem
-		}{"Other (no matching file)", "◯", l.Other})
-	}
 	for _, g := range groups {
 		for _, it := range g.items {
 			width = max(width, len(it.name()))
@@ -643,24 +683,28 @@ func writeListing(w io.Writer, l listing, format string, noun, hintCmd string, s
 	}
 
 	var b strings.Builder
-	for _, g := range groups {
+	for i, g := range groups {
 		if len(g.items) == 0 {
 			continue
 		}
-		b.WriteString(g.title + "\n")
+		if b.Len() > 0 {
+			b.WriteString("\n")
+		}
+		b.WriteString(st.header.Render(g.title))
+		b.WriteByte('\n')
 		for _, it := range g.items {
-			_, _ = fmt.Fprintf(&b, "  %s %-*s  %s\n", g.mark, width, it.name(), it.label)
+			b.WriteString(listLine(false, i == 0, it, width))
+			b.WriteByte('\n')
 		}
 	}
 	if !showOther && len(l.Other) > 0 {
-		n := len(l.Other)
-		verb := "linters don't"
-		if n == 1 {
-			verb = "linter doesn't"
+		noun := "linters"
+		if len(l.Other) == 1 {
+			noun = "linter"
 		}
-		_, _ = fmt.Fprintf(&b, "(%d other %s match any file here — rtunk linters list --all)\n", n, verb)
+		_, _ = fmt.Fprintf(&b, "(%d other %s — rtunk linters list --all)\n", len(l.Other), noun)
 	}
 	_, _ = fmt.Fprintf(&b, "\nEnable one with: rtunk %s <id>\n", hintCmd)
-	_, err := io.WriteString(w, b.String())
+	_, err := lipgloss.Fprint(w, b.String())
 	return err
 }
