@@ -14,7 +14,7 @@ import (
 	"github.com/xunleii/rtunk/pkg/run/engine"
 )
 
-// Spinner frame sets (docs/ux.md "Spinners"); the frame is picked from the clock so every row of a
+// Spinner frame sets (docs/Terminal-UX-Design.md "Spinners"); the frame is picked from the clock so every row of a
 // kind stays in sync and frame() stays pure.
 var (
 	dotsFrames  = strings.Fields("⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ ⠏")

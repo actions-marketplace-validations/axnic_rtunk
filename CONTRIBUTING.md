@@ -8,7 +8,7 @@ All participation in this project is governed by [CODE_OF_CONDUCT.md](CODE_OF_CO
 
 ## Development environment
 
-Use [docs/installation.md](docs/installation.md)'s "clone and build" path rather than
+Use [docs/Installation.md](docs/Installation.md)'s "clone and build" path rather than
 `go install` — it's the setup this file assumes:
 
 ```bash
@@ -21,7 +21,7 @@ go build -o rtunk ./cmd/rtunk
 
 `mise install` resolves the toolchain declared in [`.mise.toml`](.mise.toml): the Go compiler
 matching `go.mod`'s floor, and `trunk`, the metalinter used below. See
-[docs/installation.md](docs/installation.md) for prerequisites and platform support (macOS and
+[docs/Installation.md](docs/Installation.md) for prerequisites and platform support (macOS and
 Linux only) — this file doesn't repeat that.
 
 ## Tests and lint

@@ -25,7 +25,7 @@ rtunk exists to offer the same orchestration experience as an auditable, fully o
 - **Partially compatible with trunk.** 100% compatible with trunk configuration; no compatibility
   constraint for the rest (cache, other) nor for the UI.
 - **Fast.** Checks are optimized: by default only changed files are verified (see
-  [docs/cli.md](./docs/cli.md), "File selection").
+  [docs/CLI-Design.md](./docs/CLI-Design.md), "File selection").
 - **Pleasant, simple to understand and use.** A simple CLI and a simple UX.
 
 ## How it relates to trunk
@@ -34,7 +34,7 @@ rtunk exists to offer the same orchestration experience as an auditable, fully o
   `trunk-ignore` inline directives, so a repository already using trunk can adopt rtunk with
   minimal friction. rtunk's own native config lives at `.rtunk/rtunk.yaml` (a git-ignored
   `.rtunk/user.yaml` local override is design intent, not yet implemented — see
-  [docs/configuration.md](./docs/configuration.md#config-file-discovery)), modeled closely on
+  [docs/Configuration-Reference.md](./docs/Configuration-Reference.md#config-file-discovery)), modeled closely on
   trunk's schema and semantics but not a literal copy of trunk's branding or documentation text.
 - **Consumes the community plugin ecosystem.** The part of trunk that is genuinely open and
   well-maintained is [trunk-io/plugins](https://github.com/trunk-io/plugins) — the YAML
@@ -82,7 +82,7 @@ rtunk is, and will remain, a 100% local tool.
   Windows), overridable via `--cache-dir` flag / `RTUNK_CACHE_DIR` env var (the same underlying
   flag, kong-bound — not two independently-read sources) falling back to that default; there is no
   config-file key for it (see
-  [docs/configuration.md](./docs/configuration.md#cache-directory)). It is content-addressed, so
+  [docs/Configuration-Reference.md](./docs/Configuration-Reference.md#cache-directory)). It is content-addressed, so
   it is safe to copy between machines, and nothing is ever uploaded from it.
 - **`rtunk-ignore` with permanent trunk compatibility.** The native inline ignore directive is
   `rtunk-ignore(linter/rule): reason`. `trunk-ignore(...)` and its `-all`/`-begin`/`-end` variants
@@ -100,8 +100,8 @@ rtunk is, and will remain, a 100% local tool.
 
 ## Behavioral decisions
 
-Detail lives in [docs/cli.md](./docs/cli.md) (commands and run semantics) and
-[docs/ux.md](./docs/ux.md) (terminal UX); they are the authoritative target design. Everything
+Detail lives in [docs/CLI-Design.md](./docs/CLI-Design.md) (commands and run semantics) and
+[docs/Terminal-UX-Design.md](./docs/Terminal-UX-Design.md) (terminal UX); they are the authoritative target design. Everything
 through `v0.9` is implemented today; `v1.1` (`rtunk.lock`) remains planned.
 
 - **Project root.** `check`, `fmt` and `run` refuse to run without a `.trunk`/`.rtunk` ancestor.
@@ -128,6 +128,6 @@ concurrency.
 
 ## Where to go next
 
-See [docs/cli.md](./docs/cli.md) and [docs/ux.md](./docs/ux.md) for the command and UX design, and
+See [docs/CLI-Design.md](./docs/CLI-Design.md) and [docs/Terminal-UX-Design.md](./docs/Terminal-UX-Design.md) for the command and UX design, and
 [ROADMAP.md](./ROADMAP.md) for the staged build-out of rtunk's functionality, from reading an
 existing trunk configuration through its public release and beyond.

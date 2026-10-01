@@ -1,4 +1,7 @@
-# Inconsistencies to resolve
+# Decision Log
+
+> [!NOTE]
+> Contributor documentation. Records design decisions behind the refactor, not how to use rtunk — see [Migrating From Trunk](Migrating-From-Trunk.md) for the user view.
 
 This is the refactor's decision log, not a freestanding bug tracker: every entry has been reviewed
 and given a **Status**, so this document drives what the redesign actually does, not just what it
@@ -282,7 +285,7 @@ for every enabled id that carries it.
 from the same override value, with different join conventions, so a custom cache directory produces
 a different, undocumented on-disk shape than the default location. Full detail, the target design
 (one shared root-resolution, every subtree derived from it), and the on-disk layout are in
-[cache.md](./cache.md#single-cache-root).
+[Cache-Architecture.md](Cache-Architecture.md#single-cache-root).
 
 **Severity**: maintainability (correctness-adjacent: no data loss, but a real, silent behavioral
 difference based on a single flag).
@@ -296,7 +299,7 @@ patch.
 survives a full wipe silently. The target's unified `cache clean` (full wipe of the whole root) and
 `cache prune` (index-driven garbage collection across every subtree) both close this by construction,
 since neither is scoped to "downloads only." See
-[cache.md](./cache.md#repository-index-and-cache-prune).
+[Cache-Architecture.md](Cache-Architecture.md#repository-index-and-cache-prune).
 
 **Severity**: maintainability.
 
@@ -329,7 +332,7 @@ has on its own (which prevents corruption, not duplicated work). The target's pe
 exclusive-create lock file, recording the owning process id and triggering repository and fail-fast
 on contention, is a real cross-process fix — a lock whose recorded process id is no longer alive is
 detected as stale and cleared automatically, rather than blocking forever. See
-[cache.md](./cache.md#locking), including the accepted pid-liveness limitation (a reused pid, or a
+[Cache-Architecture.md](Cache-Architecture.md#locking), including the accepted pid-liveness limitation (a reused pid, or a
 lock seen from a different host over a shared network filesystem, can't be checked for liveness).
 
 **Severity**: maintainability (no correctness bug given atomic publish today, but a real scaling limit
@@ -376,7 +379,7 @@ Beyond the fields already covered above (version range, platform restriction, fi
 the two caching opt-outs), the real catalog declares a further set of fields on commands, tools, and
 actions that the resolved configuration shape either drops entirely while parsing or parses and then
 never reads again. See
-[plugin-model.md](./plugin-model.md#declared-fields-the-current-execution-engine-does-not-act-on) for
+[Plugin-Model.md](Plugin-Model.md#declared-fields-the-current-execution-engine-does-not-act-on) for
 the full field-by-field index with catalog occurrence counts.
 
 - **`suggest_if` (linter-level, the single most common of these fields in the real catalog)**:
@@ -570,3 +573,9 @@ empty git-based selection also takes.
 
 **Severity**: correctness (a scriptable/CI caller cannot currently distinguish "nothing to check" from
 "this invocation was missing required arguments").
+
+## Where to go next
+
+- [Architecture](Architecture.md)
+- [CLI Design](CLI-Design.md)
+- [Plugin Model](Plugin-Model.md)

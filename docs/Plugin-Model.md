@@ -1,10 +1,13 @@
-# Plugin object model
+# Plugin Model
+
+> [!NOTE]
+> Contributor documentation. Describes the plugin object model, not how to configure it — see [Configuration Reference](Configuration-Reference.md) for that.
 
 How the objects a plugin repository declares are shaped and how they reference each other — the
 domain model of the _configuration vocabulary itself_ (plugin.yaml and trunk.yaml), independent of
 any component that reads it. This is the schema a redesign's config resolver has to keep
-faithfully representable; see [README.md](./README.md) for the components that consume it and
-[sources.md](./sources.md) for the resolution/fetch architecture built on top.
+faithfully representable; see [Architecture.md](Architecture.md) for the components that consume it and
+[Plugin-Sources.md](Plugin-Sources.md) for the resolution/fetch architecture built on top.
 
 The field survey below is based on the trunk-io/plugins catalog at commit
 `d1e3af5752059371e206fe8f242b15d7f4205555` (208 plugin.yaml files).
@@ -170,7 +173,7 @@ a single `type`/`command` pair directly on the linter definition instead of one 
 catalog on deprecated-but-still-enableable ids, so an existing trunk.yaml that still enables one of
 them is a real input a redesign's model has to account for, either by modeling the shape or by
 treating it as a resolvable-to-empty legacy id with a surfaced warning. See
-[inconsistencies.md](./inconsistencies.md) for what happens today when neither is done.
+[Decision-Log.md](Decision-Log.md) for what happens today when neither is done.
 
 ## Field-category table (conceptual, not exhaustive)
 
@@ -191,7 +194,7 @@ distinct ids) groups every field found on `CommandDefinition`/`LinterDefinition`
 `ActionDefinition` that a redesign's object model should represent, but that today's engine parses
 and then never consults, or never parses at all because the corresponding struct has no field for
 it. Full detail, evidence, and severity for each is in
-[inconsistencies.md](./inconsistencies.md#declared-but-inert-catalog-fields); this is the field-level
+[Decision-Log.md](Decision-Log.md#declared-but-inert-catalog-fields); this is the field-level
 index into that.
 
 | Field                       | Declared on | Catalog occurrences | Status today                                                                                                                                                                                              |
@@ -212,3 +215,9 @@ index into that.
 | `health_checks`             | tool        | 20                  | not modeled (dropped while parsing)                                                                                                                                                                       |
 | `extra_packages`            | tool        | 6                   | not modeled (dropped while parsing)                                                                                                                                                                       |
 | `output_type`               | action      | 2                   | not modeled (dropped while parsing)                                                                                                                                                                       |
+
+## Where to go next
+
+- [Architecture](Architecture.md)
+- [Plugin Sources](Plugin-Sources.md)
+- [Configuration Reference](Configuration-Reference.md)

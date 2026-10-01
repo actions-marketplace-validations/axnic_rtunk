@@ -153,7 +153,7 @@ func printValue(w io.Writer, v any, format string) error {
 }
 
 // resolvePaths turns the user's path arguments into the absolute file list engine.Run gets, per
-// docs/cli.md "File selection": no paths -> changed files (selectFiles), explicit paths -> every
+// docs/CLI-Design.md "File selection": no paths -> changed files (selectFiles), explicit paths -> every
 // file under them (expandPaths). errNoFiles means there is nothing to run.
 func resolvePaths(repoRoot string, paths []string, from string) ([]string, error) {
 	var files []string

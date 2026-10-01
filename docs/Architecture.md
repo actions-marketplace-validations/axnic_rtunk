@@ -1,27 +1,33 @@
-# rtunk architecture
+# Architecture
+
+> [!NOTE]
+> Contributor documentation. Describes the components rtunk is built from, not how to use it — see [Command Reference](Command-Reference.md) for that.
 
 This is the architecture reference for rtunk, written to let a full redesign or reimplementation
 be planned from these documents alone. It describes responsibilities, boundaries, and the
 reasoning connecting components — not the code that currently realizes them. For product framing
-and scope, see [AGENTS.md](../../AGENTS.md) and [ROADMAP.md](../../ROADMAP.md); for CLI/UX
-contracts, see [docs/cli.md](../cli.md) and [docs/ux.md](../ux.md).
+and scope, see [AGENTS.md](../AGENTS.md) and [ROADMAP.md](../ROADMAP.md); for CLI/UX
+contracts, see [CLI Design](CLI-Design.md) and [Terminal UX Design](Terminal-UX-Design.md).
 
 ## Documents
 
 - **This file** — the component map: what a runtime, plugin, linter, tool, action, engine, and
   cache are, and how the components that realize them compose.
-- **[plugin-model.md](./plugin-model.md)** — the plugin object model: how a linter, tool, runtime,
+- **[Plugin-Model.md](Plugin-Model.md)** — the plugin object model: how a linter, tool, runtime,
   action, and download recipe are declared, how they reference each other, and how trunk.yaml's
   enabled ids select from that catalog.
-- **[sources.md](./sources.md)** — how plugins, linters, and runtimes are resolved and downloaded.
-- **[flows.md](./flows.md)** — the shared pre-run and run flows behind checking and formatting (and
+- **[Plugin-Sources.md](Plugin-Sources.md)** — how plugins, linters, and runtimes are resolved and downloaded.
+- **[Run-Flows.md](Run-Flows.md)** — the shared pre-run and run flows behind checking and formatting (and
   their variants: linter fixes, format-before-check, fmt's own modes), how actions work end to end,
   and initializing/removing a repository's configuration.
-- **[cache.md](./cache.md)** — the cache subsystem's target design: a single overridable root,
+- **[Cache-Architecture.md](Cache-Architecture.md)** — the cache subsystem's target design: a single overridable root,
   on-disk layout, key derivation, locking, and index-driven garbage collection.
-- **[inconsistencies.md](./inconsistencies.md)** — the refactor's decision log: every open
+- **[Decision-Log.md](Decision-Log.md)** — the refactor's decision log: every open
   incoherence, with a status (accepted, an intentional divergence, roadmap, or an open question),
   evidence, and severity.
+- **[CLI-Design.md](CLI-Design.md)** — the authoritative command surface and run semantics of `check`,
+  `fmt` and `run`.
+- **[Terminal-UX-Design.md](Terminal-UX-Design.md)** — the terminal rendering of `check` and `fmt`.
 
 ## Component map
 
@@ -75,7 +81,7 @@ plugin sources, download recipes, tool/runtime/linter/action definitions, and th
 environment/file-type tables. What each of those definitions contains and how they reference each
 other — a linter's tools, a tool's runtime-or-download binding, an action's triggers, trunk.yaml's
 enabled ids selecting from the catalog — is its own object model, in
-[plugin-model.md](./plugin-model.md); this diagram only covers the _behavior_ components that
+[Plugin-Model.md](Plugin-Model.md); this diagram only covers the _behavior_ components that
 consume that catalog:
 
 ```mermaid
@@ -112,7 +118,7 @@ important thing to preserve, or deliberately renegotiate, in a redesign:
   (`go`, `node`, `python`, `php`, `rust`, `ruby`), each knowing how to install a package through
   that runtime's package manager, what extra shim environment an installed package needs, and
   which upstream package registry tracks its version updates. See
-  [sources.md](./sources.md#runtimes).
+  [Plugin-Sources.md](Plugin-Sources.md#runtimes).
 - The same split exists between a **linter's declared definition** (files it matches, tools and
   commands it names) and the **execution engine**, which interprets that definition into planned,
   running processes; and between an **action's declared definition** and the **action runner**
@@ -153,7 +159,7 @@ inspect without needing any execution machinery at all.
   normalizer.
 - **Action Runner** — executes one action definition end to end: resolves whatever runtime/package
   environment it needs (independently of the execution engine — see
-  [inconsistencies.md](./inconsistencies.md)), substitutes its invocation template's variables, runs
+  [Decision-Log.md](Decision-Log.md)), substitutes its invocation template's variables, runs
   it, records its output to the run log, and appends its outcome to a per-repository history.
 - **Git Hooks Manager** — installs and removes the shim scripts, at the appropriate git lifecycle
   points, that hand off to the action runner; the set of hook points to wire is derived from every
@@ -193,5 +199,12 @@ the runtime behavior registry itself (one behavior entry per runtime kind, repla
 per-kind dispatch that used to be spread across two unrelated subsystems) and the small shared
 install-finalizer primitive that came with it. Everything else that pass identified, plus further
 issues found since, is catalogued with evidence and severity in
-[inconsistencies.md](./inconsistencies.md) — the target shape a redesign should pick up from, rather
+[Decision-Log.md](Decision-Log.md) — the target shape a redesign should pick up from, rather
 than invent from scratch.
+
+## Where to go next
+
+- [Plugin Model](Plugin-Model.md)
+- [Run Flows](Run-Flows.md)
+- [Cache Architecture](Cache-Architecture.md)
+- [Decision Log](Decision-Log.md)

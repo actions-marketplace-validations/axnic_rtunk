@@ -1,4 +1,7 @@
-# Flows
+# Run Flows
+
+> [!NOTE]
+> Contributor documentation. Describes the design rtunk is built to, not how to use it — see [Checking Code](Checking-Code.md) for that.
 
 End-to-end interaction sequences for rtunk's architecturally significant behaviors, described at
 the level of components and responsibilities. Two flows cover checking and formatting between them:
@@ -9,7 +12,7 @@ init/deinit are their own, unrelated flows, covered separately below.
 
 The output side of every diagram below is a single **UI** participant — the presentation layer
 (plain text, a live view, a machine-readable document) is a UX concern with its own contract; see
-[docs/cli.md](../cli.md) and [docs/ux.md](../ux.md) for what it actually renders.
+[CLI Design](CLI-Design.md) and [Terminal UX Design](Terminal-UX-Design.md) for what it actually renders.
 
 ## Pre-run flow
 
@@ -51,7 +54,7 @@ sequenceDiagram
 
 Nothing in this flow is written to the run journal, by design — file selection and provisioning are
 deliberately outside the journal's scope, not merely unimplemented; see "install events and file
-selection are deliberately not logged" in [inconsistencies.md](./inconsistencies.md).
+selection are deliberately not logged" in [Decision-Log.md](Decision-Log.md).
 
 ### File selection
 
@@ -62,7 +65,7 @@ selection are deliberately not logged" in [inconsistencies.md](./inconsistencies
 | Inside a git repository, no upstream                    | Every file with a staged change, every file with an unstaged change, and every untracked, non-ignored file — everything that differs from the last commit, tracked or not, staged or not. | Listed through git (so gitignore applies), intersected with the given paths. |
 
 Implemented as of v0.10 (`internal/cli/shared.go`); see
-[inconsistencies.md](./inconsistencies.md) entries #19 and #20.
+[Decision-Log.md](Decision-Log.md) entries #19 and #20.
 
 ## Run flow
 
@@ -127,7 +130,7 @@ stream closes.
 `check --fix` and `check --format-before-check` are each two runs of this same pipeline in sequence
 — a writing pass, then a plain-checking pass over the result — not a different pipeline.
 Implemented as of v0.10; see "fix vs. formatter conflation" in
-[inconsistencies.md](./inconsistencies.md).
+[Decision-Log.md](Decision-Log.md).
 
 **Finding-level autofixes**, applied under `check --fix` above: some structured output formats let a
 finding carry its own replacement text inline — the tool already computed exactly what the fixed
@@ -227,14 +230,14 @@ sequenceDiagram
 
 The action runner resolves its own runtime shim location, and substitutes its own invocation
 template's variables, independently of the execution engine — see
-[inconsistencies.md](./inconsistencies.md).
+[Decision-Log.md](Decision-Log.md).
 
 **Today:** neither unsupported trigger kind is refused. Both a file-change trigger and a schedule
 trigger are silently parsed and then never consulted by anything — the query above that resolves
 "which actions fire on this trigger" only ever matches the git-hook trigger kind — so an action
 relying on either quietly never fires, with no indication why, rather than being caught at
 configuration validation as the target above requires. Tracked in
-[inconsistencies.md](./inconsistencies.md).
+[Decision-Log.md](Decision-Log.md).
 
 ## Initializing / removing a repository's configuration
 
@@ -266,3 +269,9 @@ Removing hooks always runs _before_ removing the configuration directory: a repo
 ever used the upstream-compatible configuration path (the system's primary drop-in use case) can
 still have an installed hook, and if hook removal fails partway, the user keeps their configuration
 rather than losing both the configuration and a working hook at once.
+
+## Where to go next
+
+- [Architecture](Architecture.md)
+- [CLI Design](CLI-Design.md)
+- [Terminal UX Design](Terminal-UX-Design.md)

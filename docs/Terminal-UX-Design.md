@@ -1,7 +1,10 @@
-# Terminal UX design
+# Terminal UX Design
+
+> [!NOTE]
+> Contributor documentation. Describes the terminal rendering rtunk is built to, not how to use it — see [Checking Code](Checking-Code.md) for that.
 
 This document specifies the terminal UX of `check` and `fmt`. Command semantics live in
-[cli.md](./cli.md); staging lives in [ROADMAP.md](../ROADMAP.md).
+[CLI-Design.md](CLI-Design.md); staging lives in [ROADMAP.md](../ROADMAP.md).
 
 **Implementation status.** `v0.9` item 1 (event stream + plain renderer) is implemented, in
 `internal/cli/render`: `check`, `fmt` and `check --format-before-check`'s formatter pass render through the plain
@@ -224,3 +227,9 @@ file`), else `N files`. Names are padded to align.
 
 All four items are implemented. Later: color themes (including a distinct install-row color),
 detailed byte-progress style, a "waiting for runtime" install state.
+
+## Where to go next
+
+- [CLI Design](CLI-Design.md)
+- [Run Flows](Run-Flows.md)
+- [Command Reference](Command-Reference.md)

@@ -1,11 +1,14 @@
-# CLI reference and behavioral rules
+# CLI Design
+
+> [!NOTE]
+> Contributor documentation. Describes the command surface rtunk is built to, not a user manual — see [Command Reference](Command-Reference.md) for that.
 
 This document is the authoritative target design for rtunk's command surface and the run
-semantics of `check`, `fmt` and `run`. Terminal rendering lives in [ux.md](./ux.md); staging lives in
+semantics of `check`, `fmt` and `run`. Terminal rendering lives in [Terminal-UX-Design.md](Terminal-UX-Design.md); staging lives in
 [ROADMAP.md](../ROADMAP.md); project principles live in [AGENTS.md](../AGENTS.md).
 
 This file's audience is now contributors and maintainers verifying implementation status against
-design; the public, user-facing command reference lives at [docs/commands.md](./commands.md).
+design; the public, user-facing command reference lives at [Command Reference](Command-Reference.md).
 
 **Implementation status.** `v0.8` (CLI reshape) is implemented, under internal/cli (now one file per
 command): `.rtunk` over `.trunk` precedence and the project root rule (`findConfig` in
@@ -13,7 +16,7 @@ internal/cli/shared.go), file selection and `--from` (internal/cli/shared.go), e
 (`cmd/rtunk/main.go`), `fmt` working-tree-only behavior with `--force`, `linters
 {list,enable,disable}`, `git-hooks sync|unsync`, `plugins print`, the hidden `toolbox` group, `logs
 list|show|clean`, `help [--all]`, and `cache clean|prune`. `v0.9` item 1 is implemented: `check` and
-`fmt` render through the plain renderer in `internal/cli/render` (see [ux.md](./ux.md)), with
+`fmt` render through the plain renderer in `internal/cli/render` (see [Terminal-UX-Design.md](Terminal-UX-Design.md)), with
 `--no-progress`; this is a breaking change, the former `file:line severity [rule] message` lines and
 `N issue(s) in M file(s)` summary are gone. `v0.9` item 2 is implemented: `--format human|sarif|json`
 and ANSI color. `v0.9` item 4 is implemented: the filtered `linters list` / `actions list`
@@ -73,7 +76,7 @@ deprecations.go, internal/cli/shared.go's checkDeprecations, called from check_r
 
 `--no-progress` (`check` and `fmt`, implemented) suppresses the per-linter progress lines on stderr;
 warnings and errors are still printed. It also disables the live view. The default output is the
-plain renderer described in [ux.md](./ux.md).
+plain renderer described in [Terminal-UX-Design.md](Terminal-UX-Design.md).
 
 Live view (`check` and `fmt`, implemented): when stderr is a terminal, `--no-progress` is not set and
 `TERM` is not `dumb`, a live area is drawn on stderr while the run progresses and erased before the
@@ -88,7 +91,7 @@ run logs are not affected.
 
 `--format human|sarif|json` (`check` and `fmt`, implemented; default `human`):
 
-- `human`: the report described in [ux.md](./ux.md). ANSI color is added only when stdout is a
+- `human`: the report described in [Terminal-UX-Design.md](Terminal-UX-Design.md). ANSI color is added only when stdout is a
   terminal and `NO_COLOR` is empty; stderr progress lines are never colored. Output outside a
   terminal is uncolored.
 - `json`: one document on stdout: `{version: 1, command: "check"|"fmt", elapsed_ms, run_log,
@@ -218,7 +221,7 @@ human|json]`. (`list` implemented, internal/cli/linters_list.go.)
   the history of actions in this repo (`history [--id=STRING] [--limit=INT]`, restricting to one
   action id via `--id`, not a positional argument).
 
-`linters list` and `actions list` share one layout (see [ux.md](./ux.md)). `linters ...` replaces
+`linters list` and `actions list` share one layout (see [Terminal-UX-Design.md](Terminal-UX-Design.md)). `linters ...` replaces
 `check enable|disable|list` (implemented; `check` takes paths only). File counts come from every
 repository file matched against the linter's `files:` criteria.
 
@@ -292,3 +295,9 @@ A versioned `rtunk.lock` in the repo, `id@version@platform -> sha256` (go.sum st
 ### Later (v1+)
 
 Reuse checksums and signatures from the aqua-registry.
+
+## Where to go next
+
+- [Terminal UX Design](Terminal-UX-Design.md)
+- [Run Flows](Run-Flows.md)
+- [Decision Log](Decision-Log.md)

@@ -26,7 +26,7 @@ self-upgrade.
 ## Quickstart
 
 Full installation options, including a contributor build from source, are in
-[docs/installation.md](docs/installation.md). The fastest path, if you already have Go on `PATH`:
+[docs/Installation.md](docs/Installation.md). The fastest path, if you already have Go on `PATH`:
 
 ```bash
 go install github.com/xunleii/rtunk/cmd/rtunk@latest
@@ -57,16 +57,16 @@ Checked 2 files with 1 linter in 0.1s
 repository already has a `.trunk/trunk.yaml`, it warns on stderr that the new file now takes
 precedence and that `.trunk/trunk.yaml` stops being read. A repository migrating from trunk should
 generally **not** run `init` — go straight to `rtunk check` against the existing
-`.trunk/trunk.yaml`; see the [migration guide](docs/migration-from-trunk.md). `rtunk linters
+`.trunk/trunk.yaml`; see the [migration guide](docs/Migrating-From-Trunk.md). `rtunk linters
 enable <id>` turns a linter on. `rtunk check`, given no paths, checks whatever changed — here,
 every file in the still-commit-less repository — and prints the report above. Full command and
-flag reference: [docs/commands.md](docs/commands.md); full config key reference:
-[docs/configuration.md](docs/configuration.md).
+flag reference: [docs/Command-Reference.md](docs/Command-Reference.md); full config key reference:
+[docs/Configuration-Reference.md](docs/Configuration-Reference.md).
 
 ## How rtunk differs from trunk
 
 A closed list of deliberate decisions, not open bugs. Full rationale, migration impact, and
-"why" for each: [docs/migration-from-trunk.md](docs/migration-from-trunk.md).
+"why" for each: [docs/Migrating-From-Trunk.md](docs/Migrating-From-Trunk.md).
 
 - **Plain `check` never runs formatters.** trunk's `check` also runs every enabled formatter and
   reports an unformatted file as a finding; rtunk's `check` only ever runs genuine checking
@@ -80,13 +80,13 @@ A closed list of deliberate decisions, not open bugs. Full rationale, migration 
 
 ## Documentation
 
-- [docs/commands.md](docs/commands.md) — command and flag reference.
-- [docs/configuration.md](docs/configuration.md) — config file schema, override precedence,
+- [docs/Command-Reference.md](docs/Command-Reference.md) — command and flag reference.
+- [docs/Configuration-Reference.md](docs/Configuration-Reference.md) — config file schema, override precedence,
   `rtunk-ignore`/`trunk-ignore` syntax.
-- [docs/installation.md](docs/installation.md) — full installation guide.
-- [docs/migration-from-trunk.md](docs/migration-from-trunk.md) — moving an existing trunk
+- [docs/Installation.md](docs/Installation.md) — full installation guide.
+- [docs/Migrating-From-Trunk.md](docs/Migrating-From-Trunk.md) — moving an existing trunk
   repository to rtunk.
-- [docs/architecture/README.md](docs/architecture/README.md) — internal architecture, for
+- [docs/Architecture.md](docs/Architecture.md) — internal architecture, for
   contributors making non-trivial changes.
 - [CONTRIBUTING.md](CONTRIBUTING.md) — development environment, tests and lint, commit
   conventions.

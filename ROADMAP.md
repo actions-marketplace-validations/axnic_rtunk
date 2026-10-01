@@ -34,7 +34,7 @@ permanently out of scope and will never appear on this roadmap**, at any version
 
 The remaining work before `v1.0` falls into three phases, in order: first, a correctness and
 consistency pass over what already exists (`v0.10`–`v0.11`), driven by the architecture review in
-[docs/architecture/inconsistencies.md](./docs/architecture/inconsistencies.md); then Renovate
+[docs/Decision-Log.md](./docs/Decision-Log.md); then Renovate
 integration is promoted from an internal command to a supported, public one (`v0.12`); and finally,
 documentation is written to the standard a public release requires (`v0.13`), immediately before
 `v1.0` itself. `v1.0` is the public release — CLI flag compatibility with trunk is explicitly not a
@@ -44,7 +44,7 @@ goal, at `v1.0` or any other version. `v1.1`, after the public release, hardens 
 
 Checking, formatting, and fixing are put on one consistent execution model, and the command
 selection and validation bugs recorded in
-[docs/architecture/inconsistencies.md](./docs/architecture/inconsistencies.md) are fixed, so every
+[docs/Decision-Log.md](./docs/Decision-Log.md) are fixed, so every
 real plugin behavior rtunk's own catalog already declares runs the way it's declared, and a
 misconfigured or deprecated setup is reported instead of silently doing nothing.
 
@@ -262,7 +262,7 @@ behavior — entirely from the published documentation and release artifacts.
 
 Post-`v1.0` hardening; not blocking for `check`/`fmt`/`run`. Today, a downloaded tool is trusted the
 first time it's fetched, with no independent check afterward (see [AGENTS.md](./AGENTS.md) and
-[docs/cli.md](./docs/cli.md), "Download integrity"); a source compromised at that exact moment would
+[docs/CLI-Design.md](./docs/CLI-Design.md), "Download integrity"); a source compromised at that exact moment would
 not be detected.
 
 - **A committed lock file records what every download should be.** `rtunk.lock`, checked into the
@@ -289,7 +289,7 @@ configuration snippet keeps `rtunk.lock` current after a version bump.
 
 Not work items — decisions already made and closed, recorded here so they are not mistaken for
 open bugs later. Full rationale for each is in
-[docs/architecture/inconsistencies.md](./docs/architecture/inconsistencies.md).
+[docs/Decision-Log.md](./docs/Decision-Log.md).
 
 - **Plain `check` does not run formatters.** Unlike trunk, a checking run never reports unformatted
   files as findings by default; `--format-before-check` (`v0.10`) reproduces that behavior on

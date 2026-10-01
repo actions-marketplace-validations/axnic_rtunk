@@ -1,4 +1,7 @@
-# Sources: plugins, linters, runtimes, downloads
+# Plugin Sources
+
+> [!NOTE]
+> Contributor documentation. Describes how plugins, linters and runtimes are resolved and fetched, not how to use them — see [Managing Linters](Managing-Linters.md) for that.
 
 How rtunk's inputs are modeled, resolved, and fetched, at the architecture level: what each
 concept means, how definitions flow from plugin sources into one resolved configuration, and how
@@ -100,7 +103,7 @@ A linter definition ties together:
   declared variant whose version range and platform restriction both admit the resolved tool
   version and host wins, matching every other variant-selection logic in this codebase
   (`download.MatchEntry`'s own first-match semantics). See
-  [inconsistencies.md](./inconsistencies.md).
+  [Decision-Log.md](Decision-Log.md).
 - **Config file presence** — files whose presence enables or influences the linter, also used to
   decide where a command actually runs from when several matched files share a common context.
 
@@ -166,7 +169,7 @@ provisioning whatever runtime it declares (or nothing, if it declares none) — 
 category every tool provisioning already goes through, not a distinct fetch-target kind. Today, a
 separate action fetch category exists and only ever delegates straight to the runtime category,
 which is a redundant extra category rather than a real distinction; see
-[inconsistencies.md](./inconsistencies.md).
+[Decision-Log.md](Decision-Log.md).
 
 ### Cold vs. warm path (tools and runtimes)
 
@@ -220,3 +223,9 @@ A single shared query goes from "the currently enabled action set" to "actions r
 git hook name" — both the git hooks manager (deciding which hook points need a shim script at all)
 and the action-running/listing commands build on that same query, so the hook name set stays
 correct as the enabled action set changes, with no separately maintained list to fall out of sync.
+
+## Where to go next
+
+- [Plugin Model](Plugin-Model.md)
+- [Cache Architecture](Cache-Architecture.md)
+- [Configuration Reference](Configuration-Reference.md)

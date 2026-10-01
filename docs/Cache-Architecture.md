@@ -1,11 +1,14 @@
-# Cache
+# Cache Architecture
+
+> [!NOTE]
+> Contributor documentation. Describes the cache design, not how to use it — see [Cache And Logs](Cache-And-Logs.md) for that.
 
 The cache is a **single overridable root** with independent, purpose-specific subtrees under it —
 one for installed tools/runtimes, one for the plugin-source registry, one for run journals. This
 document is the target design: one shared root, transient blob storage, per-target lock files, and
 index-driven garbage collection. Where today's behavior still diverges from it, a **Today:** note
 says so explicitly; everything else describes the design to build toward.
-[inconsistencies.md](./inconsistencies.md) tracks each divergence as a numbered, status-tagged item.
+[Decision-Log.md](Decision-Log.md) tracks each divergence as a numbered, status-tagged item.
 
 ## What gets cached, and why
 
@@ -30,7 +33,7 @@ the linter-level flag is parsed into the resolved configuration and then never c
 the command-level form is not part of the resolved shape at all, so it is silently dropped while
 parsing. This is a deliberate scope gap for the caching feature itself (simply not yet built), but
 the flag's own complete inertness — accepted and then ignored rather than rejected or surfaced as
-unsupported — is worth calling out on its own; see [inconsistencies.md](./inconsistencies.md).
+unsupported — is worth calling out on its own; see [Decision-Log.md](Decision-Log.md).
 
 ## On-disk layout (target)
 
@@ -80,7 +83,7 @@ verify-before-trust discipline as today) — but that location is a **temporary 
 once the artifact has been extracted/copied into its install location. Content hashing is kept for
 exactly what it's actually used for: verifying a single fetch as it happens, and (once built) as the
 value checked against the planned checksum ledger — see "Trust-on-first-use" in
-[inconsistencies.md](./inconsistencies.md), tracked as the `rtunk.lock` roadmap milestone.
+[Decision-Log.md](Decision-Log.md), tracked as the `rtunk.lock` roadmap milestone.
 
 ## Single cache root
 
@@ -97,7 +100,7 @@ the moment a custom cache root is supplied, that symmetry breaks — downloads l
 of it, but the plugin-source cache's own files land directly in the custom root itself, alongside
 (not inside a sibling of) the downloads subdirectory. This is exactly the kind of divergence the
 single, shared root-resolution above is meant to prevent by construction. Tracked in
-[inconsistencies.md](./inconsistencies.md).
+[Decision-Log.md](Decision-Log.md).
 
 **Today**, relatedly: the plugin-source registry is never swept by anything — there is no command
 whose scope reaches it at all. The target's unified `cache clean`/`cache prune` (below) close this by
@@ -125,7 +128,7 @@ same-runtime installs, treating a losing checkout-publish race as success) is sc
 process's own in-memory state; two entirely separate processes racing to populate the same cache
 entry are not coordinated at all beyond the atomic-publish guarantee each write already has on its
 own (which prevents corruption, not duplicated work). Tracked in
-[inconsistencies.md](./inconsistencies.md).
+[Decision-Log.md](Decision-Log.md).
 
 **Accepted limitation:** liveness is checked by process id alone, which has two known blind spots — a
 reused pid can make a genuinely stale lock look alive (an unrelated process now happens to hold that
@@ -213,3 +216,9 @@ age-based prune, which this design replaces rather than refines).
   build on that same single resolution, so there is exactly one authority for "where is the cache,"
   not one de facto authority (the download subsystem) with a documented gap (the plugin-source
   registry) beside it.
+
+## Where to go next
+
+- [Architecture](Architecture.md)
+- [Run Flows](Run-Flows.md)
+- [Decision Log](Decision-Log.md)

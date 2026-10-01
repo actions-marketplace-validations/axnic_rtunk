@@ -251,7 +251,7 @@ type Command struct {
 	// behavior, not linter-overlap suppression at all. The whole-linter suppression feature this
 	// field used to drive (internal/cli/check.go's now-removed suppressUpstreamEvents) was built on
 	// the wrong premise and has been retired rather than re-guessed a second time; see
-	// docs/architecture/inconsistencies.md.
+	// docs/Decision-Log.md.
 	DisableUpstream bool `yaml:"disable_upstream,omitempty"`
 	// IsSecurity tags every finding this command reports as security-related, so it can be
 	// filtered or displayed separately from an ordinary finding -- real catalog convention: set on
