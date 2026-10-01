@@ -240,7 +240,7 @@ repository file matched against the linter's `files:` criteria.
 
 - **`rtunk git-hooks sync|unsync`**: enable or disable the git hooks defined by actions (implemented;
   `install`, `uninstall` and the alias are removed, with no compat aliases).
-- **`rtunk init`**: initialize a repository that has neither `.trunk` nor `.rtunk`.
+- **`rtunk init`**: initialize rtunk: scaffolds `.rtunk/rtunk.yaml`, or migrates an existing `.trunk/` into `.rtunk/` and removes it. On a terminal it then runs the linters and actions pickers and downloads what is enabled; otherwise it prints the next commands. Then links `.rtunk/{logs,tools,plugins}`.
 - **`rtunk deinit`**: remove rtunk's configuration and installed artifacts (the inverse of `init`).
 - **`rtunk logs list [<file>...]`**, **`rtunk logs show <uid>|latest [<file>...]`**,
   **`rtunk logs clean`**: inspect and clean per-run logs. Implemented in

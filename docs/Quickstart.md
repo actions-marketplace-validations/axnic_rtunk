@@ -18,18 +18,22 @@ formatted YAML file.
 $ printf 'name:   test\nlist: [a,  b]\n' > example.yaml
 $ rtunk init
 initialized rtunk at /path/to/repo/.rtunk/rtunk.yaml
-next: rtunk linters enable <linter>, rtunk actions enable <action>, rtunk git-hooks sync
+next: rtunk linters enable, rtunk actions enable, rtunk download
 linked /path/to/repo/.rtunk
+then: rtunk git-hooks sync to install the git hooks of the enabled actions
 ```
 
-`init` creates `.rtunk/rtunk.yaml` with no linter enabled. It pins the
+On a terminal, `init` also opens the linters and actions pickers and downloads what you enabled
+(the `next:` line is for non-interactive use).
+
+Without a `.trunk/`, `init` creates `.rtunk/rtunk.yaml` with no linter enabled. It pins the
 [trunk plugins](https://github.com/trunk-io/plugins) repository as the source of linter
 definitions.
 
 > [!WARNING]
-> Coming from trunk? Do not run `init`. If `.trunk/trunk.yaml` exists, the new `.rtunk/rtunk.yaml`
-> takes precedence and `.trunk/trunk.yaml` stops being read. Run `rtunk check` directly instead; see
-> [Migrating from trunk](Migrating-From-Trunk.md).
+> Coming from trunk? If `.trunk/trunk.yaml` exists, `init` migrates it (and `configs/`,
+> `user_trunk.yaml`, `user.yaml`) to `.rtunk/` and removes `.trunk/`. To keep trunk's layout, skip
+> `init` and run `rtunk check` directly; see [Migrating from trunk](Migrating-From-Trunk.md).
 
 ## Enable a linter
 

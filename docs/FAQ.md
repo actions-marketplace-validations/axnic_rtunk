@@ -9,7 +9,7 @@ without any rewrite. See [Migrating from trunk](Migrating-From-Trunk.md) and
 ## What happens if both `.rtunk` and `.trunk` exist?
 
 `.rtunk/rtunk.yaml` wins and `.trunk/trunk.yaml` is not read; the two are never merged.
-`rtunk init` warns about this on stderr. See
+`rtunk init` avoids it by migrating `.trunk/` into `.rtunk/`. See
 [config file discovery](Configuration-Reference.md#config-file-discovery).
 
 ## Why did `check` not format my files?

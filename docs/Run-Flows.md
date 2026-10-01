@@ -254,9 +254,9 @@ sequenceDiagram
 
     User->>Init: init
     Init->>Disk: does this repository's own configuration already exist? (fail unless forced)
-    Init->>Disk: does an upstream-compatible configuration already exist here? (warn, don't fail — the new one now takes precedence)
-    Init->>Disk: write a minimal starting configuration
-    Init-->>User: "next: enable linters, enable actions, sync git hooks"
+    Init->>Disk: does an upstream-compatible configuration already exist here? (migrate it into .rtunk/ and remove .trunk/)
+    Init->>Disk: otherwise write a minimal starting configuration
+    Init-->>User: "next: enable linters, enable actions, download (interactive on a terminal), then sync git hooks"
 
     User->>Deinit: deinit
     Deinit->>Hooks: remove every hook this system installed

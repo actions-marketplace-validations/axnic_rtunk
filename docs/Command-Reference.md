@@ -416,8 +416,22 @@ rtunk git-hooks unsync
 
 ### `rtunk init`
 
-Initialize rtunk in this repository: writes the `.rtunk/rtunk.yaml` scaffold (see [Configuration
-Reference](Configuration-Reference.md#minimal-example)).
+Initialize rtunk in this repository. Without `.trunk/trunk.yaml`, writes the `.rtunk/rtunk.yaml`
+scaffold (see [Configuration Reference](Configuration-Reference.md#minimal-example)). With one, it
+migrates instead: `.trunk/trunk.yaml` moves to `.rtunk/rtunk.yaml` (content unchanged), as do
+`configs/`, `user_trunk.yaml` and `user.yaml` when present, printing `migrated .trunk/<x> ->
+.rtunk/<y>` for each; the rest of `.trunk/` (trunk's links into `~/.cache/trunk`, plugin checkouts,
+`.gitignore`) is then removed (`removed .trunk/`). `trunk.yaml` being tracked, git keeps the
+original.
+
+Then prints `initialized rtunk at <path>`. On a terminal (stdin and stdout), it runs the linters
+picker, the actions picker (as in `linters enable` / `actions enable`, with the `Enabled:` /
+`Disabled:` summary but no download hint), then `rtunk download` of everything enabled with the
+live install view; a download failure is only a warning, `check` and `fmt` retry later. Off a
+terminal it prints `next: rtunk linters enable, rtunk actions enable, rtunk download`. Finally it
+links `.rtunk/{logs,tools,plugins}` and prints `then: rtunk git-hooks sync to install the git hooks of
+the enabled actions`. The generated `.rtunk/.gitignore` ignores `logs`, `tools`, `plugins`,
+`user_trunk.yaml` and `user.yaml`.
 
 ```text
 rtunk init [flags]
@@ -425,12 +439,14 @@ rtunk init [flags]
 
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |
-| `--force` | flag | — | Overwrite an existing `.rtunk/rtunk.yaml`. |
+| `--force` | flag | — | Overwrite an existing `.rtunk/rtunk.yaml` (required when it exists; the scaffold or migration replaces it). |
 
 ```console
 $ rtunk init
 initialized rtunk at <repo>/.rtunk/rtunk.yaml
-next: rtunk linters enable <linter>, rtunk actions enable <action>, rtunk git-hooks sync
+next: rtunk linters enable, rtunk actions enable, rtunk download
+linked <repo>/.rtunk
+then: rtunk git-hooks sync to install the git hooks of the enabled actions
 ```
 
 ### `rtunk deinit`

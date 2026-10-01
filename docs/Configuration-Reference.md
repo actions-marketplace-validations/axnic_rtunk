@@ -28,9 +28,11 @@ order, `.rtunk/rtunk.yaml` then `.trunk/trunk.yaml`; the first match stops the s
 for the config path.
 
 When both `.rtunk/rtunk.yaml` and `.trunk/trunk.yaml` exist in the same directory, `.rtunk` wins and
-`.trunk` is not read at all: the two are never merged. `rtunk init` warns on stderr, but still
-succeeds, if it would write `.rtunk/rtunk.yaml` into a repository that already has a
-`.trunk/trunk.yaml`, since from that point on the new file shadows it.
+`.trunk` is not read at all: the two are never merged. `rtunk init` in a repository that has a
+`.trunk/trunk.yaml` avoids this by migrating it to `.rtunk/` and removing `.trunk/` (see
+[`rtunk init`](Command-Reference.md#rtunk-init)). Linters' config files (`direct_configs`) are
+looked up in `.rtunk/configs` first, then `.trunk/configs`, so a repository still on trunk keeps
+working.
 
 > [!NOTE]
 > `.rtunk/user.yaml` (a git-ignored local override) is a design goal, not shipped behavior.
