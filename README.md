@@ -1,10 +1,12 @@
-# rtunk
+<h1 align="center">rtunk</h1>
 
-**One command for your linters, formatters and security scanners. Open source, 100% local.**
+<p align="center"><strong>One command for your linters, formatters and security scanners. Open source, 100% local.</strong></p>
 
-[![Go version](https://img.shields.io/github/go-mod/go-version/xunleii/rtunk)](go.mod)
-[![License: MIT](https://img.shields.io/github/license/xunleii/rtunk)](LICENSE)
-[![Docs: wiki](https://img.shields.io/badge/docs-wiki-blue)](https://github.com/axnic/rtunk/wiki)
+<p align="center">
+<a href="go.mod"><img alt="Go version" src="https://img.shields.io/github/go-mod/go-version/xunleii/rtunk"></a>
+<a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/github/license/xunleii/rtunk"></a>
+<a href="https://github.com/axnic/rtunk/wiki"><img alt="Docs: wiki" src="https://img.shields.io/badge/docs-wiki-blue"></a>
+</p>
 
 rtunk is a from-scratch rewrite of [trunk.io's Code Quality
 CLI](https://docs.trunk.io/code-quality/overview): it orchestrates existing tools behind a single
@@ -12,7 +14,7 @@ declarative config.
 
 ```bash
 go install github.com/xunleii/rtunk/cmd/rtunk@latest   # needs Go on PATH; see Installation
-cd your-git-repo && rtunk init && rtunk linters enable yamllint
+cd your-git-repo && rtunk init   # on a terminal, pick yamllint in the linters picker
 rtunk check
 ```
 
@@ -35,8 +37,10 @@ Checked 2 files with 1 linter in 0.2s
 gate. It downloads each linter on first use, so that run takes longer.
 
 > [!NOTE]
-> Already use trunk? Skip `rtunk init`: it creates `.rtunk/rtunk.yaml`, which then takes precedence
-> over `.trunk/trunk.yaml`. Run `rtunk check` directly instead.
+> Already use trunk? Run `rtunk check` directly: rtunk reads your existing `.trunk/trunk.yaml`
+> (`rtunk init` migrates `.trunk/` into `.rtunk/` when you want to switch). It is not a drop-in
+> clone: plain `check` never runs formatters, Windows is not supported, and actions cannot trigger
+> on file changes or a schedule. See the [migration guide](https://github.com/axnic/rtunk/wiki/Migrating-From-Trunk).
 
 ## Why rtunk
 
@@ -51,19 +55,12 @@ the opacity: no telemetry, no cloud account, no daemon, no self-upgrade.
 | Linters, formatters, scanners | Runs the tools defined by the [trunk plugins](https://github.com/trunk-io/plugins) ecosystem: `rtunk check`, `rtunk fmt` |
 | trunk-compatible config | Reads `.trunk/trunk.yaml` as is, or `.rtunk/rtunk.yaml` |
 | Per-project tool versions | Linters are pinned in the config and downloaded on demand |
-| Git-aware | With no paths, `check` only looks at changed files |
+| Git-aware | With no paths, `check` only looks at [changed files](https://github.com/axnic/rtunk/wiki/Checking-Code#choose-which-files-to-check) |
 | Normalized output | One report format for every tool: `--format human`, `json` or `sarif` |
 | Autofix | `rtunk check --fix` applies linter fixes, then reports what remains |
 | Actions and git hooks | `rtunk actions`, `rtunk git-hooks sync` |
 | Renovate pins | `rtunk renovate enable` annotates version pins for Renovate |
 | Caching and logs | Downloads are cached; `rtunk logs` lists and shows past runs |
-
-## Coming from trunk?
-
-rtunk reads your existing `.trunk/trunk.yaml`. It is not a drop-in clone: plain `check` never runs
-formatters, Windows is not supported, and actions cannot trigger on file changes or a schedule. The
-[migration guide](https://github.com/axnic/rtunk/wiki/Migrating-From-Trunk) lists what carries
-over, what changes and why.
 
 ## Documentation
 

@@ -18,6 +18,21 @@ unstaged and untracked files that git does not ignore. The base depends on the r
 | In git, no upstream            | Changes since `HEAD`                                    |
 | Not in git                     | Nothing: rtunk exits with an error, pass explicit paths |
 
+Precisely, the default file set is the union of:
+
+- the files in `git diff <base>` against the working tree, so staged and unstaged changes alike
+  (added, modified and renamed; deleted files are never selected);
+- untracked files that `.gitignore` does not exclude.
+
+`<base>` is the merge base of the reference and `HEAD`: the reference is `--from` when given, else
+the branch's upstream (`@{upstream}`). With neither, `<base>` is `HEAD` itself, so everything since
+the last commit counts; in a repository with no commit yet, every file counts. A `--from` ref that
+cannot be resolved is an error. Symlinks are dropped from the selection (their target is selected
+under its own path).
+
+`rtunk fmt` uses the same selection, and additionally skips files with both staged and unstaged
+changes (see [Formatting Code](Formatting-Code.md#files-with-staged-and-unstaged-changes)).
+
 When nothing changed, rtunk says so and exits `0`:
 
 ```console
@@ -33,8 +48,11 @@ rtunk check .
 rtunk check scripts/run.sh
 ```
 
-In CI, a checkout is often a detached `HEAD` with no upstream, so the default base is not what you
-want. Force it with `--from`:
+Explicit paths bypass the diff: the file set is every file under them that git tracks or could
+track, whether or not it changed.
+
+In CI, a checkout is often a detached `HEAD` with no upstream, so the default base is `HEAD` and
+nothing is selected on a clean checkout. Force the base with `--from`:
 
 ```bash
 rtunk check --from origin/main

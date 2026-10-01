@@ -6,7 +6,8 @@ enable one linter, run the check, then fix or ignore what it finds. This page as
 the linter on first use).
 
 ```bash
-rtunk init && rtunk linters enable yamllint && rtunk check
+rtunk init   # pick yamllint in the picker; non-interactively: rtunk linters enable yamllint
+rtunk check
 ```
 
 ## Initialize rtunk in a repository

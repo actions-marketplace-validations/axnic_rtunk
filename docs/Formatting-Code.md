@@ -10,8 +10,8 @@ rtunk fmt
 
 Without arguments, `rtunk fmt` selects files the same way as
 [`rtunk check`](Checking-Code.md#choose-which-files-to-check): the files that differ from the
-upstream merge base (or from `HEAD` without an upstream), including untracked files. Pass paths to format specific files or directories, and `--from <ref>` to set the
-diff base.
+upstream merge base (or from `HEAD` without an upstream), including untracked files. Pass paths to
+format specific files or directories, and `--from <ref>` to set the diff base.
 
 ```console
 $ rtunk fmt
