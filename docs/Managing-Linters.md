@@ -100,7 +100,10 @@ This removes the linter from the configuration. Disabled linters no longer run i
 
 `enable` and `disable` edit only the base config file. To switch a linter off for yourself, or one
 that a [local override file](Configuration-Reference.md#local-override-files) enables, list it under
-`lint.disabled` in `.rtunk/rtunk.local.yaml`; it then stays off whichever file enables it.
+`lint.disabled` in `.rtunk/rtunk.local.yaml`; it then stays off whichever file enables it. `enable` and `disable` warn on stderr when an override
+decides otherwise (`warning: <id> stays disabled: <file> lists it under lint.disabled`, `warning: <id>
+stays enabled: <file> enables it ...`), and `linters list` marks such linters with `(from <file>)` or
+`(disabled by <file>)`.
 
 ## Inspect the resolved configuration
 

@@ -207,7 +207,7 @@ Enable one with: rtunk linters enable <id>
   repository file, or suggested by `suggest_if`). Groups are separated by a blank line. With
   `--all`, a third group `Other` (linters matching no file, and linters matching files that
   `suggest_if` does not suggest) replaces the parenthetical, which otherwise reads `(N other
-  linters — rtunk linters list --all)` (`linter` for N = 1).
+linters — rtunk linters list --all)` (`linter` for N = 1).
 - **Counts.** From every file of the repository (`git ls-files -co --exclude-standard` in git, a
   walk skipping `.git` otherwise), matched with the linter's `files:` criteria. The label is
   `N <type> files` for a linter with a single non-`ALL` file type (`2 go files`, `1 markdown
@@ -217,6 +217,9 @@ file`), else `N files`. Names are padded to align.
 - **`--format json`** prints `{"enabled": [...], "available": [...], "other": [...]}`, entries being
   `{id, version, files, description}`; `other` is only filled with `--all`, arrays are never
   `null`, and `files` is omitted for actions.
+- **Override notes.** A linter enabled or re-pinned by a local override file gets ` (from <file>)`
+  after its count, one kept off by `lint.disabled` ` (disabled by <file>)`; JSON items gain
+  `enabled_by` / `disabled_by`. The picker rows carry the same notes.
 - **Color.** Only on a terminal and without `NO_COLOR`: bold headers, green enabled marks, dimmed
   linters matching 0 files. Plain text when piped. No ASCII fallback.
 - **Interactive picker** (`linters enable` / `actions enable` without id). Full-screen on the

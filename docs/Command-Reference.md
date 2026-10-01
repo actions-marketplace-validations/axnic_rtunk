@@ -239,6 +239,12 @@ rtunk linters list [flags]
 | `--all`    | flag   | —       | Also show the `Other` group: linters matching no file, or not suggested by `suggest_if`. |
 | `--format` | string | `human` | Output format: `human` or `json`.                                                        |
 
+A linter enabled or re-pinned by a [local override
+file](Configuration-Reference.md#local-override-files) shows ` (from <file>)` after its file count
+(`✔ vet  2 go files (from user.yaml)`); one kept off by `lint.disabled` shows ` (disabled by <file>)`
+(`◯ mdlint  1 markdown file (disabled by rtunk.local.yaml)`). In `--format json`, items gain
+`enabled_by` and `disabled_by` (file name, omitted when empty).
+
 ```bash
 rtunk linters list --all
 ```
@@ -258,7 +264,9 @@ Arguments:
 
 Unknown ids are rejected with an error and a non-zero exit; the configuration is left unchanged.
 Only the base config file is edited: an id listed in `lint.disabled` of a [local override
-file](Configuration-Reference.md#local-override-files) stays off even once enabled here.
+file](Configuration-Reference.md#local-override-files) stays off even once enabled here, and
+`warning: <id> stays disabled: <file> lists it under lint.disabled` is printed on stderr. The
+download hint below is still printed for such an id.
 
 Afterwards prints `Enabled: <ids>` and/or `Disabled: <ids>` and, if anything was enabled, the hint
 `rtunk download lint <ids>`.
@@ -283,6 +291,10 @@ rtunk linters disable <id>...
 Arguments:
 
 - `<id>...`: linter id(s) to disable.
+
+Only the base config file is edited. If a [local override
+file](Configuration-Reference.md#local-override-files) still enables the id, stderr gets `warning:
+<id> stays enabled: <file> enables it (remove it there, or list it under lint.disabled)`.
 
 Only the global flags apply.
 

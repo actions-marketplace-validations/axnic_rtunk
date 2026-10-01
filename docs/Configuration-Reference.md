@@ -62,10 +62,18 @@ lint:                         lint:
 An override that cannot be parsed fails config loading with an error naming the file
 (`config: parse <path>/user.yaml: ...`); a missing one is skipped.
 
+`rtunk linters list` (and the picker rows) show where an override decides: ` (from user.yaml)` after
+the file count of a linter an override enables or re-pins, ` (disabled by <file>)` for a linter
+`lint.disabled` keeps off (the file listing it, base config included). Entries the shared config
+enables itself carry no note. `--format json` items gain `enabled_by` and `disabled_by` (file name,
+omitted when empty).
+
 > [!NOTE]
-> `rtunk linters enable|disable` and the pickers edit only the base config file. An id enabled only
-> by an override cannot be removed with `linters disable`: list it in `lint.disabled` instead. An id
-> listed in `lint.disabled` stays off even if `linters enable` adds it to the base file.
+> `rtunk linters enable|disable` and the pickers edit only the base config file, and warn on stderr
+> when an override still decides otherwise: `warning: <id> stays disabled: <file> lists it under
+lint.disabled` after enabling, `warning: <id> stays enabled: <file> enables it (remove it there, or
+list it under lint.disabled)` after disabling. An id enabled only by an override cannot be removed
+> with `linters disable`: list it in `lint.disabled` instead.
 
 ## Schema overview
 
