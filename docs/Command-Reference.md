@@ -4,38 +4,38 @@ Every command and flag the `rtunk` binary ships, with its arguments and defaults
 `rtunk help --all` and each `rtunk <command> --help` of the current build. For the reasoning behind
 the CLI's shape and its run semantics, see [CLI Design](CLI-Design.md).
 
-| Command | Purpose |
-| --- | --- |
-| [`rtunk check`](#rtunk-check) | Run enabled checks against source files (read-only). |
-| [`rtunk fmt`](#rtunk-fmt) | Run configured formatters against source files. |
-| [`rtunk run`](#rtunk-run) | Run an action (shortcut for `actions run`). |
-| [`rtunk download`](#rtunk-download) | Download enabled tools and runtimes ahead of time. |
-| [`rtunk config print`](#rtunk-config-print) | Print the fully resolved configuration. |
-| [`rtunk plugins print`](#rtunk-plugins-print) | Print everything available across all plugins. |
-| [`rtunk linters list`](#rtunk-linters-list) | List linters available for the current configuration. |
-| [`rtunk linters enable`](#rtunk-linters-enable) | Enable linters (interactive picker when no id is given). |
-| [`rtunk linters disable`](#rtunk-linters-disable) | Disable linters. |
-| [`rtunk actions list`](#rtunk-actions-list) | List actions available for the current configuration. |
-| [`rtunk actions enable`](#rtunk-actions-enable) | Enable actions (interactive picker when no id is given). |
-| [`rtunk actions disable`](#rtunk-actions-disable) | Disable actions. |
-| [`rtunk actions run`](#rtunk-actions-run) | Run an action on demand, or every action a git hook triggers. |
-| [`rtunk actions history`](#rtunk-actions-history) | Show recent action runs. |
-| [`rtunk git-hooks sync`](#rtunk-git-hooks-sync) | Install git hooks for enabled actions. |
-| [`rtunk git-hooks unsync`](#rtunk-git-hooks-unsync) | Remove rtunk-installed git hooks. |
-| [`rtunk init`](#rtunk-init) | Initialize rtunk in this repository. |
-| [`rtunk deinit`](#rtunk-deinit) | Remove rtunk's configuration and installed artifacts. |
-| [`rtunk cache clean`](#rtunk-cache-clean) | Remove the rtunk cache subtrees (downloads, plugins, logs, registry). |
-| [`rtunk cache prune`](#rtunk-cache-prune) | Remove cache entries no repository currently needs. |
-| [`rtunk logs list`](#rtunk-logs-list) | List this repository's recent runs. |
-| [`rtunk logs show`](#rtunk-logs-show) | Show one run's log. |
-| [`rtunk logs clean`](#rtunk-logs-clean) | Delete run logs. |
-| [`rtunk renovate enable`](#rtunk-renovate-enable) | Annotate `trunk.yaml`'s version pins for Renovate. |
-| [`rtunk renovate disable`](#rtunk-renovate-disable) | Remove the Renovate annotations. |
-| [`rtunk renovate config`](#rtunk-renovate-config) | Print the Renovate `regexManagers` config to add. |
-| [`rtunk toolbox download`](#rtunk-download) | Alias of `rtunk download`. |
-| [`rtunk toolbox where`](#rtunk-toolbox-where) | Print a cached item's install directory. |
-| [`rtunk toolbox exec`](#rtunk-toolbox-exec-alias-x) | Run a command from a runtime or tool. |
-| [`rtunk toolbox link`](#rtunk-toolbox-link) | Rebuild the `.rtunk/{logs,tools,plugins}` symlinks. |
+| Command                                             | Purpose                                                               |
+| --------------------------------------------------- | --------------------------------------------------------------------- |
+| [`rtunk check`](#rtunk-check)                       | Run enabled checks against source files (read-only).                  |
+| [`rtunk fmt`](#rtunk-fmt)                           | Run configured formatters against source files.                       |
+| [`rtunk run`](#rtunk-run)                           | Run an action (shortcut for `actions run`).                           |
+| [`rtunk download`](#rtunk-download)                 | Download enabled tools and runtimes ahead of time.                    |
+| [`rtunk config print`](#rtunk-config-print)         | Print the fully resolved configuration.                               |
+| [`rtunk plugins print`](#rtunk-plugins-print)       | Print everything available across all plugins.                        |
+| [`rtunk linters list`](#rtunk-linters-list)         | List linters available for the current configuration.                 |
+| [`rtunk linters enable`](#rtunk-linters-enable)     | Enable linters (interactive picker when no id is given).              |
+| [`rtunk linters disable`](#rtunk-linters-disable)   | Disable linters.                                                      |
+| [`rtunk actions list`](#rtunk-actions-list)         | List actions available for the current configuration.                 |
+| [`rtunk actions enable`](#rtunk-actions-enable)     | Enable actions (interactive picker when no id is given).              |
+| [`rtunk actions disable`](#rtunk-actions-disable)   | Disable actions.                                                      |
+| [`rtunk actions run`](#rtunk-actions-run)           | Run an action on demand, or every action a git hook triggers.         |
+| [`rtunk actions history`](#rtunk-actions-history)   | Show recent action runs.                                              |
+| [`rtunk git-hooks sync`](#rtunk-git-hooks-sync)     | Install git hooks for enabled actions.                                |
+| [`rtunk git-hooks unsync`](#rtunk-git-hooks-unsync) | Remove rtunk-installed git hooks.                                     |
+| [`rtunk init`](#rtunk-init)                         | Initialize rtunk in this repository.                                  |
+| [`rtunk deinit`](#rtunk-deinit)                     | Remove rtunk's configuration and installed artifacts.                 |
+| [`rtunk cache clean`](#rtunk-cache-clean)           | Remove the rtunk cache subtrees (downloads, plugins, logs, registry). |
+| [`rtunk cache prune`](#rtunk-cache-prune)           | Remove cache entries no repository currently needs.                   |
+| [`rtunk logs list`](#rtunk-logs-list)               | List this repository's recent runs.                                   |
+| [`rtunk logs show`](#rtunk-logs-show)               | Show one run's log.                                                   |
+| [`rtunk logs clean`](#rtunk-logs-clean)             | Delete run logs.                                                      |
+| [`rtunk renovate enable`](#rtunk-renovate-enable)   | Annotate `trunk.yaml`'s version pins for Renovate.                    |
+| [`rtunk renovate disable`](#rtunk-renovate-disable) | Remove the Renovate annotations.                                      |
+| [`rtunk renovate config`](#rtunk-renovate-config)   | Print the Renovate `regexManagers` config to add.                     |
+| [`rtunk toolbox download`](#rtunk-download)         | Alias of `rtunk download`.                                            |
+| [`rtunk toolbox where`](#rtunk-toolbox-where)       | Print a cached item's install directory.                              |
+| [`rtunk toolbox exec`](#rtunk-toolbox-exec-alias-x) | Run a command from a runtime or tool.                                 |
+| [`rtunk toolbox link`](#rtunk-toolbox-link)         | Rebuild the `.rtunk/{logs,tools,plugins}` symlinks.                   |
 
 Every command also accepts `-h`/`--help` for this same information at the terminal. Commands that
 are groups (`check`, `linters`, `actions`, `config`, `plugins`, `cache`, `git-hooks`, `logs`,
@@ -46,14 +46,14 @@ are groups (`check`, `linters`, `actions`, `config`, `plugins`, `cache`, `git-ho
 
 These apply to every command below; they are not repeated in each command's own table.
 
-| Flag | Type | Default | Description |
-| --- | --- | --- | --- |
-| `-h`, `--help` | flag | — | Show context-sensitive help. |
-| `--config` | string | nearest `.rtunk/rtunk.yaml` or `.trunk/trunk.yaml` | Path to trunk.yaml. |
-| `--cache-dir` | string | OS cache dir (`$RTUNK_CACHE_DIR`) | Plugin cache directory. |
-| `--version` | flag | — | Print rtunk's own version and exit. |
-| `--ci` | flag | — | Accepted for trunk compatibility; rtunk is always CI-safe, this has no effect. |
-| `-v`, `--verbose` | flag | — | Accepted for trunk compatibility; rtunk already prints this detail, this has no effect. |
+| Flag              | Type   | Default                                            | Description                                                                             |
+| ----------------- | ------ | -------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `-h`, `--help`    | flag   | —                                                  | Show context-sensitive help.                                                            |
+| `--config`        | string | nearest `.rtunk/rtunk.yaml` or `.trunk/trunk.yaml` | Path to trunk.yaml.                                                                     |
+| `--cache-dir`     | string | OS cache dir (`$RTUNK_CACHE_DIR`)                  | Plugin cache directory.                                                                 |
+| `--version`       | flag   | —                                                  | Print rtunk's own version and exit.                                                     |
+| `--ci`            | flag   | —                                                  | Accepted for trunk compatibility; rtunk is always CI-safe, this has no effect.          |
+| `-v`, `--verbose` | flag   | —                                                  | Accepted for trunk compatibility; rtunk already prints this detail, this has no effect. |
 
 Config-path and cache-directory precedence is detailed in [Configuration
 Reference](Configuration-Reference.md#override-precedence). A bare `rtunk` prints the help.
@@ -74,22 +74,22 @@ Arguments:
 
 - `<path>...`: paths to check (default: changed files, see `--from`).
 
-| Flag | Type | Default | Description |
-| --- | --- | --- | --- |
-| `--no-progress` | flag | — | Do not print the per-linter progress lines on stderr. |
-| `--ascii` | flag | — | Use ASCII glyphs in the live view. |
-| `--live-height` | int | half the terminal height, minimum 3 (`$RTUNK_LIVE_HEIGHT`) | Maximum height of the live view in lines. |
-| `--format` | string | `human` | Output format: `human`, `sarif` (for CI) or `json`. |
-| `--from` | string | — | Diff base for the default file selection (e.g. `origin/main`, for CI). |
-| `-j`, `--jobs` | int | number of CPUs | Number of parallel linter workers. |
-| `--format-before-check` | flag | — | Run every formatter, then check the reformatted files. |
-| `-y`, `--fix` | flag | — | Apply linter fixes (fix commands and finding-level autofixes) to what checking found, then report what remains. |
-| `--verify-stable` | flag | — | With `--format-before-check`, verify the formatting result is stable instead of a single pass. |
-| `--filter` | string | — | Comma-separated linter id allow-list, or `--filter=-id,-id...` deny-list (trunk compatibility). |
-| `--exclude` | string | — | Comma-separated linter id deny-list; shorthand for an inverse `--filter` (trunk compatibility). |
-| `--security-only` | flag | — | Run only commands tagged `is_security: true`, skipping every other check. |
-| `-n`, `--no-fix` | flag | — | Accepted for trunk compatibility; has no effect. `--fix` always wins if both are given. |
-| `--print-failures` | flag | — | Accepted for trunk compatibility; check already always prints failures, this has no effect. |
+| Flag                    | Type   | Default                                                    | Description                                                                                                     |
+| ----------------------- | ------ | ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `--no-progress`         | flag   | —                                                          | Do not print the per-linter progress lines on stderr.                                                           |
+| `--ascii`               | flag   | —                                                          | Use ASCII glyphs in the live view.                                                                              |
+| `--live-height`         | int    | half the terminal height, minimum 3 (`$RTUNK_LIVE_HEIGHT`) | Maximum height of the live view in lines.                                                                       |
+| `--format`              | string | `human`                                                    | Output format: `human`, `sarif` (for CI) or `json`.                                                             |
+| `--from`                | string | —                                                          | Diff base for the default file selection (e.g. `origin/main`, for CI).                                          |
+| `-j`, `--jobs`          | int    | number of CPUs                                             | Number of parallel linter workers.                                                                              |
+| `--format-before-check` | flag   | —                                                          | Run every formatter, then check the reformatted files.                                                          |
+| `-y`, `--fix`           | flag   | —                                                          | Apply linter fixes (fix commands and finding-level autofixes) to what checking found, then report what remains. |
+| `--verify-stable`       | flag   | —                                                          | With `--format-before-check`, verify the formatting result is stable instead of a single pass.                  |
+| `--filter`              | string | —                                                          | Comma-separated linter id allow-list, or `--filter=-id,-id...` deny-list (trunk compatibility).                 |
+| `--exclude`             | string | —                                                          | Comma-separated linter id deny-list; shorthand for an inverse `--filter` (trunk compatibility).                 |
+| `--security-only`       | flag   | —                                                          | Run only commands tagged `is_security: true`, skipping every other check.                                       |
+| `-n`, `--no-fix`        | flag   | —                                                          | Accepted for trunk compatibility; has no effect. `--fix` always wins if both are given.                         |
+| `--print-failures`      | flag   | —                                                          | Accepted for trunk compatibility; check already always prints failures, this has no effect.                     |
 
 ```bash
 rtunk check --from origin/main
@@ -107,20 +107,20 @@ Arguments:
 
 - `<path>...`: paths to format (default: changed files, see `--from`).
 
-| Flag | Type | Default | Description |
-| --- | --- | --- | --- |
-| `--no-progress` | flag | — | Do not print the per-linter progress lines on stderr. |
-| `--ascii` | flag | — | Use ASCII glyphs in the live view. |
-| `--live-height` | int | half the terminal height, minimum 3 (`$RTUNK_LIVE_HEIGHT`) | Maximum height of the live view in lines. |
-| `--format` | string | `human` | Output format: `human` or `json` (`sarif` is only supported by `check`). |
-| `--from` | string | — | Diff base for the default file selection (e.g. `origin/main`, for CI). |
-| `--force` | flag | — | Also format files with both staged and unstaged changes (skipped with a warning by default). |
-| `-j`, `--jobs` | int | number of CPUs | Number of parallel linter workers. |
-| `-n`, `--check` | flag | — | Report files that would be reformatted, without writing them. (alias: `--no-fix`) |
-| `--verify-stable` | flag | — | Verify the result is stable (write, dry-run check, write+check again if needed) instead of a single pass. |
-| `--filter` | string | — | Comma-separated linter id allow-list, or `--filter=-id,-id...` deny-list (trunk compatibility). |
-| `--exclude` | string | — | Comma-separated linter id deny-list; shorthand for an inverse `--filter` (trunk compatibility). |
-| `--print-failures` | flag | — | Accepted for trunk compatibility; fmt already always prints failures, this has no effect. |
+| Flag               | Type   | Default                                                    | Description                                                                                               |
+| ------------------ | ------ | ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `--no-progress`    | flag   | —                                                          | Do not print the per-linter progress lines on stderr.                                                     |
+| `--ascii`          | flag   | —                                                          | Use ASCII glyphs in the live view.                                                                        |
+| `--live-height`    | int    | half the terminal height, minimum 3 (`$RTUNK_LIVE_HEIGHT`) | Maximum height of the live view in lines.                                                                 |
+| `--format`         | string | `human`                                                    | Output format: `human` or `json` (`sarif` is only supported by `check`).                                  |
+| `--from`           | string | —                                                          | Diff base for the default file selection (e.g. `origin/main`, for CI).                                    |
+| `--force`          | flag   | —                                                          | Also format files with both staged and unstaged changes (skipped with a warning by default).              |
+| `-j`, `--jobs`     | int    | number of CPUs                                             | Number of parallel linter workers.                                                                        |
+| `-n`, `--check`    | flag   | —                                                          | Report files that would be reformatted, without writing them. (alias: `--no-fix`)                         |
+| `--verify-stable`  | flag   | —                                                          | Verify the result is stable (write, dry-run check, write+check again if needed) instead of a single pass. |
+| `--filter`         | string | —                                                          | Comma-separated linter id allow-list, or `--filter=-id,-id...` deny-list (trunk compatibility).           |
+| `--exclude`        | string | —                                                          | Comma-separated linter id deny-list; shorthand for an inverse `--filter` (trunk compatibility).           |
+| `--print-failures` | flag   | —                                                          | Accepted for trunk compatibility; fmt already always prints failures, this has no effect.                 |
 
 ```bash
 rtunk fmt --check
@@ -140,9 +140,9 @@ Arguments:
 - `<args>...`: `<action-id> [-- args...]` when `--hook` is not given; otherwise just the args to
   forward.
 
-| Flag | Type | Default | Description |
-| --- | --- | --- | --- |
-| `--hook` | string | — | Run every enabled action triggered by this git hook, instead of a single action by id. |
+| Flag     | Type   | Default | Description                                                                            |
+| -------- | ------ | ------- | -------------------------------------------------------------------------------------- |
+| `--hook` | string | —       | Run every enabled action triggered by this git hook, instead of a single action by id. |
 
 ```bash
 rtunk run <action-id>
@@ -196,9 +196,9 @@ Print the fully resolved configuration.
 rtunk config print [flags]
 ```
 
-| Flag | Type | Default | Description |
-| --- | --- | --- | --- |
-| `--output` | string | `yaml` | Output format: `yaml` or `json`. |
+| Flag       | Type   | Default | Description                      |
+| ---------- | ------ | ------- | -------------------------------- |
+| `--output` | string | `yaml`  | Output format: `yaml` or `json`. |
 
 ```bash
 rtunk config print --output json
@@ -213,9 +213,9 @@ registry dump. Replaces `config print --all`, which is removed.
 rtunk plugins print [flags]
 ```
 
-| Flag | Type | Default | Description |
-| --- | --- | --- | --- |
-| `--output` | string | `yaml` | Output format: `yaml` or `json`. |
+| Flag       | Type   | Default | Description                      |
+| ---------- | ------ | ------- | -------------------------------- |
+| `--output` | string | `yaml`  | Output format: `yaml` or `json`. |
 
 ```bash
 rtunk plugins print
@@ -234,10 +234,10 @@ List all linters available for the current configuration.
 rtunk linters list [flags]
 ```
 
-| Flag | Type | Default | Description |
-| --- | --- | --- | --- |
-| `--all` | flag | — | Also show the `Other` group: linters matching no file, or not suggested by `suggest_if`. |
-| `--format` | string | `human` | Output format: `human` or `json`. |
+| Flag       | Type   | Default | Description                                                                              |
+| ---------- | ------ | ------- | ---------------------------------------------------------------------------------------- |
+| `--all`    | flag   | —       | Also show the `Other` group: linters matching no file, or not suggested by `suggest_if`. |
+| `--format` | string | `human` | Output format: `human` or `json`.                                                        |
 
 ```bash
 rtunk linters list --all
@@ -257,6 +257,8 @@ Arguments:
 - `<id>...`: linter id(s) to enable, optionally `@version`. Omit for an interactive picker.
 
 Unknown ids are rejected with an error and a non-zero exit; the configuration is left unchanged.
+Only the base config file is edited: an id listed in `lint.disabled` of a [local override
+file](Configuration-Reference.md#local-override-files) stays off even once enabled here.
 
 Afterwards prints `Enabled: <ids>` and/or `Disabled: <ids>` and, if anything was enabled, the hint
 `rtunk download lint <ids>`.
@@ -296,8 +298,8 @@ List actions available for the current configuration.
 rtunk actions list [flags]
 ```
 
-| Flag | Type | Default | Description |
-| --- | --- | --- | --- |
+| Flag       | Type   | Default | Description                       |
+| ---------- | ------ | ------- | --------------------------------- |
 | `--format` | string | `human` | Output format: `human` or `json`. |
 
 ```bash
@@ -357,9 +359,9 @@ Arguments:
 - `<args>...`: `<action-id> [-- args...]` when `--hook` is not given; otherwise just the args to
   forward.
 
-| Flag | Type | Default | Description |
-| --- | --- | --- | --- |
-| `--hook` | string | — | Run every enabled action triggered by this git hook, instead of a single action by id. |
+| Flag     | Type   | Default | Description                                                                            |
+| -------- | ------ | ------- | -------------------------------------------------------------------------------------- |
+| `--hook` | string | —       | Run every enabled action triggered by this git hook, instead of a single action by id. |
 
 ```bash
 rtunk actions run <action-id>
@@ -373,10 +375,10 @@ Show recent action runs.
 rtunk actions history [flags]
 ```
 
-| Flag | Type | Default | Description |
-| --- | --- | --- | --- |
-| `--id` | string | — | Restrict to one action id. |
-| `--limit` | int | `20` | Maximum entries to show. (alias: `--count`) |
+| Flag      | Type   | Default | Description                                 |
+| --------- | ------ | ------- | ------------------------------------------- |
+| `--id`    | string | —       | Restrict to one action id.                  |
+| `--limit` | int    | `20`    | Maximum entries to show. (alias: `--count`) |
 
 ```bash
 rtunk actions history --id <action-id> --limit 5
@@ -390,9 +392,9 @@ Install git hooks for enabled actions. Idempotent: re-running it rewrites the sa
 rtunk git-hooks sync [flags]
 ```
 
-| Flag | Type | Default | Description |
-| --- | --- | --- | --- |
-| `--force` | flag | — | Overwrite an existing, non-rtunk hook file. |
+| Flag      | Type | Default | Description                                 |
+| --------- | ---- | ------- | ------------------------------------------- |
+| `--force` | flag | —       | Overwrite an existing, non-rtunk hook file. |
 
 ```bash
 rtunk git-hooks sync
@@ -431,15 +433,16 @@ live install view; a download failure is only a warning, `check` and `fmt` retry
 terminal it prints `next: rtunk linters enable, rtunk actions enable, rtunk download`. Finally it
 links `.rtunk/{logs,tools,plugins}` and prints `then: rtunk git-hooks sync to install the git hooks of
 the enabled actions`. The generated `.rtunk/.gitignore` ignores `logs`, `tools`, `plugins`,
-`user_trunk.yaml` and `user.yaml`.
+`user_trunk.yaml`, `user.yaml` and `rtunk.local.yaml` (the [local override
+files](Configuration-Reference.md#local-override-files)).
 
 ```text
 rtunk init [flags]
 ```
 
-| Flag | Type | Default | Description |
-| --- | --- | --- | --- |
-| `--force` | flag | — | Overwrite an existing `.rtunk/rtunk.yaml` (required when it exists; the scaffold or migration replaces it). |
+| Flag      | Type | Default | Description                                                                                                 |
+| --------- | ---- | ------- | ----------------------------------------------------------------------------------------------------------- |
+| `--force` | flag | —       | Overwrite an existing `.rtunk/rtunk.yaml` (required when it exists; the scaffold or migration replaces it). |
 
 ```console
 $ rtunk init
@@ -457,9 +460,9 @@ Remove rtunk's configuration and installed artifacts.
 rtunk deinit [flags]
 ```
 
-| Flag | Type | Default | Description |
-| --- | --- | --- | --- |
-| `-y`, `--yes` | flag | — | Accepted for trunk compatibility; deinit never prompts, this has no effect. |
+| Flag          | Type | Default | Description                                                                 |
+| ------------- | ---- | ------- | --------------------------------------------------------------------------- |
+| `-y`, `--yes` | flag | —       | Accepted for trunk compatibility; deinit never prompts, this has no effect. |
 
 ```bash
 rtunk deinit
@@ -527,9 +530,9 @@ Arguments:
 
 - `<run>`: run name (or a unique prefix of it) as printed by `logs list`, or `latest`.
 
-| Flag | Type | Default | Description |
-| --- | --- | --- | --- |
-| `--json` | flag | — | Print the raw JSONL instead of the text rendering. |
+| Flag     | Type | Default | Description                                        |
+| -------- | ---- | ------- | -------------------------------------------------- |
+| `--json` | flag | —       | Print the raw JSONL instead of the text rendering. |
 
 ```bash
 rtunk logs show latest
@@ -543,9 +546,9 @@ Delete this repository's run logs.
 rtunk logs clean [flags]
 ```
 
-| Flag | Type | Default | Description |
-| --- | --- | --- | --- |
-| `--all` | flag | — | Delete every repository's logs, not just this one's. |
+| Flag    | Type | Default | Description                                          |
+| ------- | ---- | ------- | ---------------------------------------------------- |
+| `--all` | flag | —       | Delete every repository's logs, not just this one's. |
 
 ```bash
 rtunk logs clean
@@ -639,9 +642,9 @@ Arguments:
 - `<id>`: resource id, optionally `@version`.
 - `<args>...`: command to run, then its arguments.
 
-| Flag | Type | Default | Description |
-| --- | --- | --- | --- |
-| `--interactive` | flag | — | Bind stdin and stdout to the terminal. |
+| Flag            | Type | Default | Description                            |
+| --------------- | ---- | ------- | -------------------------------------- |
+| `--interactive` | flag | —       | Bind stdin and stdout to the terminal. |
 
 ```bash
 rtunk toolbox x runtime python@3.14 -- python3 --version
@@ -650,7 +653,8 @@ rtunk toolbox x runtime python@3.14 -- python3 --version
 ### `rtunk toolbox link`
 
 (Re)build `.rtunk/logs`, `.rtunk/tools/<id>` and `.rtunk/plugins/<source-id>` as symlinks into
-rtunk's cache, plus a `.rtunk/.gitignore` covering them. The links give shells, editors and other
+rtunk's cache, plus a `.rtunk/.gitignore` covering them and the local override files (`user_trunk.yaml`, `user.yaml`,
+`rtunk.local.yaml`); missing entries are appended to an existing `.gitignore`, existing lines are kept. The links give shells, editors and other
 tooling a fixed local path to the logs, the resolved tool shims and the plugin checkouts. A link may
 dangle until something populates its target; a `local:` plugin source is not linked. See [Cache and
 Logs](Cache-And-Logs.md).

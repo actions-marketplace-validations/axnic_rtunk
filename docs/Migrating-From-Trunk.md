@@ -74,7 +74,7 @@ toward matching trunk on — all are shipped, current behavior. Full rationale f
 - **Migration impact**: a CI script or pre-commit hook that relies on `trunk check --fix`
   reformatting files needs `rtunk check --fix --format-before-check` instead, or two separate
   invocations (`rtunk fmt` then `rtunk check --fix`) — see [`rtunk
-  check`](Command-Reference.md#rtunk-check) for the full flag reference.
+check`](Command-Reference.md#rtunk-check) for the full flag reference.
 
 ### 3. Windows is not a supported host platform
 
@@ -119,7 +119,7 @@ toward matching trunk on — all are shipped, current behavior. Full rationale f
   Log](Decision-Log.md#18-file-change-and-schedule-action-triggers-are-refused-not-run)).
 - **Migration impact**: an action configuration that relies on either trigger kind needs an external
   scheduler (cron, a CI schedule trigger, a file-watcher wrapper) invoking `rtunk actions
-  run`/`rtunk check` instead — `rtunk` will not do the watching or waiting itself.
+run`/`rtunk check` instead — `rtunk` will not do the watching or waiting itself.
 
 ### 6. A failed action never raises a desktop notification
 
@@ -127,7 +127,7 @@ toward matching trunk on — all are shipped, current behavior. Full rationale f
   when its command exits non-zero.
 - **rtunk**: does not parse `notify_on_error` at all, and never raises a notification on action
   failure. The failure is still visible in the command's own output, its exit code, and `rtunk
-  logs`.
+logs`.
 - **Why**: maintaining a native OS notification integration (and its darwin/linux/windows backend
   differences) was judged not worth the ongoing surface for a CLI tool ([Decision
   Log](Decision-Log.md#19-desktop-notifications-on-action-failure-are-not-implemented)).
@@ -151,7 +151,9 @@ does not spend time re-verifying something that already matches.
 2. **Leave `.trunk/trunk.yaml` in place, or move it to `.rtunk/rtunk.yaml`.** Both work: `rtunk`
    reads `.trunk/trunk.yaml` when no `.rtunk/rtunk.yaml` exists. Renaming is optional and can happen
    later, at your own pace — see [Configuration
-   Reference](Configuration-Reference.md#config-file-discovery) for the exact discovery order.
+   Reference](Configuration-Reference.md#config-file-discovery) for the exact discovery order. trunk's
+   own `user_trunk.yaml` and `user.yaml` next to the config are read too, as [local override
+   files](Configuration-Reference.md#local-override-files).
 3. **Run `rtunk check` once and diff its findings against the last `trunk check` run.** This is the
    practical way to catch any of the six itemized divergences above in your actual configuration — a
    missing formatter finding under plain `check` (item 1), a Windows-only command that no longer

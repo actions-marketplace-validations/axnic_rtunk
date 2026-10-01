@@ -98,6 +98,10 @@ rtunk linters disable shfmt
 This removes the linter from the configuration. Disabled linters no longer run in
 [`rtunk check`](Checking-Code.md) or [`rtunk fmt`](Formatting-Code.md).
 
+`enable` and `disable` edit only the base config file. To switch a linter off for yourself, or one
+that a [local override file](Configuration-Reference.md#local-override-files) enables, list it under
+`lint.disabled` in `.rtunk/rtunk.local.yaml`; it then stays off whichever file enables it.
+
 ## Inspect the resolved configuration
 
 Two commands print YAML (or JSON with `--output json`):

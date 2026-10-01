@@ -32,9 +32,10 @@ rtunk exists to offer the same orchestration experience as an auditable, fully o
 
 - **Config-compatible where practical.** rtunk aims to understand `.trunk/trunk.yaml` and honor
   `trunk-ignore` inline directives, so a repository already using trunk can adopt rtunk with
-  minimal friction. rtunk's own native config lives at `.rtunk/rtunk.yaml` (a git-ignored
-  `.rtunk/user.yaml` local override is design intent, not yet implemented — see
-  [docs/Configuration-Reference.md](./docs/Configuration-Reference.md#config-file-discovery)), modeled closely on
+  minimal friction. rtunk's own native config lives at `.rtunk/rtunk.yaml` (optional git-ignored
+  local overrides `user_trunk.yaml`, `user.yaml` and `rtunk.local.yaml` next to it are merged over
+  it — see
+  [docs/Configuration-Reference.md](./docs/Configuration-Reference.md#local-override-files)), modeled closely on
   trunk's schema and semantics but not a literal copy of trunk's branding or documentation text.
 - **Consumes the community plugin ecosystem.** The part of trunk that is genuinely open and
   well-maintained is [trunk-io/plugins](https://github.com/trunk-io/plugins) — the YAML

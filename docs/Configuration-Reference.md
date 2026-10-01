@@ -4,15 +4,16 @@ Every key `rtunk` reads from its config file (native and trunk-compatible), the 
 discovery rules, and every override with its precedence. Verified against the key definitions in
 `pkg/trunk/config`, not transcribed from prose.
 
-| Section | Purpose |
-| --- | --- |
-| [Config file discovery](#config-file-discovery) | Which file `rtunk` reads, and in what order. |
-| [Schema overview](#schema-overview) | Every top-level key, with type and default. |
-| [`plugins.sources`](#pluginssources) | Where linter, tool, runtime and action definitions come from. |
-| [`actions.disabled`](#actionsdisabled) | A record of turned-off actions; suppresses nothing by itself. |
-| [Examples](#minimal-example) | The `rtunk init` scaffold and a fully populated file. |
-| [Override precedence](#override-precedence) | Config path, cache directory and environment variables. |
-| [Inspecting the resolved configuration](#inspecting-the-resolved-configuration) | `config print` and `plugins print`. |
+| Section                                                                         | Purpose                                                                    |
+| ------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| [Config file discovery](#config-file-discovery)                                 | Which file `rtunk` reads, and in what order.                               |
+| [Local override files](#local-override-files)                                   | `user_trunk.yaml`, `user.yaml`, `rtunk.local.yaml` merged over the config. |
+| [Schema overview](#schema-overview)                                             | Every top-level key, with type and default.                                |
+| [`plugins.sources`](#pluginssources)                                            | Where linter, tool, runtime and action definitions come from.              |
+| [`actions.disabled`](#actionsdisabled)                                          | A record of turned-off actions; suppresses nothing by itself.              |
+| [Examples](#minimal-example)                                                    | The `rtunk init` scaffold and a fully populated file.                      |
+| [Override precedence](#override-precedence)                                     | Config path, cache directory and environment variables.                    |
+| [Inspecting the resolved configuration](#inspecting-the-resolved-configuration) | `config print` and `plugins print`.                                        |
 
 This page covers the config file itself: the keys a repository writes into `.rtunk/rtunk.yaml` or
 `.trunk/trunk.yaml`. For what a plugin repository contributes (linters, tools, runtimes, actions and
@@ -34,24 +35,53 @@ When both `.rtunk/rtunk.yaml` and `.trunk/trunk.yaml` exist in the same director
 looked up in `.rtunk/configs` first, then `.trunk/configs`, so a repository still on trunk keeps
 working.
 
+## Local override files
+
+Next to the config file that is loaded (`.rtunk/rtunk.yaml`, or `.trunk/trunk.yaml` for a repository
+still on trunk), rtunk also reads, in this order, `user_trunk.yaml`, `user.yaml` (trunk's own names)
+and `rtunk.local.yaml`. Each is optional and uses the same schema as the config; they are merged
+over it, the last one winning. They are meant for per-developer settings and stay untracked:
+`.rtunk/.gitignore` (written by `rtunk init` and `rtunk toolbox link`) lists all three.
+
+| Key                                                   | Merge rule                                                                                                                                                                             |
+| ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `version`, `cli.version`                              | A non-empty override value replaces the base's.                                                                                                                                        |
+| `plugins.sources`                                     | Merged by `id`: the override's source replaces the same id, a new id is added.                                                                                                         |
+| `lint.enabled`, `runtimes.enabled`, `actions.enabled` | Lists add up, one entry per bare id (the part before `@`). An id already present keeps its position but takes the later entry, so an override can re-pin a version (`yamllint@1.0.0`). |
+| `lint.disabled`                                       | Removes these linters from the effective enabled list, whichever file enabled them. Lists from several files are concatenated.                                                         |
+| `actions.disabled`                                    | Lists from several files are concatenated (the key has no other effect, see [`actions.disabled`](#actionsdisabled)).                                                                   |
+
+```yaml
+# .rtunk/rtunk.yaml           # .rtunk/rtunk.local.yaml
+lint:                         lint:
+  enabled: [gofmt, yamllint]    enabled: [shellcheck]
+                                disabled: [yamllint]
+# effective lint.enabled: gofmt, shellcheck
+```
+
+An override that cannot be parsed fails config loading with an error naming the file
+(`config: parse <path>/user.yaml: ...`); a missing one is skipped.
+
 > [!NOTE]
-> `.rtunk/user.yaml` (a git-ignored local override) is a design goal, not shipped behavior.
-> Discovery only ever checks the two paths above, and nothing reads or merges a `user.yaml`.
+> `rtunk linters enable|disable` and the pickers edit only the base config file. An id enabled only
+> by an override cannot be removed with `linters disable`: list it in `lint.disabled` instead. An id
+> listed in `lint.disabled` stays off even if `linters enable` adds it to the base file.
 
 ## Schema overview
 
 A config file has six top-level sections. A missing section decodes to its zero value, but a
 `version` line is what every real-world config and `rtunk init`'s own scaffold write in practice.
 
-| Key | Type | Default | Meaning |
-| --- | --- | --- | --- |
-| `version` | string | `""` | Schema version marker. Parsed and stored, not otherwise validated or acted on. |
-| `cli.version` | string | `""` | Trunk CLI version marker, kept for trunk compatibility. Parsed and stored, not otherwise validated or acted on. |
-| `plugins.sources` | list of source | `[]` | Plugin repositories to merge linter, tool, runtime and action definitions from. |
-| `runtimes.enabled` | list of string | `[]` | Runtime ids (optionally `id@version`) to activate. |
-| `lint.enabled` | list of string | `[]` | Linter ids (optionally `id@version`) to activate. |
-| `actions.enabled` | list of string | `[]` | Action ids (optionally `id@version`) to activate. |
-| `actions.disabled` | list of string | `[]` | Action ids `rtunk actions disable` records as turned off. See [below](#actionsdisabled). |
+| Key                | Type           | Default | Meaning                                                                                                                                            |
+| ------------------ | -------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `version`          | string         | `""`    | Schema version marker. Parsed and stored, not otherwise validated or acted on.                                                                     |
+| `cli.version`      | string         | `""`    | Trunk CLI version marker, kept for trunk compatibility. Parsed and stored, not otherwise validated or acted on.                                    |
+| `plugins.sources`  | list of source | `[]`    | Plugin repositories to merge linter, tool, runtime and action definitions from.                                                                    |
+| `runtimes.enabled` | list of string | `[]`    | Runtime ids (optionally `id@version`) to activate.                                                                                                 |
+| `lint.enabled`     | list of string | `[]`    | Linter ids (optionally `id@version`) to activate.                                                                                                  |
+| `lint.disabled`    | list of string | `[]`    | Linter ids to switch off, any `@version` ignored; removes them from the effective enabled list. See [Local override files](#local-override-files). |
+| `actions.enabled`  | list of string | `[]`    | Action ids (optionally `id@version`) to activate.                                                                                                  |
+| `actions.disabled` | list of string | `[]`    | Action ids `rtunk actions disable` records as turned off. See [below](#actionsdisabled).                                                           |
 
 An `enabled:` entry is either a bare id (`golangci-lint2`) or `id@version` (`golangci-lint2@2.13.2`)
 to pin which version of that id's downloads get resolved; the `@version` suffix is stripped before
@@ -67,12 +97,12 @@ Each entry is either a **git source** (`id`, `uri`, `ref`) or a **local source**
 mutually exclusive. An entry with neither `local:` nor `uri:` set fails to resolve with `plugin
 source "<id>": neither local nor uri is set`.
 
-| Field | Applies to | Required | Meaning |
-| --- | --- | --- | --- |
-| `id` | both | yes | Source identifier, referenced nowhere else in the config file but used to key caching and error messages. |
-| `uri` | git source | yes | Git remote URL, cloned via the system `git` binary (`init`/`fetch --depth 1`/`checkout`). |
-| `ref` | git source | yes in practice | Tag or commit SHA to fetch, passed directly to `git fetch origin <ref>`; an empty value fails the fetch. Never a branch. |
-| `local` | local source | yes | Filesystem path to the plugin repository, resolved relative to the config file's own directory. Must already exist: unlike a git source, a missing local path is a hard error (`plugin source "<id>": local path <path> does not exist`), never fetched. |
+| Field   | Applies to   | Required        | Meaning                                                                                                                                                                                                                                                  |
+| ------- | ------------ | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`    | both         | yes             | Source identifier, referenced nowhere else in the config file but used to key caching and error messages.                                                                                                                                                |
+| `uri`   | git source   | yes             | Git remote URL, cloned via the system `git` binary (`init`/`fetch --depth 1`/`checkout`).                                                                                                                                                                |
+| `ref`   | git source   | yes in practice | Tag or commit SHA to fetch, passed directly to `git fetch origin <ref>`; an empty value fails the fetch. Never a branch.                                                                                                                                 |
+| `local` | local source | yes             | Filesystem path to the plugin repository, resolved relative to the config file's own directory. Must already exist: unlike a git source, a missing local path is a hard error (`plugin source "<id>": local path <path> does not exist`), never fetched. |
 
 A git source's parsed definitions (not its raw checkout) are cached under the resolved cache
 directory, keyed by `uri`+`ref`, so a pinned ref is fetched from the network only once. See [Cache
@@ -147,6 +177,8 @@ actions:
 
 There is no environment variable for the config path.
 
+The file found is then layered with its [local override files](#local-override-files).
+
 ### Cache directory
 
 1. `--cache-dir <path>`: explicit flag value.
@@ -171,11 +203,11 @@ Architecture](Cache-Architecture.md).
 Beyond `RTUNK_CACHE_DIR`, `rtunk` reads a handful of environment variables that affect output
 rendering rather than configuration resolution:
 
-| Variable | Effect |
-| --- | --- |
-| `RTUNK_LIVE_HEIGHT` | Maximum height of the live view, in lines. Same option as `--live-height`; see [`rtunk check`](Command-Reference.md#rtunk-check). |
-| `NO_COLOR` | Any value disables ANSI color in output. See `--ascii` and `--no-progress` in [`rtunk check`](Command-Reference.md#rtunk-check) for related output-shaping flags. |
-| `TERM` | `TERM=dumb` disables the live terminal view; output falls back to plain progress lines. |
+| Variable                     | Effect                                                                                                                                                                          |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `RTUNK_LIVE_HEIGHT`          | Maximum height of the live view, in lines. Same option as `--live-height`; see [`rtunk check`](Command-Reference.md#rtunk-check).                                               |
+| `NO_COLOR`                   | Any value disables ANSI color in output. See `--ascii` and `--no-progress` in [`rtunk check`](Command-Reference.md#rtunk-check) for related output-shaping flags.               |
+| `TERM`                       | `TERM=dumb` disables the live terminal view; output falls back to plain progress lines.                                                                                         |
 | `LC_ALL`, `LC_CTYPE`, `LANG` | Checked in that order; the first non-empty one that doesn't contain `utf-8` or `utf8` triggers the ASCII glyph fallback in the live view, the same effect as passing `--ascii`. |
 
 None of these has a config-file equivalent: they are read directly from the process environment, not
