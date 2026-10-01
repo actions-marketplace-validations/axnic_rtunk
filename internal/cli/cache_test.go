@@ -29,12 +29,32 @@ func TestCacheClean(t *testing.T) {
 	unrelated := filepath.Join(cacheDir, "unrelated-file.txt")
 	require.NoError(t, os.WriteFile(unrelated, nil, 0o644))
 
-	_, stderr, err := run2(t, "--config", trunkYAML, "--cache-dir", cacheDir, "cache", "clean")
+	stdout, stderr, err := run2(t, "--config", trunkYAML, "--cache-dir", cacheDir, "cache", "clean")
 	require.NoError(t, err, "stderr: %s", stderr)
+	assert.Equal(t, "removed downloads (0 B)\nremoved plugins (0 B)\nremoved logs (0 B)\n", stdout)
 	assert.NoDirExists(t, root)
 	assert.NoDirExists(t, filepath.Join(sharedRoot, "plugins"))
 	assert.NoDirExists(t, filepath.Join(sharedRoot, "logs"))
 	assert.FileExists(t, unrelated)
+
+	stdout, _, err = run2(t, "--config", trunkYAML, "--cache-dir", cacheDir, "cache", "clean")
+	require.NoError(t, err)
+	assert.Equal(t, "The cache is already empty.\n", stdout)
+}
+
+func TestCleanModel_RowsTurnIntoChecks(t *testing.T) {
+	dir := t.TempDir()
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "f"), make([]byte, 2048), 0o644))
+	rows := []*cleanRow{{name: "downloads", path: dir}}
+	m := newCleanModel(rows)
+	assert.Contains(t, m.View().Content, " downloads\n", "spinner while removing")
+
+	size, err := removeMeasured(dir)
+	_, cmd := m.Update(cleanDoneMsg{row: rows[0], size: size, err: err})
+	assert.NotNil(t, cmd, "last row done: quit")
+	assert.Contains(t, m.View().Content, "✔")
+	assert.Contains(t, m.View().Content, "downloads  2.0 KB freed")
+	assert.NoDirExists(t, dir)
 }
 
 func TestCachePrune_DropsEntryForGoneRepo(t *testing.T) {
