@@ -8,6 +8,9 @@ type actionsEnableCmd struct {
 
 func (c *actionsEnableCmd) Run(cli *CLI) error {
 	if len(c.ID) > 0 {
+		if err := rejectUnknownIDs(cli, "action", c.ID); err != nil {
+			return err
+		}
 		return editActionsEnabled(cli, c.ID, true)
 	}
 	return interactiveActionsEnable(cli)

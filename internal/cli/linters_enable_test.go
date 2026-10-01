@@ -22,49 +22,49 @@ func TestLintersEnableCmd_NoID_NonTerminal_ErrorsInsteadOfHanging(t *testing.T) 
 }
 
 func TestLintersEnableCmd_AddsAndPreservesComments(t *testing.T) {
-	path := writeScratchTrunkYAML(t, "version: \"0.1\"\n# a leading comment, must survive\nlint:\n  enabled: []\n")
+	path := writeScratchWithPlugins(t, "version: \"0.1\"\n# a leading comment, must survive\nlint:\n  enabled: []\n")
 
-	_, stderr, err := run2(t, "--config", path, "linters", "enable", "shellcheck")
+	_, stderr, err := run2(t, "--config", path, "linters", "enable", "actionlint")
 	require.NoError(t, err, "stderr: %s", stderr)
 
 	got, err := os.ReadFile(path)
 	require.NoError(t, err)
 	assert.Contains(t, string(got), "# a leading comment, must survive")
-	assert.Contains(t, string(got), "shellcheck")
+	assert.Contains(t, string(got), "actionlint")
 }
 
 func TestLintersEnableCmd_Idempotent(t *testing.T) {
-	path := writeScratchTrunkYAML(t, "version: \"0.1\"\nlint:\n  enabled: [shellcheck]\n")
+	path := writeScratchWithPlugins(t, "version: \"0.1\"\nlint:\n  enabled: [actionlint]\n")
 
-	_, stderr, err := run2(t, "--config", path, "linters", "enable", "shellcheck")
+	_, stderr, err := run2(t, "--config", path, "linters", "enable", "actionlint")
 	require.NoError(t, err, "stderr: %s", stderr)
 
 	got, err := os.ReadFile(path)
 	require.NoError(t, err)
-	assert.Equal(t, 1, strings.Count(string(got), "shellcheck"))
+	assert.Equal(t, 1, strings.Count(string(got), "actionlint"))
 }
 
 func TestLintersEnableCmd_VersionPinReplacesOldPin(t *testing.T) {
-	path := writeScratchTrunkYAML(t, "version: \"0.1\"\nlint:\n  enabled: [shellcheck@1.0.0]\n")
+	path := writeScratchWithPlugins(t, "version: \"0.1\"\nlint:\n  enabled: [actionlint@1.0.0]\n")
 
-	_, stderr, err := run2(t, "--config", path, "linters", "enable", "shellcheck@2.0.0")
+	_, stderr, err := run2(t, "--config", path, "linters", "enable", "actionlint@2.0.0")
 	require.NoError(t, err, "stderr: %s", stderr)
 
 	got, err := os.ReadFile(path)
 	require.NoError(t, err)
-	assert.Contains(t, string(got), "shellcheck@2.0.0")
-	assert.NotContains(t, string(got), "shellcheck@1.0.0")
+	assert.Contains(t, string(got), "actionlint@2.0.0")
+	assert.NotContains(t, string(got), "actionlint@1.0.0")
 }
 
 func TestLintersEnableCmd_NoLintKeyAtAll(t *testing.T) {
-	path := writeScratchTrunkYAML(t, "version: \"0.1\"\n")
+	path := writeScratchWithPlugins(t, "version: \"0.1\"\n")
 
-	_, stderr, err := run2(t, "--config", path, "linters", "enable", "shellcheck")
+	_, stderr, err := run2(t, "--config", path, "linters", "enable", "actionlint")
 	require.NoError(t, err, "stderr: %s", stderr)
 
 	got, err := os.ReadFile(path)
 	require.NoError(t, err)
-	assert.Contains(t, string(got), "shellcheck")
+	assert.Contains(t, string(got), "actionlint")
 }
 
 // TestLintersEnableCmd_LintKeyWithNoValue guards against a real silent data-loss bug: a
@@ -73,14 +73,14 @@ func TestLintersEnableCmd_NoLintKeyAtAll(t *testing.T) {
 // silently ignored by the yaml.v3 encoder, so without coercing the node back to a MappingNode
 // first, the whole edit vanished on write and the command still reported success.
 func TestLintersEnableCmd_LintKeyWithNoValue(t *testing.T) {
-	path := writeScratchTrunkYAML(t, "version: \"0.1\"\nlint:\n")
+	path := writeScratchWithPlugins(t, "version: \"0.1\"\nlint:\n")
 
-	_, stderr, err := run2(t, "--config", path, "linters", "enable", "shellcheck")
+	_, stderr, err := run2(t, "--config", path, "linters", "enable", "actionlint")
 	require.NoError(t, err, "stderr: %s", stderr)
 
 	got, err := os.ReadFile(path)
 	require.NoError(t, err)
-	assert.Contains(t, string(got), "shellcheck")
+	assert.Contains(t, string(got), "actionlint")
 	assert.Contains(t, string(got), "enabled")
 }
 
@@ -89,30 +89,30 @@ func TestLintersEnableCmd_LintKeyWithNoValue(t *testing.T) {
 // the 2-space indent trunk.yaml's real-world convention (and this repo's own .trunk/trunk.yaml)
 // actually uses -- untouched keys must keep their original indentation exactly.
 func TestLintersEnableCmd_PreservesSourceIndentWidth(t *testing.T) {
-	path := writeScratchTrunkYAML(t, "version: \"0.1\"\nruntimes:\n  enabled:\n    - node@22.18.0\nlint:\n  enabled:\n    - prettier\n")
+	path := writeScratchWithPlugins(t, "version: \"0.1\"\nruntimes:\n  enabled:\n    - node@22.18.0\nlint:\n  enabled:\n    - prettier\n")
 
-	_, stderr, err := run2(t, "--config", path, "linters", "enable", "shellcheck")
+	_, stderr, err := run2(t, "--config", path, "linters", "enable", "actionlint")
 	require.NoError(t, err, "stderr: %s", stderr)
 
 	got, err := os.ReadFile(path)
 	require.NoError(t, err)
 	assert.Contains(t, string(got), "runtimes:\n  enabled:\n    - node@22.18.0\n")
-	assert.Contains(t, string(got), "shellcheck")
+	assert.Contains(t, string(got), "actionlint")
 }
 
 func TestLintersEnableCmd_NoAnnotations_BehaviorUnchanged(t *testing.T) {
 	// Same fixture/assertion as TestLintersEnableCmd_AddsAndPreservesComments -- no # renovate:
 	// comment anywhere means the new annotation-aware branch in editEnabled must never trigger.
 	// This is this plan's own proof the fix is genuinely opt-in.
-	path := writeScratchTrunkYAML(t, "version: \"0.1\"\n# a leading comment, must survive\nlint:\n  enabled: []\n")
+	path := writeScratchWithPlugins(t, "version: \"0.1\"\n# a leading comment, must survive\nlint:\n  enabled: []\n")
 
-	_, stderr, err := run2(t, "--config", path, "linters", "enable", "shellcheck")
+	_, stderr, err := run2(t, "--config", path, "linters", "enable", "actionlint")
 	require.NoError(t, err, "stderr: %s", stderr)
 
 	got, err := os.ReadFile(path)
 	require.NoError(t, err)
 	assert.Contains(t, string(got), "# a leading comment, must survive")
-	assert.Contains(t, string(got), "shellcheck")
+	assert.Contains(t, string(got), "actionlint")
 	assert.NotContains(t, string(got), "# renovate:")
 }
 
@@ -124,8 +124,8 @@ func TestLintersEnableCmd_AnnotatedSurvivor_KeepsExactComment(t *testing.T) {
 	require.NoError(t, err)
 	require.Contains(t, string(before), "# renovate: datasource=github-releases depName=acme/widget")
 
-	// An unrelated enable of a second, unresolvable id must not disturb fixture's own comment.
-	_, stderr, err = run2(t, "--config", cfgPath, "linters", "enable", "unrelated")
+	// A re-enable of the same pin must not disturb fixture's own comment.
+	_, stderr, err = run2(t, "--config", cfgPath, "linters", "enable", "fixture@1.0.0")
 	require.NoError(t, err, "stderr: %s", stderr)
 
 	after, err := os.ReadFile(cfgPath)
@@ -201,34 +201,45 @@ lint:
 	assert.Contains(t, string(got), "# renovate: datasource=github-releases depName=other/second\n    - second@4.5.6\n")
 }
 
-func TestLintersEnableCmd_UnresolvableNewEntryInAnnotatedCategory_NoCommentNoForcedPin(t *testing.T) {
-	cfgPath, _ := writeToolLinterFixture(t, []string{"fixture"})
-	_, stderr, err := run2(t, "--config", cfgPath, "renovate", "enable")
-	require.NoError(t, err, "stderr: %s", stderr)
-
-	_, stderr, err = run2(t, "--config", cfgPath, "linters", "enable", "phantom")
-	require.NoError(t, err, "stderr: %s", stderr)
-
-	got, err := os.ReadFile(cfgPath)
+// writeScratchWithPlugins is writeScratchTrunkYAML with the fixture plugin repo (defines
+// actionlint, commitlint, ...) wired in as a plugin source; content must start with the
+// `version: "0.1"` line.
+func writeScratchWithPlugins(t *testing.T, content string) string {
+	t.Helper()
+	abs, err := filepath.Abs("../../pkg/trunk/config/testdata/pluginrepo")
 	require.NoError(t, err)
-	assert.Contains(t, string(got), "phantom\n")
-	assert.NotContains(t, string(got), "phantom@")
-	// phantom itself must get no annotation of its own. Note this can't be a whole-file
-	// NotContains(got, "depName=") check: "fixture" is itself resolvable, so the "renovate
-	// annotate" step above already wrote its own "depName=acme/widget" survivor comment into the
-	// file, which TestLintersEnableCmd_AnnotatedSurvivor_KeepsExactComment requires editEnabled to
-	// preserve -- so "depName=" legitimately appears elsewhere in the file. Only phantom's own
-	// line is asserted comment-free here.
-	lines := strings.Split(string(got), "\n")
-	found := false
-	for i, line := range lines {
-		if strings.TrimSpace(line) == "- phantom" {
-			found = true
-			if i > 0 {
-				assert.NotContains(t, lines[i-1], "# renovate:", "phantom must not get its own renovate annotation")
-			}
-			break
-		}
+	const head = "version: \"0.1\"\n"
+	require.True(t, strings.HasPrefix(content, head))
+	path := writeScratchTrunkYAML(t, content)
+	rel, err := filepath.Rel(filepath.Dir(path), abs) // local: paths resolve relative to the config
+	require.NoError(t, err)
+	require.NoError(t, os.WriteFile(path, []byte(head+"plugins:\n  sources:\n    - id: trunk\n      local: "+rel+"\n"+strings.TrimPrefix(content, head)), 0o644))
+	return path
+}
+
+// Unknown ids (no plugin defines them) must be rejected naming the id, with the config untouched --
+// including the name part of a name@version, and when mixed with a valid id.
+func TestLintersEnableCmd_UnknownID_Rejected(t *testing.T) {
+	for _, args := range [][]string{{"nope"}, {"nope@1.2.3"}, {"actionlint", "nope"}} {
+		path := writeScratchWithPlugins(t, "version: \"0.1\"\nlint:\n  enabled: []\n")
+		before, err := os.ReadFile(path)
+		require.NoError(t, err)
+
+		_, _, err = run2(t, append([]string{"--config", path, "linters", "enable"}, args...)...)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "nope")
+		assert.NotContains(t, err.Error(), "nope@")
+		assert.Contains(t, err.Error(), "linters list")
+
+		after, err := os.ReadFile(path)
+		require.NoError(t, err)
+		assert.Equal(t, string(before), string(after))
 	}
-	assert.True(t, found, "phantom entry not found in output")
+}
+
+// A defined linter that is already enabled is not "unknown".
+func TestLintersEnableCmd_DefinedAndAlreadyEnabled_OK(t *testing.T) {
+	path := writeScratchWithPlugins(t, "version: \"0.1\"\nlint:\n  enabled: [actionlint]\n")
+	_, stderr, err := run2(t, "--config", path, "linters", "enable", "actionlint@1.0.0")
+	require.NoError(t, err, "stderr: %s", stderr)
 }

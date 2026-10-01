@@ -220,6 +220,8 @@ Arguments:
 
 - `<id>...`: linter id(s) to enable, optionally `@version`. Omit for an interactive picker.
 
+Unknown ids are rejected with an error and a non-zero exit; the configuration is left unchanged.
+
 Only the global flags apply.
 
 ```bash
@@ -271,6 +273,8 @@ rtunk actions enable [<id>...]
 Arguments:
 
 - `<id>...`: action id(s) to enable. Omit for an interactive picker.
+
+Unknown ids are rejected with an error and a non-zero exit; the configuration is left unchanged.
 
 Only the global flags apply.
 

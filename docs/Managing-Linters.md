@@ -59,9 +59,10 @@ Without ids, `rtunk linters enable` opens an interactive picker over the availab
 picker needs a terminal; without one the command stops with `interactive mode requires a terminal;
 pass explicit id(s) instead`.
 
-> [!WARNING]
-> `enable` does not check that the id exists: `rtunk linters enable nope` writes `nope` into
-> `lint.enabled` without an error. Check the result with `rtunk linters list`.
+> [!NOTE]
+> `enable` rejects ids no plugin defines (the part before any `@version`): `rtunk linters enable nope`
+> exits non-zero with `unknown linter id(s): nope`, and the configuration is left unchanged. Run
+> `rtunk linters list --all` to see the available ids.
 
 ## Disable linters
 

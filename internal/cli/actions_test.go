@@ -29,8 +29,23 @@ func TestActionsEnableCmd_NoID_NonTerminal_ErrorsInsteadOfHanging(t *testing.T) 
 	assert.Contains(t, err.Error(), "terminal")
 }
 
+func TestActionsEnableCmd_UnknownID_Rejected(t *testing.T) {
+	path := writeScratchWithPlugins(t, "version: \"0.1\"\nactions:\n  enabled: []\n  disabled: []\n")
+	before, err := os.ReadFile(path)
+	require.NoError(t, err)
+
+	_, _, err = run2(t, "--config", path, "actions", "enable", "nope")
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "nope")
+	assert.Contains(t, err.Error(), "actions list")
+
+	after, err := os.ReadFile(path)
+	require.NoError(t, err)
+	assert.Equal(t, string(before), string(after))
+}
+
 func TestActionsEnableCmd_AddsToEnabledAndRemovesFromDisabled(t *testing.T) {
-	path := writeScratchTrunkYAML(t, "version: \"0.1\"\nactions:\n  enabled: []\n  disabled: [commitlint]\n")
+	path := writeScratchWithPlugins(t, "version: \"0.1\"\nactions:\n  enabled: []\n  disabled: [commitlint]\n")
 	_, stderr, err := run2(t, "--config", path, "actions", "enable", "commitlint")
 	require.NoError(t, err, "stderr: %s", stderr)
 
