@@ -23,6 +23,8 @@ checksum:
   name_template: checksums.txt
 snapshot:
   version_template: "{{ .Tag }}-SNAPSHOT"
+# Only used when goreleaser runs standalone: the Release workflow passes its own notes with
+# --release-notes (see scripts/generate-release-notes.mjs), which replaces this changelog.
 changelog:
   use: github
 release:
