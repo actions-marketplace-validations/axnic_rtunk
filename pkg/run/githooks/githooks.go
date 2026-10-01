@@ -15,7 +15,11 @@ import (
 // marker identifies a hook file as rtunk's own -- present verbatim in every shim Install writes,
 // checked by both a re-run of Install (skip-unless-force logic) and Uninstall (never remove a
 // foreign hook).
-const marker = "# Installed by rtunk git-hooks install -- do not edit by hand."
+const marker = "# Installed by rtunk git-hooks sync -- do not edit by hand."
+
+// legacyMarkers are earlier marker texts (before install/uninstall were renamed sync/unsync) that
+// still identify a hook as rtunk's own, so already-written hooks aren't mistaken for foreign ones.
+var legacyMarkers = []string{"# Installed by rtunk git-hooks install -- do not edit by hand."}
 
 // Install writes a shim script into each git hook name referenced by any of cfg's currently
 // enabled actions' git_hooks triggers. An existing hook file that isn't rtunk's own (missing
@@ -49,7 +53,7 @@ func Install(repoRoot string, cfg config.Config, force bool) (installed, skipped
 			skipped = append(skipped, name)
 			continue
 		}
-		script := "#!/bin/sh\n" + marker + "\n# Run `rtunk git-hooks uninstall` to remove.\n" +
+		script := "#!/bin/sh\n" + marker + "\n# Run `rtunk git-hooks unsync` to remove.\n" +
 			fmt.Sprintf("exec %s actions run --hook %s -- \"$@\"\n", self, name)
 		//nolint:gosec // git only runs a hook that is executable
 		if err := os.WriteFile(path, []byte(script), 0o755); err != nil {
@@ -120,7 +124,12 @@ func isForeignHook(path string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	return !strings.Contains(string(data), marker), nil
+	for _, m := range append([]string{marker}, legacyMarkers...) {
+		if strings.Contains(string(data), m) {
+			return false, nil
+		}
+	}
+	return true, nil
 }
 
 // hookNamesFor computes the git hook name set to install: every distinct Trigger.GitHooks value

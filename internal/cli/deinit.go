@@ -11,7 +11,7 @@ import (
 )
 
 // deinitCmd is `rtunk deinit`: ROADMAP.md v0.7, reversing `rtunk init` -- removes .rtunk/ and any
-// git hooks `rtunk git-hooks install` (a separate, already-shipped command any real init'd repo
+// git hooks `rtunk git-hooks sync` (a separate, already-shipped command any real init'd repo
 // would have run) could have added, since "reversing init" means undoing everything rtunk itself
 // could have set up, not just the config file alone. Yes is accepted for trunk compatibility and
 // has no effect: rtunk's deinit never prompts (an established non-goal since v0.7's own design),

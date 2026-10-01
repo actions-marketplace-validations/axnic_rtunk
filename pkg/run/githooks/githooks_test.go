@@ -45,7 +45,9 @@ func TestInstall_WritesOneShimPerReferencedHook(t *testing.T) {
 	data, err := os.ReadFile(filepath.Join(repo, ".git", "hooks", "pre-commit"))
 	require.NoError(t, err)
 	assert.Contains(t, string(data), self+" actions run --hook pre-commit", "shim must exec the running binary's absolute path, not a bare `rtunk` that a minimal PATH (GUI git clients) can't resolve")
-	assert.Contains(t, string(data), "Installed by rtunk git-hooks install")
+	assert.Contains(t, string(data), "Installed by rtunk git-hooks sync")
+	assert.Contains(t, string(data), "`rtunk git-hooks unsync`")
+	assert.NotContains(t, string(data), "git-hooks install")
 }
 
 func TestInstall_SkipsForeignHookWithoutForce(t *testing.T) {
@@ -106,4 +108,31 @@ func TestUninstall_RemovesOnlyRtunkHooks(t *testing.T) {
 	assert.ElementsMatch(t, []string{"commit-msg", "pre-commit"}, removed)
 	assert.NoFileExists(t, filepath.Join(hooksDir, "pre-commit"))
 	assert.FileExists(t, filepath.Join(hooksDir, "post-checkout"), "a foreign hook must survive uninstall")
+}
+
+const legacyHook = "#!/bin/sh\n# Installed by rtunk git-hooks install -- do not edit by hand.\n# Run `rtunk git-hooks uninstall` to remove.\nexec rtunk actions run --hook pre-commit -- \"$@\"\n"
+
+func TestInstall_LegacyMarkerHookIsNotForeign(t *testing.T) {
+	repo := initRepo(t)
+	hook := filepath.Join(repo, ".git", "hooks", "pre-commit")
+	require.NoError(t, os.WriteFile(hook, []byte(legacyHook), 0o755))
+
+	installed, skipped, err := githooks.Install(repo, testConfig(), false)
+	require.NoError(t, err)
+	assert.ElementsMatch(t, []string{"commit-msg", "pre-commit"}, installed)
+	assert.Empty(t, skipped)
+	data, err := os.ReadFile(hook)
+	require.NoError(t, err)
+	assert.Contains(t, string(data), "git-hooks sync", "legacy hook must be rewritten with the new text")
+}
+
+func TestUninstall_RemovesLegacyMarkerHook(t *testing.T) {
+	repo := initRepo(t)
+	hook := filepath.Join(repo, ".git", "hooks", "pre-commit")
+	require.NoError(t, os.WriteFile(hook, []byte(legacyHook), 0o755))
+
+	removed, err := githooks.Uninstall(repo)
+	require.NoError(t, err)
+	assert.Equal(t, []string{"pre-commit"}, removed)
+	assert.NoFileExists(t, hook)
 }
