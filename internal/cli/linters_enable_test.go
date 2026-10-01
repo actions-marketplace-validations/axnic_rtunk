@@ -243,3 +243,46 @@ func TestLintersEnableCmd_DefinedAndAlreadyEnabled_OK(t *testing.T) {
 	_, stderr, err := run2(t, "--config", path, "linters", "enable", "actionlint@1.0.0")
 	require.NoError(t, err, "stderr: %s", stderr)
 }
+
+// TestLintersEnableCmd_GoInstalledTool_KeepsExtractVersion: a tool installed through the go
+// runtime is annotated with extractVersion (go module versions are "v"-prefixed, a pin is not);
+// rewriting the enabled list must keep that part of the comment, not just datasource and depName.
+func TestLintersEnableCmd_GoInstalledTool_KeepsExtractVersion(t *testing.T) {
+	cfgPath, repoRoot := writeToolLinterFixture(t, []string{"fixture@0.5.0"})
+	require.NoError(t, os.WriteFile(filepath.Join(repoRoot, "pluginrepo", "linters", "fixture", "plugin.yaml"), []byte(`runtimes:
+  definitions:
+    - type: go
+      known_good_version: 1.2.0
+      system_version: allowed
+tools:
+  definitions:
+    - name: fixture
+      runtime: go
+      package: github.com/acme/fixture
+      known_good_version: 0.5.0
+lint:
+  definitions:
+    - name: fixture
+      files: [ALL]
+      tools: [fixture]
+      description: go-installed fixture linter
+      commands:
+        - name: lint
+          run: echo unused
+          output: xml
+`), 0o644))
+
+	_, stderr, err := run2(t, "--config", cfgPath, "renovate", "enable")
+	require.NoError(t, err, "stderr: %s", stderr)
+	const comment = "# renovate: datasource=go depName=github.com/acme/fixture extractVersion=^v(?<version>.+)$\n    - fixture@0.5.0\n"
+	before, err := os.ReadFile(cfgPath)
+	require.NoError(t, err)
+	require.Contains(t, string(before), comment)
+
+	// Re-enabling the same pin rewrites the list; the comment must come back whole.
+	_, stderr, err = run2(t, "--config", cfgPath, "linters", "enable", "fixture@0.5.0")
+	require.NoError(t, err, "stderr: %s", stderr)
+	after, err := os.ReadFile(cfgPath)
+	require.NoError(t, err)
+	assert.Contains(t, string(after), comment)
+}

@@ -80,10 +80,10 @@ func editEnabled(cli *CLI, category string, edit func([]string) []string) error 
 				if !pinned {
 					if knownGoodVersion != "" {
 						node.Value = bareID + "@" + knownGoodVersion
-						node.HeadComment = "# renovate: datasource=" + ann.Datasource + " depName=" + ann.DepName
+						node.HeadComment = ann.Comment()
 					}
 				} else {
-					node.HeadComment = "# renovate: datasource=" + ann.Datasource + " depName=" + ann.DepName
+					node.HeadComment = ann.Comment()
 				}
 			}
 		}
