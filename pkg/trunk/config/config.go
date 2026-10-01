@@ -57,4 +57,10 @@ type LintConfig struct {
 	CategoryConfig[Linter] `yaml:",inline"`
 	CommentFormats         []CommentFormat     `yaml:"comment_formats,omitempty"`
 	Files                  map[string]FileType `yaml:"files,omitempty"`
+
+	// EnabledFrom and DisabledFrom say which file is behind a linter's state, keyed by bare id:
+	// the override file that set its enabled entry (entries only the base file sets are left
+	// out), and the file -- base included -- whose lint.disabled lists it. Not printed.
+	EnabledFrom  map[string]string `yaml:"-" json:"-"`
+	DisabledFrom map[string]string `yaml:"-" json:"-"`
 }

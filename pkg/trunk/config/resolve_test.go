@@ -245,3 +245,18 @@ func TestResolve_InvalidOverrideReportsItsOwnPath(t *testing.T) {
 	require.ErrorAs(t, err, &parseErr)
 	assert.Equal(t, filepath.Join(filepath.Dir(path), "user.yaml"), parseErr.Path)
 }
+
+func TestResolve_OverrideProvenance(t *testing.T) {
+	path := writeConfigDir(t, map[string]string{
+		"trunk.yaml":       "lint:\n  enabled: [gofmt, yamllint]\n  disabled: [old]\n",
+		"user.yaml":        "lint:\n  enabled: [shfmt, gofmt@2.0.0]\n",
+		"rtunk.local.yaml": "lint:\n  disabled: [yamllint@1.0.0]\n",
+	})
+
+	cfg, err := config.ResolveAll(path, t.TempDir())
+	require.NoError(t, err)
+	assert.Equal(t, map[string]string{"shfmt": "user.yaml", "gofmt": "user.yaml"}, cfg.Lint.EnabledFrom,
+		"only entries an override set; the base file's own are left out")
+	assert.Equal(t, map[string]string{"old": "trunk.yaml", "yamllint": "rtunk.local.yaml"}, cfg.Lint.DisabledFrom,
+		"disabling is attributed to any file, base included, by bare id")
+}

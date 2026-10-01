@@ -688,3 +688,45 @@ func TestFmt_DefaultSelectionStagedOnly_SkipsPartiallyStaged(t *testing.T) {
 	require.NoError(t, err, stderr)
 	assert.Equal(t, "formatted\n", read("partial.txt"))
 }
+
+// overrideFixture is listFixture plus a user.yaml next to the config: it enables vet and
+// disables mdlint (which the shared config enables).
+func overrideFixture(t *testing.T) (cfgPath string) {
+	t.Helper()
+	cfgPath = listFixture(t, true)
+	require.NoError(t, os.WriteFile(filepath.Join(filepath.Dir(cfgPath), "user.yaml"),
+		[]byte("lint:\n  enabled: [vet]\n  disabled: [mdlint]\n"), 0o644))
+	return cfgPath
+}
+
+func TestLintersList_ShowsWhereOverridesDecide(t *testing.T) {
+	cfgPath := overrideFixture(t)
+
+	stdout, stderr, err := run2(t, "--config", cfgPath, "linters", "list")
+	require.NoError(t, err, "stderr: %s", stderr)
+	assert.Contains(t, stdout, "vet", "enabled by the override")
+	assert.Contains(t, stdout, "2 go files (from user.yaml)")
+	assert.Contains(t, stdout, "1 markdown file (disabled by user.yaml)")
+	assert.NotContains(t, stdout, "gofmt@1.2.3  2 go files (from", "the shared config's own entries carry no note")
+
+	stdout, _, err = run2(t, "--config", cfgPath, "linters", "list", "--format", "json")
+	require.NoError(t, err)
+	assert.Contains(t, stdout, `"enabled_by": "user.yaml"`)
+	assert.Contains(t, stdout, `"disabled_by": "user.yaml"`)
+}
+
+func TestLintersEnableDisable_WarnWhenAnOverrideDecidesOtherwise(t *testing.T) {
+	cfgPath := overrideFixture(t)
+
+	_, stderr, err := run2(t, "--config", cfgPath, "linters", "enable", "mdlint")
+	require.NoError(t, err)
+	assert.Contains(t, stderr, "warning: mdlint stays disabled: user.yaml lists it under lint.disabled")
+
+	_, stderr, err = run2(t, "--config", cfgPath, "linters", "disable", "vet")
+	require.NoError(t, err)
+	assert.Contains(t, stderr, "warning: vet stays enabled: user.yaml enables it")
+
+	_, stderr, err = run2(t, "--config", cfgPath, "linters", "disable", "gofmt")
+	require.NoError(t, err)
+	assert.Empty(t, stderr, "no override involved: no warning")
+}

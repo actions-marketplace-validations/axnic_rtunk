@@ -68,7 +68,7 @@ func (c *initCmd) Run(cli *CLI, stdout io.Writer, stderr Stderr) error {
 
 	sub := &CLI{Config: configPath, CacheDir: cli.CacheDir}
 	if f, ok := stdout.(*os.File); ok && isTerminal(f) && stdinIsTerminal() {
-		if _, err := interactiveLintersEnable(sub, stdout); err != nil {
+		if _, err := interactiveLintersEnable(sub, stdout, stderr); err != nil {
 			return err
 		}
 		if err := interactiveActionsEnable(sub); err != nil {

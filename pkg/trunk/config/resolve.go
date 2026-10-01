@@ -37,6 +37,8 @@ type trunkFile struct {
 		Enabled  []string `yaml:"enabled"`
 		Disabled []string `yaml:"disabled"`
 	} `yaml:"actions"`
+
+	enabledFrom, disabledFrom map[string]string // see LintConfig; filled by readLayered
 }
 
 // pluginFile is the raw shape of one plugin.yaml: any mix of the section kinds below
@@ -109,6 +111,7 @@ func resolveMerged(file, cacheDir string) (cfg Config, err error) {
 	cfg.CLI.Version = tf.CLI.Version
 	cfg.Runtimes.Enabled = tf.Runtimes.Enabled
 	cfg.Lint.Enabled = tf.Lint.Enabled
+	cfg.Lint.EnabledFrom, cfg.Lint.DisabledFrom = tf.enabledFrom, tf.disabledFrom
 	cfg.Actions.Enabled = tf.Actions.Enabled
 	cfg.Actions.Disabled = tf.Actions.Disabled
 
@@ -165,6 +168,13 @@ func readLayered(path string) (trunkFile, error) {
 	if err != nil {
 		return tf, err
 	}
+	tf.enabledFrom, tf.disabledFrom = map[string]string{}, map[string]string{}
+	noteDisabled := func(f trunkFile, name string) {
+		for _, e := range f.Lint.Disabled {
+			tf.disabledFrom[bareID(e)] = name
+		}
+	}
+	noteDisabled(tf, filepath.Base(path))
 	for _, name := range overrideFiles {
 		over, err := readTrunkFile(filepath.Join(filepath.Dir(path), name))
 		if errors.Is(err, os.ErrNotExist) {
@@ -173,15 +183,24 @@ func readLayered(path string) (trunkFile, error) {
 		if err != nil {
 			return tf, err
 		}
+		for _, e := range over.Lint.Enabled {
+			tf.enabledFrom[bareID(e)] = name
+		}
+		noteDisabled(over, name)
 		tf.merge(over)
 	}
 	off := enabledIDs(tf.Lint.Disabled)
 	tf.Lint.Enabled = slices.DeleteFunc(tf.Lint.Enabled, func(e string) bool {
-		id, _, _ := strings.Cut(e, "@")
-		_, disabled := off[id]
+		_, disabled := off[bareID(e)]
 		return disabled
 	})
 	return tf, nil
+}
+
+// bareID is an enabled entry without its "@version" pin.
+func bareID(entry string) string {
+	id, _, _ := strings.Cut(entry, "@")
+	return id
 }
 
 // merge applies an override file: its scalars replace the base's when set, its plugin sources
@@ -207,8 +226,7 @@ func (tf *trunkFile) merge(o trunkFile) {
 // in base keeps its position but takes the later entry, so an override can re-pin a version.
 func mergeEnabled(base, extra []string) []string {
 	for _, e := range extra {
-		id, _, _ := strings.Cut(e, "@")
-		i := slices.IndexFunc(base, func(b string) bool { bid, _, _ := strings.Cut(b, "@"); return bid == id })
+		i := slices.IndexFunc(base, func(b string) bool { return bareID(b) == bareID(e) })
 		if i >= 0 {
 			base[i] = e
 		} else {

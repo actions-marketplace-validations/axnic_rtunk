@@ -430,8 +430,12 @@ type listItem struct {
 	Version     string `json:"version"`
 	Files       *int   `json:"files,omitempty"`
 	Description string `json:"description"`
-	label       string // human text after the name: "2 go files", or the action's description
-	section     string // interactiveChecklist group header, set by flattenListing
+	// EnabledBy is the local override file that enabled (or re-pinned) the linter, DisabledBy
+	// the file whose lint.disabled keeps it off; neither is set for the shared config's own.
+	EnabledBy  string `json:"enabled_by,omitempty"`
+	DisabledBy string `json:"disabled_by,omitempty"`
+	label      string // human text after the name: "2 go files", or the action's description
+	section    string // interactiveChecklist group header, set by flattenListing
 }
 
 // unused reports a linter matching no file here, shown dimmed.
@@ -560,8 +564,16 @@ func buildLintersList(cfg config.Config, repoRoot string, files []string) listin
 		item := listItem{ID: name, Files: &n, Description: linter.Description, label: countLabel(n, linter.Files)}
 		if version, ok := pinned[name]; ok {
 			item.Version = version
+			if item.EnabledBy = cfg.Lint.EnabledFrom[name]; item.EnabledBy != "" {
+				item.label += " (from " + item.EnabledBy + ")"
+			}
 			l.Enabled = append(l.Enabled, item)
-		} else if suggested(linter, n, present) {
+			continue
+		}
+		if item.DisabledBy = cfg.Lint.DisabledFrom[name]; item.DisabledBy != "" {
+			item.label += " (disabled by " + item.DisabledBy + ")"
+		}
+		if suggested(linter, n, present) {
 			l.Available = append(l.Available, item)
 		} else {
 			l.Other = append(l.Other, item)
