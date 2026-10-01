@@ -10,6 +10,9 @@ import (
 type Download struct {
 	Name    string `yaml:"name"`
 	Version string `yaml:"version"`
+	// Executable marks every entry as a raw executable (not an archive); a per-entry
+	// Executable is OR-ed with it. Real catalog example: shfmt declares it here, once.
+	Executable bool `yaml:"executable,omitempty"`
 	// Args declares extra template variables derived from ${version} (or ${os}/${cpu}) via a
 	// regex, for a URL to reference alongside the built-in vars -- real catalog example: taplo's
 	// own recipe strips a release-tag prefix trunk's real GitHub tags carry (e.g.

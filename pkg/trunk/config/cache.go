@@ -43,11 +43,12 @@ type sourceDefs struct {
 // class of bug hit three times already (ParseRegex, Linter.SourceDir, Download.Args). Bumped again
 // for Command.Target: with a stale cache every command decodes an empty Target, so golangci-lint2
 // kept running on single files (bogus "undefined:" errors) even after target: ${parent} was
-// supported.
+// supported. Bumped again for Download.Executable: a stale cache decodes every recipe-level
+// `executable: true` (shfmt) as false, so raw-binary downloads kept failing as archives.
 // loadSourceCache rejects a version mismatch as a decode failure; fetchGitSource already treats
 // any decode failure as "drop and regenerate" (see git.go), so this one check is the whole fix --
 // no new code path.
-const cacheSchemaVersion = 5
+const cacheSchemaVersion = 6
 
 // cacheEnvelope is what actually lives on disk: sourceDefs plus the schema version it was written
 // under.

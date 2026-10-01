@@ -805,3 +805,35 @@ func TestPending_DedupesRuntimeAndSkipsInstalled(t *testing.T) {
 	require.NoError(t, os.WriteFile(filepath.Join(download.InstallDir(root, "tools", "c", "1"), "f"), nil, 0o644))
 	assert.Len(t, download.Pending(cfg, root, refs...), 3, "an installed tool is not pending")
 }
+
+// TestDownload_RawBinary_RecipeLevelExecutable pins shfmt's shape: `executable: true` sits on the
+// recipe (not on each downloads[] entry) and the URL is an extension-less raw binary whose
+// dotted version ("shfmt_v3.13.1_linux_amd64") must not be mistaken for a file extension.
+func TestDownload_RawBinary_RecipeLevelExecutable(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write([]byte("#!/bin/sh\necho ran-shfmt\n"))
+	}))
+	defer srv.Close()
+
+	cfg := config.Config{
+		Downloads: map[string]config.Download{
+			"shfmt": {Name: "shfmt", Executable: true, Downloads: []config.DownloadEntry{{
+				OS:  config.OSSpec{"linux": "linux", "macos": "darwin", "windows": "windows"},
+				CPU: config.OSSpec{"x86_64": "amd64", "arm_64": "arm64"},
+				URL: srv.URL + "/shfmt_v${version}_${os}_${cpu}",
+			}}},
+		},
+		Tools: map[string]config.Tool{
+			"shfmt": {Name: "shfmt", Download: "shfmt", KnownGoodVersion: "3.13.1", Shims: []string{"shfmt"}},
+		},
+	}
+
+	events, err := download.Download(cfg, t.TempDir(), "/repo", download.Ref{Category: "tools", ID: "shfmt"})
+	require.NoError(t, err)
+	var done bool
+	for ev := range events {
+		require.NoError(t, ev.Err, "event: %+v", ev)
+		done = done || ev.Phase == download.Done
+	}
+	assert.True(t, done)
+}

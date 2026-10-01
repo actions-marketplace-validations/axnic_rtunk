@@ -60,9 +60,9 @@ func TestLoadSourceCache_RejectsPreVersioningCacheFile(t *testing.T) {
 	assert.Error(t, err, "a pre-versioning flat sourceDefs file must decode to Version 0, which never matches a real cacheSchemaVersion")
 }
 
-func TestCacheSchemaVersion_Is5(t *testing.T) {
+func TestCacheSchemaVersion_Is6(t *testing.T) {
 	// Regression pin: Command.Target is a new field (after Action.Environment/... before it) an
 	// already-cached git plugin source's JSON would silently decode as their zero values without
 	// this bump -- see cache.go's own comment for the three prior times this exact bug was hit.
-	assert.Equal(t, 5, cacheSchemaVersion)
+	assert.Equal(t, 6, cacheSchemaVersion)
 }

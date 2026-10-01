@@ -76,8 +76,8 @@ func InstallDownload(blobPath, url, destDir string, entry config.DownloadEntry, 
 	// An extension-less (or .exe) URL is a bare binary even when the recipe forgets
 	// `executable: true` (osv-scanner_darwin_arm64 ships that way).
 	if ext := filepath.Ext(name); entry.Executable || ext == "" || ext == ".exe" {
-		if !entry.Executable && singleFileName != "" {
-			name = singleFileName // the shim looks for the recipe's name, not "osv-scanner_darwin_arm64"
+		if singleFileName != "" {
+			name = singleFileName // the shim looks for the recipe's name, not "shfmt_v3.13.1_darwin_arm64"
 		}
 		if err := copyFile(blobPath, filepath.Join(tmpDir, name), 0o755); err != nil {
 			return err
