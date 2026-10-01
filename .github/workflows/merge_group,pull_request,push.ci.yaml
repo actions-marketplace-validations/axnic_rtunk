@@ -14,7 +14,8 @@
 #                 push only that merge commit (--last) is validated, since the
 #                 PR's own commits were already checked (or exempted) above.
 #   build       — rtunk binary
-#   test        — unit tests with the race detector + a coverage floor
+#   test        — unit tests with the race detector + a coverage floor, and the
+#                 release-notes generator's tests (scripts/)
 #
 # Every job calls a task defined in .mise.toml, so `mise run ci` locally is the
 # same gate (minus commit messages).
@@ -136,3 +137,6 @@ jobs:
 
       - name: 🧪 Run tests and enforce minimum coverage
         run: mise run coverage
+
+      - name: 🧪 Run release tooling tests
+        run: mise run test:scripts
