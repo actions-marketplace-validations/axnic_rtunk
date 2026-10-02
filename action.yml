@@ -127,7 +127,8 @@ runs:
           gh release download "$VERSION" -R axnic/rtunk -D "$dl" --clobber -p "$archive" -p checksums.txt
 
           # 1. The archive matches checksums.txt.
-          (cd "$dl" && grep -F " $archive" checksums.txt | sha256 -c -)
+          # Exact file name: a substring match would also pick the archive's .sbom.json line.
+          (cd "$dl" && awk -v f="$archive" '$2 == f' checksums.txt | sha256 -c -)
 
           # 2. The archive was built and signed by the Release workflow (SECURITY.md,
           #    "Verifying a release"). Releases from before signing have no bundle.
