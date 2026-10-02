@@ -120,8 +120,8 @@ Full documentation is on the [wiki](https://github.com/axnic/rtunk/wiki) (source
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the dev environment, tests and commit conventions, and
-[SECURITY.md](SECURITY.md) to report a vulnerability. Release history is in
-[CHANGELOG.md](CHANGELOG.md).
+[SECURITY.md](SECURITY.md) to report a vulnerability. Release history is on the
+[GitHub Releases](https://github.com/axnic/rtunk/releases) page.
 
 ## License
 

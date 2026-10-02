@@ -30,14 +30,10 @@ changes exist.
    `main` is a reason to stop and ask, not to retry.
 2. Unreleased changes exist and match the bump you are about to propose:
    `git --no-pager log "$(git describe --tags --abbrev=0 --exclude '*-rc.*')..origin/main" --first-parent --oneline`.
-3. `CHANGELOG.md` has an `[Unreleased]` section listing the user-visible changes (Keep a
-   Changelog format). The workflow does not edit `CHANGELOG.md`, and nothing in the repo
-   documents who moves `[Unreleased]` under a version heading: if it is still non-empty and not
-   yet dated, tell the user and let them decide.
-4. No release run is in progress: the workflow uses the `release` concurrency group
+3. No release run is in progress: the workflow uses the `release` concurrency group
    (`cancel-in-progress: false`), so a second dispatch queues behind the first.
    `gh run list --workflow workflow_dispatch.release.yaml --limit 3`.
-5. Latest tag, for reference: `gh release list --limit 5`.
+4. Latest tag, for reference: `gh release list --limit 5`.
 
 ## Choosing the version
 

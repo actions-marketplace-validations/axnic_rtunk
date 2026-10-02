@@ -197,10 +197,10 @@ brought up to date; none is optional.
   particular because rtunk downloads and executes third-party binaries. Audience: security
   researchers and users. Done when: a working, private reporting channel is documented and linked
   from the README.
-- **CHANGELOG** — Purpose: a human-readable record of notable changes per release, so someone
-  upgrading knows what changed. Audience: users upgrading between releases. Done when: the
-  changelog exists, follows a recognizable convention, and has a real first entry for the `v1.0`
-  release.
+- **Release notes** — Purpose: a human-readable record of notable changes per release, so someone
+  upgrading knows what changed; it lives in the GitHub Releases, not in a file. Audience: users
+  upgrading between releases. Done when: every published release has notes listing its
+  user-visible changes, generated from the commits.
 - **Issue and pull request templates** — Purpose: guide a bug report or feature request to include
   what maintainers need to act on it (reproduction, configuration, plugin involved), and a pull
   request to state its rationale. Audience: contributors and issue reporters. Done when: opening a
@@ -252,7 +252,7 @@ without help from its author.
 - **The project is public.** The repository and its issue tracker are open, with the full
   documentation set from `v0.13` in place.
 - **A real, versioned release exists.** A tagged release is published with installable binaries for
-  every officially supported platform, and the changelog carries its first real entry.
+  every officially supported platform, with its release notes.
 
 **Done when**: someone with no prior contact with the project can discover rtunk, install it,
 migrate an existing trunk-based repository to it, and find an answer to any question about its
