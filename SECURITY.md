@@ -18,7 +18,7 @@ pull requests.
 
 ## Supported versions
 
-rtunk is pre-`v1.0`. Tagged releases exist (`v0.13.0` to `v0.13.2` at the time of writing, see the
+rtunk is pre-`v1.0`. Tagged releases exist (`v0.13.0` to `v0.14.0` at the time of writing, see the
 [Releases page](https://github.com/axnic/rtunk/releases)), and `--version` reports the release tag
 for a release archive and `dev` for a local `go build`. Fixes land on `main`; no release branch
 exists. No support or backport policy is defined for tagged releases yet.
@@ -49,7 +49,7 @@ gh attestation verify rtunk-<tag>-<os>-<arch>.tar.gz -R axnic/rtunk
 
 A release that fails any of these steps must not be used; report it as described above.
 
-`v0.13.0` to `v0.13.2` predate this signing: they ship `checksums.txt` and the archives only, so
+Signing starts with `v0.14.0`. `v0.13.0` to `v0.13.2` predate it: they ship `checksums.txt` and the archives only, so
 only step 2, against an unsigned `checksums.txt`, applies to them.
 
 ## Known limitation: download trust model

@@ -19,9 +19,10 @@ mise install  # installs the Go toolchain and dev tools .mise.toml declares
 go build -o rtunk ./cmd/rtunk
 ```
 
-`mise install` resolves the toolchain declared in [`.mise.toml`](.mise.toml): the Go compiler
-matching `go.mod`'s floor and the dev tools. The metalinter used below is rtunk itself, built from
-your clone, so there is nothing else to install. See
+`mise install` resolves the toolchain declared in [`.mise.toml`](.mise.toml), pinned by
+`mise.lock`: the Go compiler matching `go.mod`'s floor, `golangci-lint`, `govulncheck`,
+`goreleaser`, `cosign`, `syft` and Node with `commitlint`. The metalinter used below is rtunk
+itself, built from your clone, so there is nothing else to install. See
 [docs/Installation.md](docs/Installation.md) for prerequisites and platform support (macOS and
 Linux only) — this file doesn't repeat that.
 
@@ -33,6 +34,25 @@ non-root Ubuntu image (amd64 and arm64) with `git`, `gh`, `mise` and the Go exte
 creation it runs `mise install`, which resolves [`.mise.toml`](.mise.toml) as pinned by
 `mise.lock`; the config is pre-trusted, so no `mise trust` is needed. Downloaded tools live in
 the `rtunk-mise-data` volume and survive rebuilds. `mise run ci` is the gate there as well.
+
+### Mise tasks
+
+CI never calls a tool directly: every job runs a task of `.mise.toml`, so a green local run is the
+same gate a pull request goes through. `mise tasks` lists them.
+
+| Task                    | What it does                                                                   |
+| ----------------------- | ------------------------------------------------------------------------------ |
+| `mise run lint`         | `golangci-lint run ./...`                                                      |
+| `mise run build`        | Builds `./rtunk`                                                               |
+| `mise run rtunk`        | Builds, then runs `./rtunk check` (rtunk's own lint stack, changed files)      |
+| `mise run test`         | `go test -race` with a coverage profile                                        |
+| `mise run coverage`     | `test`, then fails under the 80% statement-coverage floor                      |
+| `mise run test:scripts` | Tests of the release tooling in `scripts/` (Node's built-in runner)            |
+| `mise run commitlint`   | Validates commit messages (`-- --from <sha> --to <sha>`)                       |
+| `mise run vulncheck`    | `govulncheck ./...`                                                            |
+| `mise run ci`           | `lint`, `build`, `coverage`, `test:scripts`: the CI gate minus commit messages |
+
+Extra arguments reach rtunk through the task: `mise run rtunk -- docs/Installation.md`.
 
 ## Tests and lint
 
@@ -54,19 +74,52 @@ lint stack declared in [`.rtunk/rtunk.yaml`](.rtunk/rtunk.yaml) — `gofmt`, `go
 accepts path arguments to scope a run to what you changed; with none, the default is changed files
 (see `--from`), not the whole repository.
 
-CI runs `./rtunk check` through the repository's own [GitHub Action](docs/GitHub-Action.md) on the
-files a pull request changes. `mise run ci` runs lint, build
-and tests locally.
+`mise run ci` runs lint, build, tests with the coverage floor and the release-tooling tests
+locally: the same gate the CI jobs below run, commit messages excluded.
 
 For documentation-only changes, this repository's own convention is `./rtunk fmt <path>` then
 `./rtunk check <path>` scoped to the files touched, in place of the full `./rtunk check` above.
+
+## Continuous integration and releases
+
+Workflows live in [`.github/workflows/`](.github/workflows), named `<triggers>.<name>.yaml`.
+
+| Workflow                                  | Runs                                                                                                          |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `merge_group,pull_request,push.ci.yaml`   | On pull requests, merge-queue entries and pushes to `main`: `lint`, `rtunk`, `commitlint`, `build` and `test` |
+| `schedule.security.yaml`                  | Daily `govulncheck`, CodeQL and OpenSSF Scorecard                                                             |
+| `push,workflow_dispatch.wiki.yaml`        | Publishes `docs/` to the GitHub Wiki on pushes to `main` that touch it                                        |
+| `pull_request.dependabot-auto-merge.yaml` | Approves and auto-merges Dependabot patch and security updates                                                |
+| `workflow_dispatch.release.yaml`          | Cuts a release (run manually, see below)                                                                      |
+
+The `test` job runs on Linux and macOS (`fail-fast: false`, so one platform's failure does not hide
+the other's); the release-tooling tests run on Linux only. The `rtunk` job dogfoods the tool and the
+[GitHub Action](docs/GitHub-Action.md): it checks the files the pull request changes with
+`version: source`, so a change is linted by its own code, and findings appear as annotations.
+
+A release is cut from `main` through Actions, Release, Run workflow: the workflow computes the next
+version from the last tag (or takes an explicit `version`), runs `mise run ci`, tags, builds the
+`darwin` and `linux` archives (`amd64`, `arm64`) with GoReleaser, signs `checksums.txt` keyless
+with cosign, attaches an SBOM per archive and records SLSA build provenance, then publishes a draft
+release with generated notes for the maintainer to review. [SECURITY.md](SECURITY.md#verifying-a-release)
+shows how to verify the result. Releases from `v0.14.0` on are signed; earlier ones are not.
+
+### `.trunk` and `.rtunk`
+
+This repository is linted by rtunk itself, through [`.rtunk/rtunk.yaml`](.rtunk/rtunk.yaml): trunk
+is not needed to work on rtunk, and the former `.trunk/` directory no longer exists. rtunk reads
+`.rtunk/rtunk.yaml` first and falls back to `.trunk/trunk.yaml`; `rtunk init` migrates a `.trunk/`
+directory into `.rtunk/`.
 
 ## Commit conventions
 
 Every commit follows `type[scope]: Subject` — a one-character type symbol (`+` Add, `-` Remove,
 `~` Improve, `!` Fix, `=` Refactor, `^` Bump, `>` Move, `<` Revert, `@` Docs, `$` Security, `?`
 Experiment, `*` Wildcard; `+!`/`~!`/`-!` for breaking changes), a mandatory bracketed scope, and
-an imperative, sentence-case subject with no trailing period. An AI-assisted commit carries an
+an imperative, sentence-case subject with no trailing period. commitlint also requires a header of
+at most 100 characters that is the very first line of the message, a sentence-case body (first
+letter a capital, so never start it with a lowercase word such as a command name) and body and
+footer lines of at most 80 characters. An AI-assisted commit carries an
 `Assisted-by: <provider>:<model-id>` trailer, never `Co-authored-by:` — a tool a human directs
 isn't a co-author. Every commit is GPG-signed (`git commit -S`); never add `-s`/`--signoff`, since
 DCO sign-off is the human committer's own attestation and an AI assistant must stay out of it.
@@ -90,7 +143,10 @@ in the same commit. Page inventory, templates and writing rules:
    `--signoff`.
 4. Open a pull request against `main` using the repository's pull request template
    (`.github/PULL_REQUEST_TEMPLATE.md`). `main` is protected: changes land through a pull request
-   only, never by a direct push.
+   only, never by a direct push. The repository only allows merge commits (no squash, no rebase),
+   and the merge commit takes the pull request title as its subject and the description as its
+   body: write the title as a valid `type[scope]: Subject` header, since CI validates that merge
+   commit on the push to `main`.
 5. CI re-runs lint, commit-message validation, build and tests (with a coverage floor) on every
    pull request; the same gate runs locally with `mise run ci`. Passing "Tests and lint" locally
    before opening the PR is what keeps review fast.

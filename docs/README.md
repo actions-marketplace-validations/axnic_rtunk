@@ -25,7 +25,7 @@ the same orchestration model as an auditable, 100% local tool.
 
 For anyone installing rtunk or moving a trunk repository to it.
 
-- [Installation](Installation.md) — build and install rtunk, supported platforms, upgrading
+- [Installation](Installation.md) — release archive, mise, aqua, `go install`, GitHub Action, dev container, supported platforms, upgrading
 - [Quickstart](Quickstart.md) — from an empty repository to your first `rtunk check` report
 - [Migrating from trunk](Migrating-From-Trunk.md) — what carries over and what changes
 
