@@ -130,7 +130,7 @@ lint:
   ignore:
     - linters: [ALL]
       paths:
-        - .mise/
+        - third_party/
     - linters: [prettier, yamllint]
       paths:
         - docs/generated/**

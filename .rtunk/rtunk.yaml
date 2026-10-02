@@ -39,10 +39,6 @@ lint:
     - trufflehog@3.97.4
     # renovate: datasource=pypi depName=yamllint
     - yamllint@1.38.0
-  ignore:
-    - linters: [ALL]
-      paths:
-        - .mise/
 actions:
   disabled:
     - trunk-announce
