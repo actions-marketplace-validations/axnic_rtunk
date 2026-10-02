@@ -1,0 +1,102 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+#
+# =============================================================================
+# PR Agent — AI review of pull requests
+# =============================================================================
+# Runs The-PR-Agent/pr-agent as a GitHub Action
+# (https://docs.pr-agent.ai/installation/github/):
+#
+#   - on a pull request (opened, reopened, ready for review, new push) it posts a description
+#     and a review as comments of the github-actions bot. It never edits the pull request's
+#     own title or description;
+#   - on a comment starting with `/` (`/review`, `/improve`, `/ask ...`, `/describe`) it runs
+#     that command. Only the logins of the allow-list below count, so nobody else can spend
+#     the OpenRouter key. Code suggestions (`/improve`) run only on request.
+#
+# The model is reached through OpenRouter with the same OPENROUTER_API_KEY secret as the
+# release notes (workflow_dispatch.release.yaml). Without the secret the job does nothing,
+# like the release notes fall back to the deterministic draft.
+#
+# Allow-list of the commenters: the repository variable PR_AGENT_ALLOWED_USERS (Settings >
+# Secrets and variables > Actions > Variables), a JSON list of GitHub logins such as
+# ["xunleii", "someone"], compared case-insensitively. Unset, it falls back to ["xunleii"].
+# Edit the variable, not this file, to add or remove someone.
+#
+# Pull requests from forks are skipped on the pull_request event (no secrets there), and
+# the event is pull_request, not pull_request_target: the pull request's own code never
+# runs with secrets. PR Agent only reads the diff through the GitHub API and needs no
+# checkout. Bots (Dependabot included) never trigger it.
+#
+# Any configurable property of PR Agent can be set as an environment variable
+# (https://github.com/The-PR-Agent/pr-agent/blob/main/pr_agent/settings/configuration.toml).
+# =============================================================================
+
+name: PR Agent
+
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review, synchronize]
+  issue_comment:
+    types: [created]
+
+# Minimal top-level permissions — the job declares what it needs.
+permissions: {}
+
+jobs:
+  pr-agent:
+    name: 🤖 PR Agent
+    if: >-
+      github.event.sender.type != 'Bot' && (
+        (
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.draft == false &&
+          github.event.pull_request.head.repo.full_name == github.repository
+        ) || (
+          github.event_name == 'issue_comment' &&
+          github.event.issue.pull_request &&
+          startsWith(github.event.comment.body, '/') &&
+          contains(fromJSON(vars.PR_AGENT_ALLOWED_USERS || '["xunleii"]'), github.event.comment.user.login)
+        )
+      )
+    runs-on: ubuntu-latest
+    # One run per pull request: a new push replaces the review in progress, a comment waits for it.
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.event.issue.number }}
+      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+    # The documented example grants contents: write (and checks: write) for features that push
+    # commits; commenting needs neither. Widen only if a PR Agent command needs it.
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+
+    steps:
+      - name: 🔑 Check the OpenRouter key
+        id: key
+        env:
+          HAS_KEY: ${{ secrets.OPENROUTER_API_KEY != '' }}
+        run: |
+          echo "set=$HAS_KEY" >> "$GITHUB_OUTPUT"
+          if [[ "$HAS_KEY" != "true" ]]; then
+            echo "::notice::OPENROUTER_API_KEY is not set - skipping PR Agent."
+          fi
+
+      - name: 🤖 Run PR Agent
+        if: steps.key.outputs.set == 'true'
+        uses: The-PR-Agent/pr-agent@8e5a9295973b24af4b70cafd0b660a230811ef9e # v0.47.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OPENROUTER.KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          # Pareto 26.10 preview, with Claude Sonnet 5.5 as the fallback. OpenRouter ids are unknown to
+          # PR Agent's token table, so the context size is declared explicitly (both models: ~1M).
+          config.model: openrouter/unbiased/pareto-26.10-preview
+          config.fallback_models: '["openrouter/anthropic/claude-sonnet-5.5"]'
+          config.custom_model_max_tokens: "1000000"
+          # Description and review on open and on every push; suggestions only on `/improve`.
+          github_action_config.auto_review: "true"
+          github_action_config.auto_describe: "true"
+          github_action_config.auto_improve: "false"
+          # Never edit the pull request itself: the description goes to one persistent comment (updated
+          # on each push) instead of overwriting the body, and the title is left alone.
+          PR_DESCRIPTION.PUBLISH_DESCRIPTION_AS_COMMENT: "true"
+          PR_DESCRIPTION.GENERATE_AI_TITLE: "false"

@@ -84,18 +84,35 @@ For documentation-only changes, this repository's own convention is `./rtunk fmt
 
 Workflows live in [`.github/workflows/`](.github/workflows), named `<triggers>.<name>.yaml`.
 
-| Workflow                                  | Runs                                                                                                          |
-| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `merge_group,pull_request,push.ci.yaml`   | On pull requests, merge-queue entries and pushes to `main`: `lint`, `rtunk`, `commitlint`, `build` and `test` |
-| `schedule.security.yaml`                  | Daily `govulncheck`, CodeQL and OpenSSF Scorecard                                                             |
-| `push,workflow_dispatch.wiki.yaml`        | Publishes `docs/` to the GitHub Wiki on pushes to `main` that touch it                                        |
-| `pull_request.dependabot-auto-merge.yaml` | Approves and auto-merges Dependabot patch and security updates                                                |
-| `workflow_dispatch.release.yaml`          | Cuts a release (run manually, see below)                                                                      |
+| Workflow                                   | Runs                                                                                                                                |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `merge_group,pull_request,push.ci.yaml`    | On pull requests, merge-queue entries and pushes to `main`: `lint`, `rtunk`, `commitlint`, `build` and `test`                       |
+| `schedule.security.yaml`                   | Daily `govulncheck`, CodeQL and OpenSSF Scorecard                                                                                   |
+| `push,workflow_dispatch.wiki.yaml`         | Publishes `docs/` to the GitHub Wiki on pushes to `main` that touch it                                                              |
+| `pull_request.dependabot-auto-merge.yaml`  | Approves and auto-merges Dependabot patch and security updates                                                                      |
+| `issue_comment,pull_request.pr-agent.yaml` | Posts an AI-written description and review on pull requests; answers `/review`, `/improve`, `/ask`, `/describe` comments (PR Agent) |
+| `workflow_dispatch.release.yaml`           | Cuts a release (run manually, see below)                                                                                            |
 
 The `test` job runs on Linux and macOS (`fail-fast: false`, so one platform's failure does not hide
 the other's); the release-tooling tests run on Linux only. The `rtunk` job dogfoods the tool and the
 [GitHub Action](docs/GitHub-Action.md): it checks the files the pull request changes with
 `version: source`, so a change is linted by its own code, and findings appear as annotations.
+
+[PR Agent](https://github.com/The-PR-Agent/pr-agent) (pinned by SHA, v0.47.0) posts a description
+and a review as comments on each pull request when it is opened, reopened, marked ready for review
+and on every push. It never edits the pull request's title or body: its description lives in one
+comment updated on each push. A comment starting with `/` on a pull request (`/review`, `/improve`,
+`/ask <question>`, `/describe`) runs that command, only for the GitHub logins listed in the
+repository variable `PR_AGENT_ALLOWED_USERS` (Settings, Secrets and variables, Actions, Variables):
+a JSON list such as `["xunleii", "someone"]`, compared case-insensitively and defaulting to
+`["xunleii"]` when unset. Everyone else's comments are ignored, so nobody else can spend the key;
+edit the variable, not the workflow, to add or remove someone. Code suggestions (`/improve`) run
+only on request. The model (Pareto 26.10 preview, with Claude Sonnet 5.5 as the fallback) is reached
+through OpenRouter with the same `OPENROUTER_API_KEY` secret as the release notes; without the
+secret the job is skipped. It is also skipped for bots (Dependabot included), draft pull requests
+and, on the `pull_request` event, pull requests from forks, which cannot read secrets. The job has
+`contents: read`, `issues: write` and `pull-requests: write` permissions. Its comments are advisory
+and never block a merge; it is not a substitute for human review.
 
 A release is cut from `main` through Actions, Release, Run workflow: the workflow computes the next
 version from the last tag (or takes an explicit `version`), runs `mise run ci`, tags, builds the
