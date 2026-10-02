@@ -40,6 +40,7 @@ For everyday use, organized by what you are trying to do.
 - [Actions and git hooks](Actions-And-Git-Hooks.md) — run actions and trigger them from git hooks
 - [Keeping tools up to date](Keeping-Tools-Up-To-Date.md) — maintain version pins with Renovate
 - [Cache and logs](Cache-And-Logs.md) — manage downloaded tools and read past run logs
+- [GitHub Action](GitHub-Action.md) — run rtunk in GitHub Actions with caching, annotations and a job summary
 
 ## Reference
 

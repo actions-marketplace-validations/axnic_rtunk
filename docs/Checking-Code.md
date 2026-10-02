@@ -199,6 +199,8 @@ There is no separate code for "findings" versus "error". The code does not depen
 When a linter fails to run, the report has a `FAILURES` section and the run log id; read it with
 `rtunk logs show <id>`.
 
+On GitHub Actions, the [GitHub Action](GitHub-Action.md) wraps this: install, cache, annotations.
+
 ## Where to go next
 
 - [Command Reference](Command-Reference.md#rtunk-check) — every flag of `rtunk check`

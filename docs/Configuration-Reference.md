@@ -62,8 +62,8 @@ lint:                         lint:
 An override that cannot be parsed fails config loading with an error naming the file
 (`config: parse <path>/user.yaml: ...`); a missing one is skipped.
 
-`rtunk linters list` (and the picker rows) show where an override decides: ` (from user.yaml)` after
-the file count of a linter an override enables or re-pins, ` (disabled by <file>)` for a linter
+`rtunk linters list` (and the picker rows) show where an override decides: `(from user.yaml)` after
+the file count of a linter an override enables or re-pins, `(disabled by <file>)` for a linter
 `lint.disabled` keeps off (the file listing it, base config included). Entries the shared config
 enables itself carry no note. `--format json` items gain `enabled_by` and `disabled_by` (file name,
 omitted when empty).

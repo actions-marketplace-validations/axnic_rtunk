@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD033 -->
+
 <h1 align="center">rtunk</h1>
 
 <p align="center"><strong>One command for your linters, formatters and security scanners. Open source, 100% local.</strong></p>

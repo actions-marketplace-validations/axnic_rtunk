@@ -15,18 +15,17 @@
 
 [tools]
 
-go = "latest"    # rtunk is implemented in Go (see AGENTS.md)
-trunk = "latest" # Metalinter/formatter, drives .trunk/trunk.yaml
+go = "latest" # rtunk is implemented in Go (see AGENTS.md)
 
 "go:golang.org/x/tools/gopls" = "latest" # Go language server, used by editors/agents (Serena)
 
-golangci-lint = "latest"                                 # Go linter, drives .golangci.yml (`mise run lint`)
-"go:golang.org/x/vuln/cmd/govulncheck" = "latest"        # Known-CVE scan of Go dependencies (security workflow)
-goreleaser = "latest"                                    # Cross-platform release builds, drives .goreleaser.yml
-cosign = "latest"                                        # Keyless signing of release checksums (goreleaser `signs`)
-syft = "latest"                                          # SBOM generation for release archives (goreleaser `sboms`)
-node = "lts"                                             # Runtime for commitlint
-"npm:@commitlint/cli" = "latest"                         # Commit convention check, drives .commitlintrc.js
+golangci-lint = "latest"                          # Go linter, drives .golangci.yml (`mise run lint`)
+"go:golang.org/x/vuln/cmd/govulncheck" = "latest" # Known-CVE scan of Go dependencies (security workflow)
+goreleaser = "latest"                             # Cross-platform release builds, drives .goreleaser.yml
+cosign = "latest"                                 # Keyless signing of release checksums (goreleaser `signs`)
+syft = "latest"                                   # SBOM generation for release archives (goreleaser `sboms`)
+node = "lts"                                      # Runtime for commitlint
+"npm:@commitlint/cli" = "latest"                  # Commit convention check, drives .commitlintrc.js
 
 # =============================================================================
 # Tasks
@@ -39,6 +38,11 @@ run = "golangci-lint run ./..."
 [tasks.build]
 description = "Build the rtunk binary"
 run = "go build -o rtunk ./cmd/rtunk"
+
+[tasks.rtunk]
+description = "Run rtunk's own lint stack (.rtunk/rtunk.yaml) on the changed files; extra arguments go to rtunk check"
+depends = ["build"]
+run = "./rtunk check"
 
 [tasks.test]
 description = "Run the unit tests with a coverage profile"

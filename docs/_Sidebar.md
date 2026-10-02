@@ -17,6 +17,7 @@
 - [Actions and git hooks](Actions-And-Git-Hooks.md)
 - [Keeping tools up to date](Keeping-Tools-Up-To-Date.md)
 - [Cache and logs](Cache-And-Logs.md)
+- [GitHub Action](GitHub-Action.md)
 
 **Reference**
 
