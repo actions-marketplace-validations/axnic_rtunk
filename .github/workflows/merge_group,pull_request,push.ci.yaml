@@ -14,8 +14,8 @@
 #                 push only that merge commit (--last) is validated, since the
 #                 PR's own commits were already checked (or exempted) above.
 #   build       — rtunk binary
-#   test        — unit tests with the race detector + a coverage floor, and the
-#                 release-notes generator's tests (scripts/)
+#   test        — unit tests with the race detector + a coverage floor on Linux and
+#                 macOS, and the release-notes generator's tests (scripts/, Linux)
 #
 # Every job calls a task defined in .mise.toml, so `mise run ci` locally is the
 # same gate (minus commit messages).
@@ -120,8 +120,14 @@ jobs:
   # test — unit tests (race detector) + minimum coverage floor
   # ---------------------------------------------------------------------------
   test:
-    name: 🧪 Tests
-    runs-on: ubuntu-latest
+    name: 🧪 Tests (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    # Linux and macOS (rtunk ships to both: ioctl terminal size, ~/Library/Caches). Every leg runs to
+    # completion so one platform's failure does not hide the other's.
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
     permissions:
       contents: read
 
@@ -138,5 +144,7 @@ jobs:
       - name: 🧪 Run tests and enforce minimum coverage
         run: mise run coverage
 
+      # Platform-independent Node scripts: one run (Linux) is enough.
       - name: 🧪 Run release tooling tests
+        if: runner.os == 'Linux'
         run: mise run test:scripts
