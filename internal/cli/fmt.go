@@ -96,7 +96,7 @@ func (c *fmtCmd) Run(cli *CLI, stdout io.Writer, stderr Stderr, argv Argv) error
 		kind = render.FmtCheck
 	}
 	started := time.Now()
-	r := newRenderer(c.Format, stdout, stderr, kind, progressOpts{c.NoProgress, c.ASCII, c.LiveHeight})
+	r := newRenderer(c.Format, stdout, stderr, kind, progressOpts{NoProgress: c.NoProgress, ASCII: c.ASCII, LiveHeight: c.LiveHeight})
 	summary := func(changed, skipped []string, err error) render.Summary {
 		return render.Summary{Elapsed: time.Since(started), RunLog: log.Name(), Skipped: skipped, Changed: changed, Unstable: isUnstable(err)}
 	}

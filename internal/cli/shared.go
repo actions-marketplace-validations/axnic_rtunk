@@ -337,12 +337,13 @@ func filterLinters(cfg config.Config, filter, exclude string) (config.Config, er
 
 // progressOpts is what the user asked for on the progress side of a run.
 type progressOpts struct {
-	NoProgress bool // --no-progress: no per-linter lines and no live view
-	ASCII      bool // --ascii: ASCII glyphs in the live view
-	LiveHeight int  // --live-height / RTUNK_LIVE_HEIGHT; 0 means half the terminal
+	NoProgress bool   // --no-progress: no per-linter lines and no live view
+	ASCII      bool   // --ascii: ASCII glyphs in the live view
+	LiveHeight int    // --live-height / RTUNK_LIVE_HEIGHT; 0 means half the terminal
+	RepoRoot   string // directory finding paths are relative to (--format github)
 }
 
-// newRenderer builds the renderer for a --format value ("human", "json" or "sarif"), reading the
+// newRenderer builds the renderer for a --format value ("human", "json", "sarif" or "github"), reading the
 // environment once: stdout being a terminal and NO_COLOR decide color, stderr being a terminal
 // and TERM decide the live view, the locale decides ASCII glyphs.
 func newRenderer(format string, stdout, stderr io.Writer, kind render.Kind, p progressOpts) render.Renderer {
@@ -360,12 +361,15 @@ func buildRenderer(format string, stdout, stderr io.Writer, kind render.Kind, p 
 		f = render.JSON
 	case "sarif":
 		f = render.SARIF
+	case "github":
+		f = render.GitHub
 	}
 	liveOn := render.LiveEnabled(stderrIsTTY, p.NoProgress, term)
 	inner := render.New(stdout, stderr, render.Options{
 		Format: f, Command: kind, NoProgress: p.NoProgress || liveOn,
 		Color:   render.UseColor(isTerminal(stdout), os.Getenv("NO_COLOR")),
 		Version: Version,
+		Root:    p.RepoRoot, Workspace: os.Getenv("GITHUB_WORKSPACE"), StepSummary: os.Getenv("GITHUB_STEP_SUMMARY"),
 	})
 	if !liveOn {
 		return inner
