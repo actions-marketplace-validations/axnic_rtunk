@@ -74,3 +74,6 @@
 # Swift
 # **/Tests/**/*.swift
 # **/Specs/**/*.swift
+
+# --- mise local state and generated lock files ---
+/.mise/
