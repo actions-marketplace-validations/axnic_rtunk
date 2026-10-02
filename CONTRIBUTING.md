@@ -90,7 +90,7 @@ Workflows live in [`.github/workflows/`](.github/workflows), named `<triggers>.<
 | Workflow                                  | Runs                                                                                                      |
 | ----------------------------------------- | --------------------------------------------------------------------------------------------------------- |
 | `merge_group,pull_request,push.lint.yaml` | `Lint`, on pull requests, merge-queue entries and pushes to `main`, always: `lint`, `rtunk`, `commitlint` |
-| `merge_group,pull_request,push.go.yaml`   | `Go`, same triggers but path-filtered: `build`, `test`                                                    |
+| `merge_group,pull_request,push.go.yaml`   | `Go`, on pull requests and pushes to `main`, path-filtered: `build`, `test`                               |
 | `schedule.security.yaml`                  | Daily `govulncheck`, CodeQL and OpenSSF Scorecard                                                         |
 | `push,workflow_dispatch.wiki.yaml`        | Publishes `docs/` to the GitHub Wiki on pushes to `main` that touch it                                    |
 | `pull_request.dependabot-auto-merge.yaml` | Approves and auto-merges Dependabot patch and security updates                                            |
@@ -101,9 +101,10 @@ The `lint` workflow always runs, on every file, with no path filter. `lint` runs
 `rtunk` job dogfoods the tool and the [GitHub Action](docs/GitHub-Action.md) on its latest release:
 it checks every file, and findings appear as annotations; `commitlint` validates the commit messages.
 
-The `go` workflow runs `build` and `test`. On pull requests and pushes to `main` it only runs when
-`**.go`, `go.mod`, `go.sum` or the workflow file itself changed. GitHub does not evaluate path
-filters for `merge_group`, so merge-queue entries always run it. The `test` job runs on Linux and
+The `go` workflow runs `build` and `test`. It has no `merge_group` trigger: it runs on pull requests
+and pushes to `main` only, and only when `**.go`, `go.mod`, `go.sum` or the workflow file itself
+changed. Merge-queue entries do not run it, since the pull request already passed it; `Lint` still
+runs on them. The `test` job runs on Linux and
 macOS (`fail-fast: false`, so one platform's failure does not hide the other's); the release-tooling
 tests run on Linux only.
 

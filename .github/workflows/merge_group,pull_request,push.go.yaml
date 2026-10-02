@@ -3,7 +3,8 @@
 # =============================================================================
 # Go — Build and tests
 # =============================================================================
-# Runs only when Go code changes: Go sources, go.mod/go.sum, or this workflow.
+# Runs only when Go code changes: Go sources, go.mod/go.sum, or this workflow. Not run for
+# merge-queue entries: the pull request already passed it.
 # Lint, rtunk and commit messages are checked by merge_group,pull_request,push.lint.yaml
 # on every change.
 #
@@ -14,14 +15,11 @@
 # Every job calls a `ci:*` task defined in .mise.toml, so `mise run ci` locally is
 # the same gate.
 #
-# Path filters apply to pull_request and push. GitHub does not evaluate them for
-# merge_group, so merge-queue entries always run this workflow.
 # =============================================================================
 
 name: Go
 
 on:
-  merge_group: {}
   pull_request:
     paths:
       - "**.go"
