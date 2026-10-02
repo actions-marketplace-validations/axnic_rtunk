@@ -1,4 +1,4 @@
-// Run with `node --test scripts/` (or `mise run test:scripts`); no dependency beyond Node.
+// Run with `node --test scripts/` (or `mise run ci:scripts`); no dependency beyond Node.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 

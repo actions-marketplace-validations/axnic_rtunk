@@ -195,7 +195,7 @@ go build -o rtunk ./cmd/rtunk
 `mise install` resolves the toolchain declared in [`.mise.toml`](../.mise.toml): the Go compiler
 (matching the `go 1.27.0` floor in `go.mod`) and the dev tools. rtunk dogfoods itself: the binary
 you just built runs the lint stack of [`.rtunk/rtunk.yaml`](../.rtunk/rtunk.yaml) on its own source
-and docs (`./rtunk fmt`, `./rtunk check`, or `mise run rtunk`), downloading those linters into
+and docs (`./rtunk fmt`, `./rtunk check`), downloading those linters into
 its cache on first use. The output of `--version` and `help` is the same as with `go install`.
 
 ## Upgrade rtunk

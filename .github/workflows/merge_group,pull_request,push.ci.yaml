@@ -6,22 +6,28 @@
 # Validates every PR (and merge-queue entry) before it lands on main, and every
 # push to main (main only accepts merged PRs, so a push is the merge commit):
 #
-#   lint        — golangci-lint (drives .golangci.yml)
+#   changes     — decides whether Go code (or what feeds it) changed, to skip build and test
+#   lint        — golangci-lint (drives .golangci.yml). Always runs, on every file
 #   rtunk       — rtunk's own lint stack (.rtunk/rtunk.yaml) through the repository's
-#                 GitHub Action (action.yml), built from the checkout: rtunk dogfoods itself
-#                 and the action. Changed files only; findings become annotations
+#                 GitHub Action (action.yml) on its latest release: rtunk dogfoods itself
+#                 and the action. Always runs, on every file; findings become annotations
 #   commitlint  — rtunk commit convention on every commit in the PR. Skipped
 #                 for Dependabot PRs: its own commit messages never follow the
 #                 `type[scope]: Subject` convention; the dependabot-auto-merge
 #                 workflow sets a compliant subject on the merge commit, and on
 #                 push only that merge commit (--last) is validated, since the
 #                 PR's own commits were already checked (or exempted) above.
-#   build       — rtunk binary
+#   build       — rtunk binary. Skipped unless Go code changed (see `changes`)
 #   test        — unit tests with the race detector + a coverage floor on Linux and
-#                 macOS, and the release-notes generator's tests (scripts/, Linux)
+#                 macOS, and the release-notes generator's tests (scripts/, Linux).
+#                 Skipped unless Go code changed (see `changes`)
 #
-# Every job calls a task defined in .mise.toml, so `mise run ci` locally is the
-# same gate (minus commit messages).
+# Every job calls a `ci:*` task defined in .mise.toml, so `mise run ci` locally is
+# the same gate (minus commit messages and the rtunk action).
+#
+# A job skipped by `if:` reports as skipped, which satisfies a required status check
+# (unlike a workflow-level `paths:` filter, which leaves the check pending). This file
+# is part of the "Go code" set below, so editing it always runs everything.
 # =============================================================================
 
 name: PR, Merge-Queue & Main Quality Gate
@@ -40,6 +46,42 @@ concurrency:
 permissions: {}
 
 jobs:
+  # ---------------------------------------------------------------------------
+  # changes — did Go code, or anything that feeds it, change?
+  # ---------------------------------------------------------------------------
+  # Diffs the event's base..head and sets `code`. Anything unexpected (no base commit,
+  # failed diff) sets it to true: running too much is safe, skipping too much is not.
+  changes:
+    name: 🔎 Changes
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      code: ${{ steps.diff.outputs.code }}
+
+    steps:
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: 🔎 Detect Go code changes
+        id: diff
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before }}
+          HEAD: ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha || github.sha }}
+        run: |
+          # Go sources, module files, test fixtures (pkg/**/testdata), the release tooling tested
+          # alongside (scripts/), the toolchain definition and this workflow itself.
+          pattern='\.go$|^go\.(mod|sum)$|/testdata/|^scripts/|^\.mise\.toml$|^mise\.lock$|^\.github/workflows/merge_group,pull_request,push\.ci\.yaml$'
+          if files=$(git diff --name-only "$BASE" "$HEAD" 2>/dev/null) && [ -n "$BASE" ]; then
+            if grep -Eq "$pattern" <<<"$files"; then code=true; else code=false; fi
+          else
+            code=true
+          fi
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          echo "Go code changed: $code"
+
   # ---------------------------------------------------------------------------
   # lint — golangci-lint
   # ---------------------------------------------------------------------------
@@ -62,7 +104,7 @@ jobs:
           cache_key: "mise-v1-{{platform}}-{{file_hash}}"
 
       - name: 🔍 Run golangci-lint
-        run: mise run lint
+        run: mise run ci:lint
 
   # ---------------------------------------------------------------------------
   # rtunk — dogfood: rtunk checks this repository through its own action
@@ -74,18 +116,16 @@ jobs:
       contents: read
 
     steps:
-      # Full history: changed-since-base needs the base commit of the PR / merge-queue entry / push.
       - name: ⬇️ Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0
 
-      # version: source builds rtunk from this very checkout, so a PR is linted by its own code.
+      # Latest published release, not a local build: the action is what users run. Every file is
+      # checked, so a change to the lint stack itself is validated against the whole repository.
       - name: 🧹 Run rtunk check
         uses: ./
         with:
-          version: source
-          check-mode: changed-since-base
+          version: latest
+          check-mode: all
 
   # ---------------------------------------------------------------------------
   # commitlint — every commit must follow the rtunk commit convention
@@ -112,19 +152,21 @@ jobs:
       - name: ✅ Validate commit messages
         if: github.event_name != 'push' && github.actor != 'dependabot[bot]'
         run: |
-          mise run commitlint -- \
+          mise run ci:commitlint -- \
             --from ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }} \
             --to   ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha }}
 
       - name: ✅ Validate commit messages (push to main)
         if: github.event_name == 'push'
-        run: mise run commitlint -- --last
+        run: mise run ci:commitlint -- --last
 
   # ---------------------------------------------------------------------------
   # build — rtunk binary
   # ---------------------------------------------------------------------------
   build:
     name: 🏗️ Build
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -140,13 +182,15 @@ jobs:
           cache_key: "mise-v1-{{platform}}-{{file_hash}}"
 
       - name: 🏗️ Build rtunk
-        run: mise run build
+        run: mise run ci:build
 
   # ---------------------------------------------------------------------------
   # test — unit tests (race detector) + minimum coverage floor
   # ---------------------------------------------------------------------------
   test:
     name: 🧪 Tests (${{ matrix.os }})
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     runs-on: ${{ matrix.os }}
     # Linux and macOS (rtunk ships to both: ioctl terminal size, ~/Library/Caches). Every leg runs to
     # completion so one platform's failure does not hide the other's.
@@ -168,9 +212,9 @@ jobs:
           cache_key: "mise-v1-{{platform}}-{{file_hash}}"
 
       - name: 🧪 Run tests and enforce minimum coverage
-        run: mise run coverage
+        run: mise run ci:coverage
 
       # Platform-independent Node scripts: one run (Linux) is enough.
       - name: 🧪 Run release tooling tests
         if: runner.os == 'Linux'
-        run: mise run test:scripts
+        run: mise run ci:scripts
