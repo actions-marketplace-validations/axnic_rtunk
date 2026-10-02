@@ -18,6 +18,11 @@ releases list only what changed since the previous tag. A build with no version 
   `::error`, `::warning` or `::notice` annotation with `file`, `line`, `col` and `title`), and
   appends a Markdown job summary to `$GITHUB_STEP_SUMMARY` when it is set. See
   [docs/Checking-Code.md](./docs/Checking-Code.md#github-actions-annotations).
+- `lint.ignore` is honored: each entry's `paths` (gitignore-style globs relative to the repository
+  root) are kept out of the file sets of the linters it names, or of every linter with `ALL`, for
+  `check` and `fmt`. A file ignored for every linter that would match it no longer counts toward
+  `Checked N files`. Negated (`!`) paths are rejected as a configuration error. See
+  [docs/Configuration-Reference.md](./docs/Configuration-Reference.md#lintignore).
 
 ### Changed (Unreleased)
 

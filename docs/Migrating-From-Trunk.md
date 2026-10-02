@@ -26,6 +26,10 @@ trunk" section):
   form are permanent, fully equivalent aliases of `rtunk`'s own `rtunk-ignore` directives — the same
   matching regex accepts either prefix. There is no deadline to rewrite existing `trunk-ignore`
   comments. See [Ignoring Issues](Ignoring-Issues.md) for every form and its matching rules.
+- **Ignored paths.** `lint.ignore` (`linters:` and `paths:` entries, `ALL` for every linter) works
+  as in trunk for gitignore-style globs, with one exception: a `!` negation is rejected as a
+  configuration error instead of being applied. See [Configuration
+  Reference](Configuration-Reference.md#lintignore).
 - **The plugin ecosystem.** `rtunk` consumes [trunk-io/plugins](https://github.com/trunk-io/plugins)
   directly — the same linter/tool/runtime/action definitions trunk itself reads, not a
   reimplementation of linter metadata. A `plugins.sources` entry pointing at that repository (or a

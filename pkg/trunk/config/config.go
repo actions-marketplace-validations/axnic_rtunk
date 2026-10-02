@@ -45,6 +45,14 @@ type CategoryConfig[T any] struct {
 	Definitions map[string]T
 }
 
+// IgnoreRule is one `lint.ignore` entry: Paths (gitignore-style globs relative to the repository
+// root, see ignore.PathMatches) are never passed to the Linters it names, or to any linter when
+// Linters holds "ALL".
+type IgnoreRule struct {
+	Linters []string `yaml:"linters"`
+	Paths   []string `yaml:"paths"`
+}
+
 // LintConfig is CategoryConfig[Linter] plus comment_formats: (global, never trimmed, as above)
 // and files:, the file-type registry a plugin repo's own linters/plugin.yaml contributes
 // (ARCHITECTURE.md "Built-in / global config") — keyed by name like Tools/Downloads, since
@@ -57,6 +65,10 @@ type LintConfig struct {
 	CategoryConfig[Linter] `yaml:",inline"`
 	CommentFormats         []CommentFormat     `yaml:"comment_formats,omitempty"`
 	Files                  map[string]FileType `yaml:"files,omitempty"`
+
+	// Ignore is trunk.yaml's `lint.ignore`, the entries of every layered config file in order;
+	// the engine drops a matching file from the named linters' file sets (see IgnoreRule).
+	Ignore []IgnoreRule `yaml:"ignore,omitempty"`
 
 	// EnabledFrom and DisabledFrom say which file is behind a linter's state, keyed by bare id:
 	// the override file that set its enabled entry (entries only the base file sets are left

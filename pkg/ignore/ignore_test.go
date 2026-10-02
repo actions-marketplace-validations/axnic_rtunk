@@ -215,3 +215,40 @@ func joinLines(lines ...string) string {
 	}
 	return out
 }
+
+func TestPathMatches(t *testing.T) {
+	tests := []struct {
+		name    string
+		pattern string
+		rel     string
+		want    bool
+	}{
+		{"directory with trailing slash covers its files", ".mise/", ".mise/config.toml", true},
+		{"directory with trailing slash covers nested files", ".mise/", ".mise/a/b.toml", true},
+		{"directory with trailing slash is not a file of that name", "docs/", "docs", false},
+		{"bare name matches at depth", ".mise", "sub/.mise/x", true},
+		{"bare name matches a file", "go.sum", "a/b/go.sum", true},
+		{"anchored by a middle slash", "a/b", "x/a/b", false},
+		{"anchored by a middle slash at the root", "a/b", "a/b/c.txt", true},
+		{"anchored by a leading slash", "/build", "build/x", true},
+		{"anchored by a leading slash, not nested", "/build", "src/build/x", false},
+		{"star stays in one segment", "src/*.go", "src/a/b.go", false},
+		{"star within a segment", "src/*.go", "src/b.go", true},
+		{"double star in the middle", "a/**/c", "a/b/b/c", true},
+		{"double star in the middle, zero segments", "a/**/c", "a/c", true},
+		{"trailing double star", "build/**", "build/x/y", true},
+		{"leading double star", "**/vendor", "a/b/vendor/x", true},
+		{"question mark", "?.md", "a.md", true},
+		{"character class", "[ab].md", "c.md", false},
+		{"suffix glob at any depth", "*.log", "a/b/c.log", true},
+		{"no match", "docs/", "src/docs.go", false},
+		{"negation never matches", "!keep.go", "keep.go", false},
+		{"malformed class matches nothing", "[a", "a", false},
+		{"empty pattern matches nothing", "", "a", false},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Equal(t, tc.want, ignore.PathMatches(tc.pattern, tc.rel))
+		})
+	}
+}

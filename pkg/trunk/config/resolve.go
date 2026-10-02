@@ -30,8 +30,9 @@ type trunkFile struct {
 		Enabled []string `yaml:"enabled"`
 	} `yaml:"runtimes"`
 	Lint struct {
-		Enabled  []string `yaml:"enabled"`
-		Disabled []string `yaml:"disabled"` // dropped from Enabled by readLayered, whichever file enabled them
+		Enabled  []string     `yaml:"enabled"`
+		Disabled []string     `yaml:"disabled"` // dropped from Enabled by readLayered, whichever file enabled them
+		Ignore   []IgnoreRule `yaml:"ignore"`
 	} `yaml:"lint"`
 	Actions struct {
 		Enabled  []string `yaml:"enabled"`
@@ -111,6 +112,7 @@ func resolveMerged(file, cacheDir string) (cfg Config, err error) {
 	cfg.CLI.Version = tf.CLI.Version
 	cfg.Runtimes.Enabled = tf.Runtimes.Enabled
 	cfg.Lint.Enabled = tf.Lint.Enabled
+	cfg.Lint.Ignore = tf.Lint.Ignore
 	cfg.Lint.EnabledFrom, cfg.Lint.DisabledFrom = tf.enabledFrom, tf.disabledFrom
 	cfg.Actions.Enabled = tf.Actions.Enabled
 	cfg.Actions.Disabled = tf.Actions.Disabled
@@ -218,6 +220,7 @@ func (tf *trunkFile) merge(o trunkFile) {
 	tf.Runtimes.Enabled = mergeEnabled(tf.Runtimes.Enabled, o.Runtimes.Enabled)
 	tf.Lint.Enabled = mergeEnabled(tf.Lint.Enabled, o.Lint.Enabled)
 	tf.Lint.Disabled = append(tf.Lint.Disabled, o.Lint.Disabled...)
+	tf.Lint.Ignore = append(tf.Lint.Ignore, o.Lint.Ignore...)
 	tf.Actions.Enabled = mergeEnabled(tf.Actions.Enabled, o.Actions.Enabled)
 	tf.Actions.Disabled = append(tf.Actions.Disabled, o.Actions.Disabled...)
 }

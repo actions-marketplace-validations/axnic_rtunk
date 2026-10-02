@@ -12,13 +12,15 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/axnic/rtunk/pkg/ignore"
 	"github.com/axnic/rtunk/pkg/trunk/config"
 	"gopkg.in/yaml.v3"
 )
 
 // Files resolves which files under paths match linter's Files (ids into cfg.Lint.Files),
-// walking directories recursively (skipping .git), then drops any match git considers ignored
-// (see filterGitignored). repoRoot anchors the gitignore lookup -- it need not equal paths, e.g.
+// walking directories recursively (skipping .git), then drops any match trunk.yaml's lint.ignore
+// excludes for linter (see filterConfigIgnored) or git considers ignored (see filterGitignored).
+// repoRoot anchors both lookups -- it need not equal paths, e.g.
 // paths can be a subset of repoRoot passed explicitly on the command line. A directory entry
 // that is itself a file (not a directory) is taken as-is, matched or not, without a walk.
 //
@@ -80,7 +82,33 @@ func Files(cfg config.Config, linter config.Linter, repoRoot string, paths []str
 			return nil, err
 		}
 	}
-	return filterGitignored(repoRoot, out), nil
+	return filterGitignored(repoRoot, filterConfigIgnored(cfg.Lint.Ignore, linter.Name, repoRoot, out)), nil
+}
+
+// filterConfigIgnored drops any path in files that a lint.ignore rule excludes for linter: a
+// rule applies when its Linters names linter or "ALL", and excludes a path when any of its Paths
+// globs matches the path relative to repoRoot (see ignore.PathMatches). Rules only ever remove
+// files, so their order and number never change the result. A path that cannot be made relative
+// to repoRoot is kept.
+func filterConfigIgnored(rules []config.IgnoreRule, linter, repoRoot string, files []string) []string {
+	applicable := slices.DeleteFunc(slices.Clone(rules), func(r config.IgnoreRule) bool {
+		return !slices.Contains(r.Linters, "ALL") && !slices.Contains(r.Linters, linter)
+	})
+	if len(applicable) == 0 {
+		return files
+	}
+
+	kept := make([]string, 0, len(files))
+	for _, f := range files {
+		rel, err := filepath.Rel(repoRoot, f)
+		if err == nil && slices.ContainsFunc(applicable, func(r config.IgnoreRule) bool {
+			return slices.ContainsFunc(r.Paths, func(p string) bool { return ignore.PathMatches(p, filepath.ToSlash(rel)) })
+		}) {
+			continue
+		}
+		kept = append(kept, f)
+	}
+	return kept
 }
 
 // filterGitignored drops any path in files that git considers ignored, deferring to the real

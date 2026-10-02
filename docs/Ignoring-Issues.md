@@ -115,6 +115,12 @@ comment formats declared by the plugin definitions of your enabled linters; you 
 your own configuration. The check uses all openers of all enabled linters, not only those of the
 file's language.
 
+## Ignoring whole files
+
+To keep a path away from linters altogether, rather than silencing findings one by one, list it
+under `lint.ignore` in your configuration; see [Configuration
+Reference](Configuration-Reference.md#lintignore).
+
 ## Where to go next
 
 - [Checking Code](Checking-Code.md) — run checks and read the report
