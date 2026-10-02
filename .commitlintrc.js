@@ -106,7 +106,9 @@ module.exports = {
     "body-max-line-length": [2, "always", 80],
     "body-min-length": [2, "always", 0],
     "body-case": [2, "always", "sentence-case"],
-    "footer-leading-blank": [2, "always"],
+    // Built-in disabled: replaced by the squash-aware local rule below.
+    "footer-leading-blank": [0, "always"],
+    "squash-footer-leading-blank": [2, "always"],
     "footer-empty": [0, "always"],
     "footer-max-length": [2, "always", Infinity],
     "footer-max-line-length": [2, "always", 80],
@@ -139,6 +141,25 @@ module.exports = {
     "type-min-length": [2, "always", 0],
     "signed-off-by": [0, "always", "Signed-off-by: "],
   },
+  plugins: [
+    {
+      rules: {
+        // Same check as footer-leading-blank, skipped for GitHub squash-merge
+        // commits (subject ending in "(#N)"): their body is the free-form PR
+        // description, where a wrapped line such as "word: text" is parsed as
+        // a footer trailer. Direct commits stay strictly checked.
+        "squash-footer-leading-blank": ({ header, raw, footer }) => {
+          if (!footer || /\(#\d+\)$/.test(header)) return [true];
+          const lines = raw.split(/\r?\n/);
+          const at = lines.indexOf(footer.split(/\r?\n/)[0]);
+          return [
+            at <= 0 || lines[at - 1] === "",
+            "footer must have leading blank line",
+          ];
+        },
+      },
+    },
+  ],
   parserPreset: {
     parserOpts: {
       headerPattern: /^(\S+?)\[([^\]]+)\]:\s(.+)$/,
