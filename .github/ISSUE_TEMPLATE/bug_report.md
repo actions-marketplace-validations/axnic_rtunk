@@ -14,7 +14,7 @@ Output of `rtunk --version`.
 
 OS and architecture (e.g. macOS arm64, Linux x86_64). Windows isn't a
 supported host platform — see
-[docs/Migrating-From-Trunk.md](https://github.com/xunleii/rtunk/blob/main/docs/Migrating-From-Trunk.md).
+[docs/Migrating-From-Trunk.md](https://github.com/axnic/rtunk/blob/main/docs/Migrating-From-Trunk.md).
 
 ## Configuration
 

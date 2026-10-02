@@ -12,7 +12,7 @@ Use [docs/Installation.md](docs/Installation.md)'s "clone and build" path rather
 `go install` — it's the setup this file assumes:
 
 ```bash
-git clone https://github.com/xunleii/rtunk.git
+git clone https://github.com/axnic/rtunk.git
 cd rtunk
 mise trust    # if mise prompts about this repo's .mise.toml
 mise install  # installs the Go toolchain and dev tools .mise.toml declares
@@ -24,6 +24,15 @@ matching `go.mod`'s floor and the dev tools. The metalinter used below is rtunk 
 your clone, so there is nothing else to install. See
 [docs/Installation.md](docs/Installation.md) for prerequisites and platform support (macOS and
 Linux only) — this file doesn't repeat that.
+
+### Dev container
+
+[`.devcontainer/devcontainer.json`](.devcontainer/devcontainer.json) gives VS Code, Codespaces
+or the `devcontainer` CLI the same toolchain without installing anything on the host: a
+non-root Ubuntu image (amd64 and arm64) with `git`, `gh`, `mise` and the Go extension. On first
+creation it runs `mise install`, which resolves [`.mise.toml`](.mise.toml) as pinned by
+`mise.lock`; the config is pre-trusted, so no `mise trust` is needed. Downloaded tools live in
+the `rtunk-mise-data` volume and survive rebuilds. `mise run ci` is the gate there as well.
 
 ## Tests and lint
 
@@ -46,7 +55,8 @@ accepts path arguments to scope a run to what you changed; with none, the defaul
 (see `--from`), not the whole repository.
 
 CI runs `./rtunk check` through the repository's own [GitHub Action](docs/GitHub-Action.md) on the
-files a pull request changes.
+files a pull request changes. `mise run ci` runs lint, build
+and tests locally.
 
 For documentation-only changes, this repository's own convention is `./rtunk fmt <path>` then
 `./rtunk check <path>` scoped to the files touched, in place of the full `./rtunk check` above.
@@ -74,7 +84,7 @@ in the same commit. Page inventory, templates and writing rules:
 ## Submitting a change
 
 1. Fork the repository and branch off `main` — the project's only active integration branch;
-   there is no packaged release yet, so nothing downstream of it to keep separate.
+   releases are tagged from it, so there is no separate branch to keep in sync.
 2. Make the change, running the commands under "Tests and lint" as you go, not only at the end.
 3. Commit following "Commit conventions" above: GPG-signed, `Assisted-by:` if AI-assisted, never
    `--signoff`.

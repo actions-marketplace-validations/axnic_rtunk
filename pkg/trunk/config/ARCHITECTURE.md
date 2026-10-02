@@ -75,7 +75,7 @@ resolved under.
 A plugin repository (trunk-io/plugins, or any repo speaking the same dialect) has this top-level
 layout (github.com/trunk-io/plugins, repo root):
 
-```
+```text
 plugin.yaml       # repo-level metadata
 config.yml        # present but empty in trunk-io/plugins today
 linters/<name>/   # one dir per linter: plugin.yaml (+ optional README.md, *.test.ts, test_data/)

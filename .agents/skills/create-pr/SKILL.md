@@ -7,7 +7,7 @@ description: Use when the user wants to open a pull request for the current work
 
 `main` is protected by a repository rule ("Changes must be made through a pull request"), so a
 direct `git push origin main` is rejected. Every change lands through a PR. The repo lives at
-`axnic/rtunk` (the `xunleii/rtunk` remote redirects there); always pass `-R <owner/repo>` to `gh`
+`axnic/rtunk` (the Go module path and the `xunleii/rtunk` remote still use the old owner and redirect there); always pass `-R <owner/repo>` to `gh`
 instead of relying on the working directory.
 
 ## 1. Preconditions

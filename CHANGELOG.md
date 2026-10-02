@@ -3,12 +3,77 @@
 All notable changes to `rtunk` are documented in this file. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-rtunk has not tagged a release yet — `--version` reports `dev`. `[Unreleased]` below collects every
-user-visible change shipped by the milestones [ROADMAP.md](./ROADMAP.md) already records as done
-(`v0.10` through `v0.12`), grouped by milestone. The first tagged release will be `v1.0`; at that
-point this heading is renamed to `[1.0.0]` and dated, and a fresh `[Unreleased]` is started above it.
+rtunk's first tagged release is `v0.13.0` (2026-10-01); `v1.0` is planned and not yet tagged.
+`[0.13.0]` below collects every user-visible change shipped by the milestones
+[ROADMAP.md](./ROADMAP.md) records as done (`v0.10` through `v0.13`), grouped by milestone. Later
+releases list only what changed since the previous tag. A build with no version metadata (a local
+`go build`) still reports `dev`.
 
 ## [Unreleased]
+
+Nothing yet.
+
+## [0.13.2] - 2026-10-02
+
+### Fixed (v0.13.2)
+
+- The release workflow no longer silently falls back to an incomplete draft of the release notes
+  when the AI-generated text is rejected: the model now only writes the summary paragraph, and a
+  rejected answer is logged for diagnosis.
+
+## [0.13.1] - 2026-10-01
+
+### Added (v0.13.1)
+
+- The release workflow generates the release notes with an OpenRouter model.
+
+### Changed (v0.13.1)
+
+- The CI workflows pin the mise toolchain and share one cache.
+- Dependency bumps: `github.com/ulikunitz/xz` 0.5.17, `github.com/stretchr/testify` 1.12.1, and the
+  GitHub Actions the workflows use.
+
+## [0.13.0] - 2026-10-01
+
+First tagged release: darwin and linux archives for amd64 and arm64, with `checksums.txt`.
+
+### v0.13 — Documentation
+
+#### Added (v0.13)
+
+- `rtunk download` is a top-level command that downloads what the configuration needs, with a
+  live install view.
+- `rtunk toolbox link` symlinks the `.rtunk` cache paths into the repository.
+- `rtunk linters enable` and `rtunk actions enable` offer an interactive picker; unknown ids are
+  rejected.
+- Local override files layer over the loaded configuration; `rtunk linters list` and the
+  enable/disable warnings say when an override decides a linter's state.
+- Inline suppression with `rtunk-ignore` / `trunk-ignore` directives, which require a comment
+  leader.
+- `--security-only` runs only the commands tagged `is_security`.
+- A `shellcheck` output-format parser.
+
+#### Changed (v0.13)
+
+- `rtunk init` migrates an existing `.trunk` directory to `.rtunk` and chains the pickers and the
+  download.
+- `rtunk cache clean` reports per-subtree progress and the size freed.
+- `rtunk linters list` output is colorized.
+- `rtunk renovate` is promoted out of the hidden `toolbox` command group.
+
+#### Removed (v0.13)
+
+- The `upgrade` command and the self-update capability.
+- The desktop notification on action failure.
+
+#### Fixed (v0.13)
+
+- `fmt` and `check` no longer error on untracked symlinks at the repository root.
+- `check` streams its own pass live instead of buffering it whole.
+- Hook scripts of actions point at the `sync` / `unsync` commands.
+- A recipe-level `executable` is honored for raw-binary downloads.
+- An unsubstituted `${major_version}` in tool package paths is now resolved.
+- `extractVersion` is kept in Renovate comments when linters are rewritten.
 
 ### v0.12 — Renovate integration, promoted to a public command
 
