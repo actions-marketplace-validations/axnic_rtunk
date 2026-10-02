@@ -145,7 +145,7 @@ enable`.
 
 ### Fuller example
 
-This repository's own `.trunk/trunk.yaml` (paraphrased, same shape) shows every section populated,
+This repository's own `.rtunk/rtunk.yaml` (paraphrased, same shape) shows every section populated,
 including `id@version` pinning and `actions.disabled`:
 
 ```yaml

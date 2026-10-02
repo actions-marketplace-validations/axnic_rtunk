@@ -4,7 +4,8 @@ This document explains how trunk's config and plugin system are architected — 
 `pkg/trunk/config` parses and resolves for `rtunk config {plugins,lint,actions,tools,runtimes}
 list`, `... show <id>`, and `rtunk config print` (ROADMAP.md v0.1).
 
-rtunk currently reads only `.trunk/trunk.yaml`.
+rtunk reads `.rtunk/rtunk.yaml`, or `.trunk/trunk.yaml` when the former is absent; the two are
+never merged (see `docs/Configuration-Reference.md`). This document describes the shared schema.
 
 ## Two-layer model
 
@@ -17,7 +18,7 @@ Configuration is split into two kinds of files:
   actual **definitions** of every linter, tool, runtime, and action available to enable. The
   default/community source is `github.com/trunk-io/plugins`.
 
-Example (this repo's own `.trunk/trunk.yaml`):
+Example (this repo's own `.rtunk/rtunk.yaml`, same schema as `.trunk/trunk.yaml`):
 
 ```yaml
 version: 0.1

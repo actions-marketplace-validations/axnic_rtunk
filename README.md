@@ -35,6 +35,12 @@ Checked 2 files with 1 linter in 0.2s
 ✖ 4 issues (2 high · 2 medium · 0 low)
 ```
 
+Other ways to install: a release archive, mise, aqua, or the GitHub Action, see
+[Installation](https://github.com/axnic/rtunk/wiki/Installation). `v0.14.0` is the first release
+installable with `go install` (the Go module path moved to `github.com/axnic/rtunk`) and the first
+signed one: its archives carry a cosign signature, an SBOM and SLSA build provenance, verifiable
+with the steps in [SECURITY.md](SECURITY.md#verifying-a-release).
+
 `rtunk check` exits `1` when it finds issues and `0` when the tree is clean, so it works as a CI
 gate. It downloads each linter on first use, so that run takes longer.
 
@@ -44,6 +50,26 @@ gate. It downloads each linter on first use, so that run takes longer.
 > clone: plain `check` never runs formatters, Windows is not supported, and actions cannot trigger
 > on file changes or a schedule. See the [migration guide](https://github.com/axnic/rtunk/wiki/Migrating-From-Trunk).
 
+## Use it in GitHub Actions
+
+```yaml
+permissions:
+  contents: read
+steps:
+  - uses: actions/checkout@<sha>
+    with:
+      fetch-depth: 0
+  - uses: axnic/rtunk@v0.14.0
+    with:
+      version: v0.14.0
+      check-mode: changed-since-base
+      require-attestation: true
+```
+
+The action installs and verifies rtunk, caches its tools, runs `rtunk check` and reports findings
+as annotations and a job summary. Inputs, caching, verification and examples:
+[GitHub Action](https://github.com/axnic/rtunk/wiki/GitHub-Action).
+
 ## Why rtunk
 
 trunk's orchestration model is good, but `trunk` ships as a closed-source binary, which is hard to
@@ -52,17 +78,18 @@ the opacity: no telemetry, no cloud account, no daemon, no self-upgrade.
 
 ## Features
 
-| Feature | What it does |
-| ------- | ------------ |
-| Linters, formatters, scanners | Runs the tools defined by the [trunk plugins](https://github.com/trunk-io/plugins) ecosystem: `rtunk check`, `rtunk fmt` |
-| trunk-compatible config | Reads `.trunk/trunk.yaml` as is, or `.rtunk/rtunk.yaml` |
-| Per-project tool versions | Linters are pinned in the config and downloaded on demand |
-| Git-aware | With no paths, `check` only looks at [changed files](https://github.com/axnic/rtunk/wiki/Checking-Code#choose-which-files-to-check) |
-| Normalized output | One report format for every tool: `--format human`, `json` or `sarif` |
-| Autofix | `rtunk check --fix` applies linter fixes, then reports what remains |
-| Actions and git hooks | `rtunk actions`, `rtunk git-hooks sync` |
-| Renovate pins | `rtunk renovate enable` annotates version pins for Renovate |
-| Caching and logs | Downloads are cached; `rtunk logs` lists and shows past runs |
+| Feature                       | What it does                                                                                                                        |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Linters, formatters, scanners | Runs the tools defined by the [trunk plugins](https://github.com/trunk-io/plugins) ecosystem: `rtunk check`, `rtunk fmt`            |
+| trunk-compatible config       | Reads `.trunk/trunk.yaml` as is, or `.rtunk/rtunk.yaml`                                                                             |
+| Per-project tool versions     | Linters are pinned in the config and downloaded on demand                                                                           |
+| Git-aware                     | With no paths, `check` only looks at [changed files](https://github.com/axnic/rtunk/wiki/Checking-Code#choose-which-files-to-check) |
+| Normalized output             | One report format for every tool: `--format human`, `json` or `sarif`                                                               |
+| Autofix                       | `rtunk check --fix` applies linter fixes, then reports what remains                                                                 |
+| Actions and git hooks         | `rtunk actions`, `rtunk git-hooks sync`                                                                                             |
+| Renovate pins                 | `rtunk renovate enable` annotates version pins for Renovate                                                                         |
+| GitHub Action                 | `axnic/rtunk` installs, verifies and caches rtunk, then reports findings as annotations                                             |
+| Caching and logs              | Downloads are cached; `rtunk logs` lists and shows past runs                                                                        |
 
 ## Documentation
 
@@ -73,6 +100,8 @@ Full documentation is on the [wiki](https://github.com/axnic/rtunk/wiki) (source
 - [Checking code](https://github.com/axnic/rtunk/wiki/Checking-Code): select files, apply fixes, exit codes
 - [Configuration Reference](https://github.com/axnic/rtunk/wiki/Configuration-Reference): schema and overrides
 - [Command Reference](https://github.com/axnic/rtunk/wiki/Command-Reference): every command and flag
+- [Installation](https://github.com/axnic/rtunk/wiki/Installation): archive, mise, aqua, `go install`, dev container
+- [GitHub Action](https://github.com/axnic/rtunk/wiki/GitHub-Action): run rtunk in CI
 - [Migrating from trunk](https://github.com/axnic/rtunk/wiki/Migrating-From-Trunk)
 - [FAQ](https://github.com/axnic/rtunk/wiki/FAQ)
 
