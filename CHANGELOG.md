@@ -4,6 +4,7 @@ All notable changes to `rtunk` are documented in this file. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 rtunk's first tagged release is `v0.13.0` (2026-10-01); `v1.0` is planned and not yet tagged.
+`v0.14.0` changes the Go module path (breaking for importers and `go install` users).
 `[0.13.0]` below collects every user-visible change shipped by the milestones
 [ROADMAP.md](./ROADMAP.md) records as done (`v0.10` through `v0.13`), grouped by milestone. Later
 releases list only what changed since the previous tag. A build with no version metadata (a local
@@ -12,6 +13,30 @@ releases list only what changed since the previous tag. A build with no version 
 ## [Unreleased]
 
 Nothing yet.
+
+## [0.14.0] - 2026-10-02
+
+### Added (v0.14.0)
+
+- A reusable GitHub Action, `axnic/rtunk`, installs and verifies rtunk, caches its tools and
+  plugins, runs `rtunk check` and reports the findings as annotations and a job summary. See
+  [docs/GitHub-Action.md](./docs/GitHub-Action.md).
+- Release artifacts are signed and attested: `checksums.txt` is signed keyless with cosign
+  (`checksums.txt.sigstore.json`), every archive ships an SBOM (`*.sbom.json`) and a SLSA build
+  provenance attestation. This is the first signed release; see
+  [SECURITY.md](./SECURITY.md#verifying-a-release).
+- A dev container (Ubuntu, `gh`, `mise`, Go tooling) for contributors.
+
+### Changed (v0.14.0)
+
+- **Breaking:** the Go module path is now `github.com/axnic/rtunk` (was `github.com/xunleii/rtunk`).
+  Update imports and use `go install github.com/axnic/rtunk/cmd/rtunk@v0.14.0`. The `v0.13.x` tags
+  still declare the old path, so `v0.14.0` is the first version installable under the new one.
+  Release archives are unaffected.
+- CI runs the tests on Linux and macOS.
+- This repository is linted with rtunk itself (`.rtunk/rtunk.yaml`, through the GitHub Action)
+  instead of trunk, and every finding rtunk reported across CI, docs and config is fixed.
+- Documentation statements that contradicted the released state are fixed.
 
 ## [0.13.2] - 2026-10-02
 
