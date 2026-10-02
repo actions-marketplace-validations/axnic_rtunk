@@ -1,5 +1,5 @@
-// Package render turns the engine's event stream into terminal output in one of three formats
-// (human, json, sarif). A Renderer holds
+// Package render turns the engine's event stream into terminal output in one of four formats
+// (human, json, sarif, github). A Renderer holds
 // presentation state only (grouping, counting); it makes no decision about what to run or what
 // the exit code is. NewLive is a decorator over any of them: on a terminal it draws a live area on
 // stderr while the run progresses and erases it before the inner renderer writes its report.
@@ -34,18 +34,24 @@ type Format int
 
 // The output formats.
 const (
-	Human Format = iota // text report, color on a TTY
-	JSON                // one JSON document
-	SARIF               // one SARIF 2.1.0 document (check only)
+	Human  Format = iota // text report, color on a TTY
+	JSON                 // one JSON document
+	SARIF                // one SARIF 2.1.0 document (check only)
+	GitHub               // GitHub Actions workflow commands and job summary (check only)
 )
 
 // Options configures a renderer.
 type Options struct {
-	Format     Format // Human (zero value), JSON, SARIF
+	Format     Format // Human (zero value), JSON, SARIF, GitHub
 	Command    Kind
 	NoProgress bool   // suppress the per-linter progress lines on stderr
 	Color      bool   // human only: emit ANSI color; decided by the CLI (see UseColor)
 	Version    string // SARIF tool.driver.version; the CLI passes internal/cli.Version
+
+	// GitHub only: Root is the directory finding paths are relative to (the repository root),
+	// Workspace the directory annotations must be relative to ($GITHUB_WORKSPACE; Root when empty),
+	// StepSummary the file the job summary is appended to ($GITHUB_STEP_SUMMARY; none when empty).
+	Root, Workspace, StepSummary string
 }
 
 // Failure is a linter that failed to run: its name and the first line of its error.
@@ -79,6 +85,8 @@ func New(stdout, stderr io.Writer, opts Options) Renderer {
 		return &jsonRenderer{base: b}
 	case SARIF:
 		return &sarifRenderer{base: b}
+	case GitHub:
+		return &githubRenderer{base: b}
 	default:
 		return &human{base: b}
 	}

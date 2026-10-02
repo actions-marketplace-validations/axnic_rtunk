@@ -159,6 +159,25 @@ func TestFormatSARIF_CheckEmitsOneDocument(t *testing.T) {
 	assert.Len(t, doc.Runs[0].Results, 1)
 }
 
+func TestFormatGitHub_CheckEmitsAnnotationsAndSummary(t *testing.T) {
+	cfgPath, work := twoLinterFixture(t)
+	summary := filepath.Join(t.TempDir(), "summary.md")
+	t.Setenv("GITHUB_STEP_SUMMARY", summary)
+	t.Setenv("GITHUB_WORKSPACE", filepath.Dir(work))
+
+	stdout, stderr, err := run2(t, "--config", cfgPath, "--cache-dir", t.TempDir(), "check", "--format", "github", work)
+	require.Error(t, err)
+	assert.Contains(t, stdout, "::error file=work/file.txt,title=alpha::")
+	assert.Contains(t, stderr, "alpha", "progress stays on stderr")
+	md, rerr := os.ReadFile(summary)
+	require.NoError(t, rerr)
+	assert.Contains(t, string(md), "### rtunk check")
+
+	t.Setenv("GITHUB_STEP_SUMMARY", "")
+	_, _, err = run2(t, "--config", cfgPath, "--cache-dir", t.TempDir(), "fmt", "--format", "github", work)
+	assert.Error(t, err, "github is a check format")
+}
+
 func TestFormat_UnknownIsAUsageError(t *testing.T) {
 	cfgPath, work := twoLinterFixture(t)
 	_, _, err := run2(t, "--config", cfgPath, "check", "--format", "xml", work)

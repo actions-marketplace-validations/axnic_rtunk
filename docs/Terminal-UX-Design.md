@@ -21,7 +21,7 @@ gone; stable machine output is `--format json|sarif`.
 ## Architecture
 
 `check` and `fmt` emit an event stream (linter started, files in progress, finished, finding,
-failure). The `human`, `sarif` and `json` renderers consume it; the TTY live view is one consumer
+failure). The `human`, `sarif`, `json` and `github` renderers consume it; the TTY live view is one consumer
 among others and holds no business logic: it is a decorator over the chosen renderer (`render.NewLive`),
 not a fourth format. Besides `Running` and the terminal events, the engine emits additive
 `Planned`, `JobDone` and `Install*` events that the live view needs (job totals, per-job completion,

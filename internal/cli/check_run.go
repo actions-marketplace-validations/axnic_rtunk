@@ -24,7 +24,7 @@ type checkRunCmd struct {
 	NoProgress bool     `help:"Do not print the per-linter progress lines on stderr."`
 	ASCII      bool     `name:"ascii" help:"Use ASCII glyphs in the live view."`
 	LiveHeight int      `help:"Maximum height of the live view in lines (default: half the terminal, minimum 3)." env:"RTUNK_LIVE_HEIGHT"`
-	Format     string   `enum:"human,sarif,json" default:"human" help:"Output format: human, sarif (for CI) or json."`
+	Format     string   `enum:"human,sarif,json,github" default:"human" help:"Output format: human, sarif (for CI), json, or github (annotations and job summary for GitHub Actions)."`
 	From       string   `help:"Diff base for the default file selection (e.g. origin/main, for CI)."`
 	Jobs       int      `short:"j" help:"Number of parallel linter workers (default: number of CPUs)."`
 	// FormatBeforeCheck runs every enabled formatter before checking (today's "format, then
@@ -107,7 +107,7 @@ func (c *checkRunCmd) Run(cli *CLI, stdout io.Writer, stderr Stderr, argv Argv) 
 		if c.Format != "human" {
 			fixOut = io.Discard
 		}
-		fixR := newRenderer("human", fixOut, stderr, render.Fmt, progressOpts{c.NoProgress, c.ASCII, c.LiveHeight})
+		fixR := newRenderer("human", fixOut, stderr, render.Fmt, progressOpts{NoProgress: c.NoProgress, ASCII: c.ASCII, LiveHeight: c.LiveHeight})
 		onFix := func(ev engine.Event) {
 			fixR.Event(ev)
 			if ev.Phase == engine.Failed {
@@ -128,7 +128,7 @@ func (c *checkRunCmd) Run(cli *CLI, stdout io.Writer, stderr Stderr, argv Argv) 
 	}
 
 	started := time.Now()
-	r := newRenderer(c.Format, stdout, stderr, render.Check, progressOpts{c.NoProgress, c.ASCII, c.LiveHeight})
+	r := newRenderer(c.Format, stdout, stderr, render.Check, progressOpts{NoProgress: c.NoProgress, ASCII: c.ASCII, LiveHeight: c.LiveHeight, RepoRoot: repoRoot})
 	checkPredicate := func(cmd config.Command) bool {
 		return !cmd.Formatter && !cmd.InPlace && (!c.SecurityOnly || cmd.IsSecurity)
 	}
