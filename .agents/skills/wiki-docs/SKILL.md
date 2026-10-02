@@ -54,6 +54,7 @@ does not.
 | `Actions-And-Git-Hooks.md`    | Using rtunk     | Guide            | `rtunk actions`, `run`, `git-hooks` help                                        |
 | `Keeping-Tools-Up-To-Date.md` | Using rtunk     | Guide            | `rtunk renovate --help`, `CLI-Design.md` (Renovate)                             |
 | `Cache-And-Logs.md`           | Using rtunk     | Guide            | `rtunk cache`, `logs`, `toolbox link` help                                      |
+| `GitHub-Action.md`            | Using rtunk     | Guide            | `action.yml`, `rtunk check run --help`                                          |
 | `Command-Reference.md`        | Reference       | Reference        | `rtunk help --all`, `rtunk <cmd> --help`                                        |
 | `Configuration-Reference.md`  | Reference       | Reference        | `pkg/trunk/config` types and loader                                             |
 | `FAQ.md`                      | Reference       | FAQ              | the pages above; recurring issues                                               |
