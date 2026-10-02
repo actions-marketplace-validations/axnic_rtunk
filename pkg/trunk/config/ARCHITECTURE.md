@@ -423,7 +423,8 @@ not trunk.yaml-enableable, so there's nothing for `filterEnabled` to trim.
   closure, unlike `CommentFormats` above.
 - default `ignore` rules — e.g. all linters ignore `**/trunk`, and lockfiles (`go.sum`,
   `package-lock.json`, `Cargo.lock`) are ignored by all linters except explicitly listed security
-  scanners. Not yet parsed by rtunk.
+  scanners. Not yet parsed by rtunk: only the `lint.ignore` of the repository's own config files is
+  read (`Config.Lint.Ignore`).
 - `bazel` (search paths for a bazel/bazelisk binary), `default_max_file_size`,
   `compile_commands_roots`, `skip_missing_compile_command`. Not yet parsed by rtunk.
 

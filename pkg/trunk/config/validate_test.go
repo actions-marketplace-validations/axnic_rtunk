@@ -233,3 +233,14 @@ func TestConfig_Validate_JoinsMultipleErrors(t *testing.T) {
 	require.True(t, ok, "errors.Join must return something implementing Unwrap() []error")
 	assert.Len(t, joined.Unwrap(), 2)
 }
+
+func TestConfig_Validate_IgnoreNegation(t *testing.T) {
+	var cfg config.Config
+	cfg.Lint.Ignore = []config.IgnoreRule{{Linters: []string{"ALL"}, Paths: []string{"vendor/", "!vendor/keep.go"}}}
+
+	err := cfg.Validate()
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), `lint.ignore: negated path "!vendor/keep.go" is not supported`)
+	assert.NotContains(t, err.Error(), `"vendor/"`)
+}

@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 )
 
@@ -15,6 +16,7 @@ func (cfg *Config) Validate() error {
 	errs = append(errs, checkEnabled("lint", cfg.Lint.Enabled, cfg.Lint.Definitions)...)
 	errs = append(errs, checkEnabled("action", cfg.Actions.Enabled, cfg.Actions.Definitions)...)
 	errs = append(errs, validateReferences(cfg)...)
+	errs = append(errs, validateIgnore(cfg.Lint.Ignore)...)
 	return errors.Join(errs...)
 }
 
@@ -79,5 +81,19 @@ func validateReferences(cfg *Config) []error {
 		}
 	}
 
+	return errs
+}
+
+// validateIgnore reports every lint.ignore path that starts with "!": negation is not supported,
+// and skipping it silently would ignore more than the config asks to.
+func validateIgnore(rules []IgnoreRule) []error {
+	var errs []error
+	for _, r := range rules {
+		for _, p := range r.Paths {
+			if strings.HasPrefix(p, "!") {
+				errs = append(errs, fmt.Errorf("lint.ignore: negated path %q is not supported", p))
+			}
+		}
+	}
 	return errs
 }

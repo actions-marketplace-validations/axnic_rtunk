@@ -260,3 +260,50 @@ func TestResolve_OverrideProvenance(t *testing.T) {
 	assert.Equal(t, map[string]string{"old": "trunk.yaml", "yamllint": "rtunk.local.yaml"}, cfg.Lint.DisabledFrom,
 		"disabling is attributed to any file, base included, by bare id")
 }
+
+// TestResolve_LintIgnore: lint.ignore entries parse as written, and an override file's entries are
+// added after the base file's rather than replacing them.
+func TestResolve_LintIgnore(t *testing.T) {
+	tests := []struct {
+		name     string
+		base     string
+		override string
+		want     []config.IgnoreRule
+	}{
+		{
+			name: "none",
+			base: "version: 0.1\n",
+			want: nil,
+		},
+		{
+			name: "all linters and a named one",
+			base: "lint:\n  ignore:\n    - linters: [ALL]\n      paths: [.mise/]\n    - linters: [prettier, yamllint]\n      paths: [docs/**, '*.lock']\n",
+			want: []config.IgnoreRule{
+				{Linters: []string{"ALL"}, Paths: []string{".mise/"}},
+				{Linters: []string{"prettier", "yamllint"}, Paths: []string{"docs/**", "*.lock"}},
+			},
+		},
+		{
+			name:     "override entries follow the base's",
+			base:     "lint:\n  ignore:\n    - linters: [ALL]\n      paths: [a/]\n",
+			override: "lint:\n  ignore:\n    - linters: [ALL]\n      paths: [b/]\n",
+			want: []config.IgnoreRule{
+				{Linters: []string{"ALL"}, Paths: []string{"a/"}},
+				{Linters: []string{"ALL"}, Paths: []string{"b/"}},
+			},
+		},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			dir := t.TempDir()
+			require.NoError(t, os.WriteFile(filepath.Join(dir, "trunk.yaml"), []byte(tc.base), 0o644))
+			if tc.override != "" {
+				require.NoError(t, os.WriteFile(filepath.Join(dir, "rtunk.local.yaml"), []byte(tc.override), 0o644))
+			}
+
+			cfg, err := config.Resolve(filepath.Join(dir, "trunk.yaml"), t.TempDir())
+			require.NoError(t, err)
+			assert.Equal(t, tc.want, cfg.Lint.Ignore)
+		})
+	}
+}
