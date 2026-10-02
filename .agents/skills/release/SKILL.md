@@ -1,0 +1,156 @@
+---
+name: release
+description: Use when the user wants to cut, publish or tag a rtunk release, create a release candidate, choose a version bump, watch the Release workflow run, or verify a published release (checksums, cosign signature, SLSA attestation). Triggers the workflow through the GitHub CLI, only after explicit user confirmation.
+compatibility: Requires GitHub CLI (gh); cosign and sha256sum/shasum for verification
+allowed-tools: Bash(gh:*) Bash(git:*) Bash(cosign:*) Bash(sha256sum:*) Bash(shasum:*)
+---
+
+# Release
+
+Releases are fully automated by `.github/workflows/workflow_dispatch.release.yaml`. Never bump a
+version, create a tag, run `goreleaser` or upload artifacts by hand: the tag, the archives, the
+signature and the provenance must all come from that one workflow.
+
+**This skill never triggers a release without explicit user confirmation.** A release pushes a
+tag and publishes artifacts: outward-facing and not cleanly reversible. Everything except the
+`gh workflow run` step is read-only; do the read-only steps freely, stop before the trigger and
+ask.
+
+## When to release
+
+On request only. The workflow runs on `main` (the only integration branch; releases are tagged
+from it). Do not suggest a release on your own initiative beyond pointing out that unreleased
+changes exist.
+
+## Pre-flight
+
+1. `main` CI is green on the commit to be released:
+   `gh run list --branch main --workflow 'merge_group,pull_request,push.ci.yaml' --limit 3`.
+   The workflow re-runs `mise run ci` itself and fails before tagging if it is red, but a red
+   `main` is a reason to stop and ask, not to retry.
+2. Unreleased changes exist and match the bump you are about to propose:
+   `git --no-pager log "$(git describe --tags --abbrev=0 --exclude '*-rc.*')..origin/main" --first-parent --oneline`.
+3. `CHANGELOG.md` has an `[Unreleased]` section listing the user-visible changes (Keep a
+   Changelog format). The workflow does not edit `CHANGELOG.md`, and nothing in the repo
+   documents who moves `[Unreleased]` under a version heading: if it is still non-empty and not
+   yet dated, tell the user and let them decide.
+4. No release run is in progress: the workflow uses the `release` concurrency group
+   (`cancel-in-progress: false`), so a second dispatch queues behind the first.
+   `gh run list --workflow workflow_dispatch.release.yaml --limit 3`.
+5. Latest tag, for reference: `gh release list --limit 5`.
+
+## Choosing the version
+
+Read the commit types since the last tag (see `.agents/skills/git-commit/SKILL.md`). rtunk is
+pre-`v1.0`; `v0.14.0` shipped a breaking change (Go module path) as a minor bump, so the
+precedent is:
+
+| Commits since the last stable tag                         | Bump    |
+| --------------------------------------------------------- | ------- |
+| Only `!` (Fix), `=`, `^`, `@`, `$` and other non-breaking | `patch` |
+| At least one `+` or `~` (new or improved behavior)        | `minor` |
+| At least one `+!`, `~!` or `-!` (breaking), pre-`v1.0`    | `minor` |
+| `+!`/`~!`/`-!` once `v1.0` is out                         | `major` |
+
+`major` is also the way to reach `v1.0.0`; that is the maintainer's call, never inferred. When
+unsure between two bumps, propose the lower one and ask. Prefer an `rc-*` bump first when the
+change is risky; the stable release afterwards counts every commit since the last stable tag,
+RC commits included.
+
+Bump types the workflow accepts (computed from the last tag, nothing else):
+
+| `bump`     | Result                                                                       |
+| ---------- | ---------------------------------------------------------------------------- |
+| `patch`    | Stable, last stable tag with patch + 1                                       |
+| `minor`    | Stable, minor + 1, patch 0                                                   |
+| `major`    | Stable, major + 1, minor and patch 0                                         |
+| `rc-patch` | `X.Y.Z+1-rc.N`; N increments if an RC for that target already exists, else 1 |
+| `rc-minor` | Same, for the next minor                                                     |
+| `rc-major` | Same, for the next major                                                     |
+
+Optional inputs: `version` (exact `X.Y.Z` or `X.Y.Z-rc.N`, no leading `v`; overrides `bump`,
+fails if the tag exists or the format is wrong) and `notes` (replaces the generated release
+notes verbatim). `bump` is required even when `version` is set.
+
+## Triggering
+
+Show the user the computed version and the commits it covers, then ask for an explicit go. Only
+after a clear yes:
+
+```sh
+gh workflow run workflow_dispatch.release.yaml --repo axnic/rtunk --ref main --field bump=minor
+# exact version instead of the computed one (bump is ignored but still required):
+gh workflow run workflow_dispatch.release.yaml --repo axnic/rtunk --ref main \
+  --field bump=minor --field version=0.16.0
+```
+
+## What the workflow does
+
+1. Computes the next version from the last `v[0-9]*` tag (or validates `version`).
+2. Runs `mise run ci` (lint, build, tests, release-tooling tests); a failure stops everything
+   before the tag exists.
+3. Builds the release notes: a deterministic draft from the first-parent commits and their PRs
+   (`scripts/generate-release-notes.mjs`), whose summary paragraph is written by an OpenRouter
+   model prompted with `.agents/skills/release-notes/SKILL.md`. Without the
+   `OPENROUTER_API_KEY` secret, or on any model failure, the deterministic draft is used.
+4. Creates and pushes the annotated tag `v<version>`.
+5. Runs GoReleaser (`.goreleaser.yml`): `darwin` and `linux` archives for `amd64` and `arm64`
+   (`rtunk-<tag>-<os>-<arch>.tar.gz`), `checksums.txt`, one SPDX SBOM per archive, and a keyless
+   cosign signature of `checksums.txt` (`checksums.txt.sigstore.json`). The GitHub Release is
+   created as a **draft**; versions with a `-rc.N` suffix are marked prerelease automatically.
+6. Records a SLSA build provenance attestation for every archive listed in `checksums.txt`.
+
+Permissions are scoped to the job (`contents: write`, `pull-requests: read`, `id-token: write`,
+`attestations: write`). The tag is pushed with `GITHUB_TOKEN`, which triggers no other workflow;
+that is why GoReleaser runs inside the same job.
+
+## Watching the run
+
+```sh
+gh run list --repo axnic/rtunk --workflow workflow_dispatch.release.yaml --limit 3
+gh run watch <run-id> --repo axnic/rtunk --exit-status
+gh run view <run-id> --repo axnic/rtunk --log-failed
+```
+
+If the run fails after the "Create and push tag" step, the tag already exists on the remote.
+Do not delete it or re-run blindly: report the state to the user and let them decide (deleting
+a tag or release is destructive, ask first).
+
+## After the run: review and publish
+
+The release is a draft. Show the user the notes
+(`gh release view v<version> --repo axnic/rtunk --json body,isDraft,isPrerelease,assets`) and
+let them publish it from the GitHub UI or by their explicit instruction
+(`gh release edit v<version> --draft=false`). Do not publish on your own.
+
+## Verifying the release
+
+Source of truth: [SECURITY.md](../../../SECURITY.md#verifying-a-release); if it disagrees with
+this file, it wins. Signing starts with `v0.14.0`.
+
+```sh
+tag=v<version>
+gh release view "$tag" --repo axnic/rtunk --json isDraft,isPrerelease,assets --jq '.assets[].name'
+# expect, per os/arch: rtunk-$tag-<os>-<arch>.tar.gz and its .sbom.json,
+# plus checksums.txt and checksums.txt.sigstore.json
+
+mkdir -p "${TMPDIR:-/tmp}/rtunk-verify" && cd "${TMPDIR:-/tmp}/rtunk-verify"
+gh release download "$tag" --repo axnic/rtunk \
+  -p checksums.txt -p checksums.txt.sigstore.json -p "rtunk-$tag-linux-amd64.tar.gz"
+
+# 1. checksums.txt was signed by the Release workflow of this repository
+cosign verify-blob checksums.txt --bundle checksums.txt.sigstore.json \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+  --certificate-identity-regexp '^https://github.com/axnic/rtunk/\.github/workflows/workflow_dispatch\.release\.yaml@refs/heads/main$'
+
+# 2. the archive matches the signed checksums
+sha256sum --ignore-missing -c checksums.txt        # shasum -a 256 -c on macOS
+
+# 3. the archive was built by that workflow from this repository
+gh attestation verify "rtunk-$tag-linux-amd64.tar.gz" -R axnic/rtunk
+```
+
+The commands above are SECURITY.md's, run on the published release (the draft is not public
+until published). Any failed step
+means the release must not be used: report it to the user and follow
+[SECURITY.md](../../../SECURITY.md).
