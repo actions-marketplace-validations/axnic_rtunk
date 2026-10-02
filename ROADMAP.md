@@ -176,7 +176,7 @@ not an afterthought: the precise, exhaustive set of documents a public open-sour
 covering the project itself, its internals, and its users. Every document below is written or
 brought up to date; none is optional.
 
-**Standard project documents**
+### Standard project documents
 
 - **README** — Purpose: the single entry point explaining what rtunk is, why it exists, how to
   install and run it, and a dedicated section on every way rtunk's behavior intentionally differs
@@ -207,7 +207,7 @@ brought up to date; none is optional.
   new issue or pull request shows the template, and a submission that follows it contains the
   requested information.
 
-**Technical documents**
+### Technical documents
 
 - **Internal architecture** — Purpose: explain how rtunk works internally end to end —
   configuration resolution, provisioning and the cache, the execution engine, actions, and output
@@ -220,7 +220,7 @@ brought up to date; none is optional.
   debugging a plugin. Done when: someone unfamiliar with trunk's plugin format can explain, using
   only this document, what a given declared field does and whether rtunk currently acts on it.
 
-**User documents**
+### User documents
 
 - **Installation guide** — Purpose: every supported way to obtain a working `rtunk` binary and
   confirm it works. Audience: new users. Done when: a user on each officially supported platform
