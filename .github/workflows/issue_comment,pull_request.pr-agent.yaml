@@ -1,0 +1,140 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+#
+# =============================================================================
+# PR Agent — AI review of pull requests, on demand
+# =============================================================================
+# Runs The-PR-Agent/pr-agent as a GitHub Action
+# (https://docs.pr-agent.ai/installation/github/), only when asked:
+#
+#   - when a pull request is opened, a comment lists the commands and how to use them
+#     (`welcome` job; no model call, nothing from the pull request is executed);
+#   - a comment starting with `/` (`/describe`, `/review`, `/improve`, `/ask ...`, `/help`)
+#     runs that command (`pr-agent` job). Only the logins of the allow-list below count, so
+#     nobody else can spend the OpenRouter key.
+#
+# Nothing runs automatically on pushes. PR Agent never edits the pull request's own title or
+# description: `/describe` posts its result as one persistent comment.
+#
+# The model is reached through OpenRouter with the same OPENROUTER_API_KEY secret as the
+# release notes (workflow_dispatch.release.yaml). Without the secret neither job does
+# anything, like the release notes fall back to the deterministic draft.
+#
+# Allow-list of the commenters: the repository variable PR_AGENT_ALLOWED_USERS (Settings >
+# Secrets and variables > Actions > Variables), a JSON list of GitHub logins such as
+# ["xunleii", "someone"], compared case-insensitively. Unset, it falls back to ["xunleii"].
+# Edit the variable, not this file, to add or remove someone.
+#
+# The event is issue_comment/pull_request, never pull_request_target, and PR Agent only reads
+# the diff through the GitHub API with no checkout: a pull request's own code never runs with
+# secrets. Bots (Dependabot included) and pull requests from forks get no welcome comment: their
+# token is read-only.
+#
+# Any configurable property of PR Agent can be set as an environment variable
+# (https://github.com/The-PR-Agent/pr-agent/blob/main/pr_agent/settings/configuration.toml).
+# =============================================================================
+
+name: PR Agent
+
+on:
+  pull_request:
+    types: [opened]
+  issue_comment:
+    types: [created]
+
+# Minimal top-level permissions — each job declares what it needs.
+permissions: {}
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # welcome — tell the author which commands exist
+  # ---------------------------------------------------------------------------
+  welcome:
+    name: 👋 Welcome
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.sender.type != 'Bot' &&
+      github.event.pull_request.draft == false &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+
+    steps:
+      - name: 💬 Post the commands comment
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          HAS_KEY: ${{ secrets.OPENROUTER_API_KEY != '' }}
+          ALLOWED: ${{ vars.PR_AGENT_ALLOWED_USERS || '["xunleii"]' }}
+        run: |
+          if [[ "$HAS_KEY" != "true" ]]; then
+            echo "::notice::OPENROUTER_API_KEY is not set - no commands to advertise."
+            exit 0
+          fi
+          users=$(jq -r 'join(", ")' <<<"$ALLOWED")
+          gh pr comment "$PR_NUMBER" --body-file - <<BODY
+          ## PR Agent commands
+
+          Nothing runs automatically on this pull request. Comment one of these to get an AI pass, powered by [PR Agent](https://github.com/The-PR-Agent/pr-agent):
+
+          | Command | What it does |
+          | --- | --- |
+          | \`/describe\` | Posts a description, as a comment (the pull request itself is never edited) |
+          | \`/review\` | Posts a review of the changes |
+          | \`/improve\` | Suggests code improvements |
+          | \`/ask <question>\` | Answers a question about the changes |
+          | \`/help\` | Lists every command |
+
+          Only these logins can run them, other comments are ignored: ${users}. The answers are advisory and never block a merge.
+          BODY
+
+  # ---------------------------------------------------------------------------
+  # pr-agent — run the requested command
+  # ---------------------------------------------------------------------------
+  pr-agent:
+    name: 🤖 PR Agent
+    if: >-
+      github.event_name == 'issue_comment' &&
+      github.event.sender.type != 'Bot' &&
+      github.event.issue.pull_request &&
+      startsWith(github.event.comment.body, '/') &&
+      contains(fromJSON(vars.PR_AGENT_ALLOWED_USERS || '["xunleii"]'), github.event.comment.user.login)
+    runs-on: ubuntu-latest
+    # One run per pull request: a command waits for the one in progress.
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.issue.number }}
+      cancel-in-progress: false
+    # The documented example grants contents: write (and checks: write) for features that push
+    # commits; commenting needs neither. Widen only if a PR Agent command needs it.
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+
+    steps:
+      - name: 🔑 Check the OpenRouter key
+        id: key
+        env:
+          HAS_KEY: ${{ secrets.OPENROUTER_API_KEY != '' }}
+        run: |
+          echo "set=$HAS_KEY" >> "$GITHUB_OUTPUT"
+          if [[ "$HAS_KEY" != "true" ]]; then
+            echo "::notice::OPENROUTER_API_KEY is not set - skipping PR Agent."
+          fi
+
+      - name: 🤖 Run PR Agent
+        if: steps.key.outputs.set == 'true'
+        uses: The-PR-Agent/pr-agent@8e5a9295973b24af4b70cafd0b660a230811ef9e # v0.47.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OPENROUTER.KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          # Pareto 26.10 preview, with Claude Sonnet 5.5 as the fallback. OpenRouter ids are unknown to
+          # PR Agent's token table, so the context size is declared explicitly (both models: ~1M).
+          config.model: openrouter/unbiased/pareto-26.10-preview
+          config.fallback_models: '["openrouter/anthropic/claude-sonnet-5.5"]'
+          config.custom_model_max_tokens: "1000000"
+          # Never edit the pull request itself: the description goes to one persistent comment
+          # instead of overwriting the body, and the title is left alone.
+          PR_DESCRIPTION.PUBLISH_DESCRIPTION_AS_COMMENT: "true"
+          PR_DESCRIPTION.GENERATE_AI_TITLE: "false"
