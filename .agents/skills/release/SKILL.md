@@ -121,7 +121,9 @@ a tag or release is destructive, ask first).
 The release is a draft. Show the user the notes
 (`gh release view v<version> --repo axnic/rtunk --json body,isDraft,isPrerelease,assets`) and
 let them publish it from the GitHub UI or by their explicit instruction
-(`gh release edit v<version> --draft=false`). Do not publish on your own.
+(`gh release edit v<version> --draft=false`). Do not publish on your own: this skill never publishes the draft,
+it only tells the user. Remind them that the publish form has a "Publish this Release to the GitHub Marketplace"
+checkbox, which only they can tick (web UI only; the workflow cannot do it).
 
 ## Verifying the release
 

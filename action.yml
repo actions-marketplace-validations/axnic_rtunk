@@ -17,8 +17,8 @@
 # `--format github`, which rtunk has had since v0.15: older releases are not supported.
 # =============================================================================
 
-name: rtunk
-description: Install rtunk, cache its tools and plugins, run `rtunk check` and report findings as annotations and a job summary (rtunk v0.15 and later).
+name: rtunk check
+description: Run rtunk check with cached tools and report findings as annotations and a job summary.
 author: axnic
 branding:
   icon: check-circle

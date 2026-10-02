@@ -40,17 +40,18 @@ the `rtunk-mise-data` volume and survive rebuilds. `mise run ci` is the gate the
 CI never calls a tool directly: every job runs a task of `.mise.toml`, so a green local run is the
 same gate a pull request goes through. `mise tasks` lists them.
 
-| Task                     | What it does                                                                                         |
-| ------------------------ | ---------------------------------------------------------------------------------------------------- |
-| `mise run ci:lint`       | `golangci-lint run ./...`                                                                            |
-| `mise run ci:build`      | Builds `./rtunk`                                                                                     |
-| `mise run ci:rtunk`      | `rtunk check` with the released rtunk mise installs (pinned by `mise.lock`), changed files           |
-| `mise run ci:test`       | `go test -race` with a coverage profile                                                              |
-| `mise run ci:coverage`   | `ci:test`, then fails under the 80% statement-coverage floor                                         |
-| `mise run ci:scripts`    | Tests of the release tooling in `scripts/` (Node's built-in runner)                                  |
-| `mise run ci:commitlint` | Validates commit messages (`-- --from <sha> --to <sha>`)                                             |
-| `mise run ci:vulncheck`  | `govulncheck ./...`                                                                                  |
-| `mise run ci`            | `ci:lint`, `ci:build`, `ci:coverage`, `ci:scripts`: the CI gate minus `ci:rtunk` and commit messages |
+| Task                     | What it does                                                                                                      |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| `mise run ci:lint`       | `golangci-lint run ./...`                                                                                         |
+| `mise run ci:action`     | Checks `action.yml` can be published to the Marketplace (single-line name, description of at most 125 characters) |
+| `mise run ci:build`      | Builds `./rtunk`                                                                                                  |
+| `mise run ci:rtunk`      | `rtunk check` with the released rtunk mise installs (pinned by `mise.lock`), changed files                        |
+| `mise run ci:test`       | `go test -race` with a coverage profile                                                                           |
+| `mise run ci:coverage`   | `ci:test`, then fails under the 80% statement-coverage floor                                                      |
+| `mise run ci:scripts`    | Tests of the release tooling in `scripts/` (Node's built-in runner)                                               |
+| `mise run ci:commitlint` | Validates commit messages (`-- --from <sha> --to <sha>`)                                                          |
+| `mise run ci:vulncheck`  | `govulncheck ./...`                                                                                               |
+| `mise run ci`            | `ci:lint`, `ci:build`, `ci:coverage`, `ci:scripts`: the CI gate minus `ci:rtunk` and commit messages              |
 
 Extra arguments reach rtunk through the task: `mise run ci:rtunk -- docs/Installation.md`. `ci:rtunk`
 does not build: it runs the released rtunk, not `./rtunk`, so use `./rtunk` (after `mise run ci:build`)
@@ -147,6 +148,13 @@ version from the last tag (or takes an explicit `version`), runs `mise run ci`, 
 with cosign, attaches an SBOM per archive and records SLSA build provenance, then publishes a draft
 release with generated notes for the maintainer to review. [SECURITY.md](SECURITY.md#verifying-a-release)
 shows how to verify the result. Releases from `v0.14.0` on are signed; earlier ones are not.
+
+Listing the action on the GitHub Marketplace is a manual step, as GitHub documents no API or CLI for it: when
+publishing the draft, tick "Publish this Release to the GitHub Marketplace" in the release form (it needs the
+valid `action.yml` at the repository root and the Marketplace Developer Agreement accepted once by the owner).
+`mise run ci:action` (part of `mise run ci`, so it also runs before a release is tagged) fails on an `action.yml`
+without a single-line name or with a description over 125 characters; it cannot check that the name (`rtunk check`)
+is unique, which only GitHub knows.
 
 ### `.trunk` and `.rtunk`
 
