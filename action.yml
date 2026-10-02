@@ -3,8 +3,8 @@
 # =============================================================================
 # rtunk — GitHub Action
 # =============================================================================
-# Installs rtunk, restores its tool/plugin cache, runs `rtunk check` and reports
-# the result (annotations + job summary). The equivalent of trunk-io/trunk-action.
+# Installs rtunk, restores its tool/plugin cache and runs `rtunk check --format github`, which
+# itself writes the annotations and the job summary. The equivalent of trunk-io/trunk-action.
 #
 #   - uses: actions/checkout@<sha>
 #     with: { fetch-depth: 0 }                 # needed by check-mode: changed-since-base
@@ -12,13 +12,13 @@
 #
 # Docs: docs/GitHub-Action.md. Linux and macOS runners only.
 #
-# Step order matters: the cache is saved and the results reported with
-# `if: always()`, and the job only fails in the last step, so a failing check
-# still warms the cache and still annotates the pull request.
+# Step order matters: the cache is saved with `if: always()` and the job only fails in the
+# last step, so a failing check still warms the cache. Releases older than v0.15 have no
+# `--format github`: they run with the human format and produce no annotations.
 # =============================================================================
 
 name: rtunk
-description: Install rtunk, cache its tools and plugins, run `rtunk check` and report findings as annotations and a job summary.
+description: Install rtunk, cache its tools and plugins, run `rtunk check` and report findings as annotations and a job summary (rtunk v0.15 and later).
 author: axnic
 branding:
   icon: check-circle
@@ -59,9 +59,6 @@ outputs:
   exit-code:
     description: Exit code of `rtunk check` (0 = clean).
     value: ${{ steps.check.outputs.exit-code }}
-  results-file:
-    description: Path of the JSON report written by `rtunk check --format json` (empty when no file was checked).
-    value: ${{ steps.check.outputs.results-file }}
 
 runs:
   using: composite
@@ -238,45 +235,18 @@ runs:
           *) echo "::error::check-mode must be 'all' or 'changed-since-base' (got '$CHECK_MODE')"; echo "exit-code=1" >> "$GITHUB_OUTPUT"; exit 0 ;;
         esac
         read -r -a extra <<< "$ARGUMENTS"
-        out="$RUNNER_TEMP/rtunk-results.json"
-        rm -f "$out"
-        echo "::group::rtunk check ${args[*]} ${extra[*]:-}"
-        rtunk check "${args[@]}" ${extra[@]+"${extra[@]}"} --format json > "$out"
+        # rtunk writes the annotations and, through GITHUB_STEP_SUMMARY, the job summary itself.
+        # Releases that predate `--format github` still run, without annotations.
+        help=$(rtunk check run --help 2>&1 | tr -s ' \n' ' ' || true)
+        if [[ "$help" == *"annotations and job summary"* ]]; then
+          args+=(--format github)
+        else
+          echo "::warning::this rtunk release has no --format github: findings are only in the log, no annotations"
+        fi
+        rtunk check "${args[@]}" ${extra[@]+"${extra[@]}"}
         code=$?
-        echo "::endgroup::"
-        # With no file selected rtunk writes no document at all.
-        [ -s "$out" ] || { rm -f "$out"; out=; }
-        { echo "exit-code=$code"; echo "results-file=$out"; } >> "$GITHUB_OUTPUT"
+        echo "exit-code=$code" >> "$GITHUB_OUTPUT"
         exit 0
-
-    - name: Report results
-      if: always() && steps.check.outputs.results-file != ''
-      shell: bash
-      env:
-        RESULTS: ${{ steps.check.outputs.results-file }}
-      run: |
-        set -euo pipefail
-        # Workflow commands: %, CR and LF escaped in data; also : and , in properties.
-        # GitHub shows at most 10 annotations per level and step: cap the log noise at 50.
-        jq -r '
-          def e: gsub("%";"%25")|gsub("\r";"%0D")|gsub("\n";"%0A");
-          def p: e|gsub(":";"%3A")|gsub(",";"%2C");
-          (.issues[:50][] |
-            "::\(if .severity=="high" then "error" elif .severity=="medium" then "warning" else "notice" end) file=\(.file|p),line=\(if .line>0 then .line else 1 end),col=\(if .column>0 then .column else 1 end),title=\("\(.linter)\(if .rule!="" then "/"+.rule else "" end)"|p)::\(.message|e)"),
-          (.failures[] | "::error title=\(.linter|p)::linter failed to run: \(.error|e)")
-        ' "$RESULTS"
-        {
-          jq -r '
-            "### rtunk check\n",
-            "\(.files_checked) file(s), \(.linters) linter(s), \(.issues|length) issue(s), \(.failures|length) failure(s), \(.suppressed) suppressed, \(.elapsed_ms) ms.\n",
-            (if (.issues|length) > 0 then
-              "| Severity | Location | Linter | Message |\n| --- | --- | --- | --- |",
-              (.issues[:100][] | "| \(.severity) | `\(.file):\(.line)` | \(.linter)\(if .rule!="" then "/"+.rule else "" end) | \(.message|gsub("\n";" ")|gsub("\\|";"\\|")) |"),
-              (if (.issues|length) > 100 then "\n\(.issues|length-100) more issue(s) not shown." else empty end)
-            else "No issues." end),
-            (if (.failures|length) > 0 then "\n**Failures**\n", (.failures[] | "- \(.linter): \(.error|gsub("\n";" "))") else empty end)
-          ' "$RESULTS"
-        } >> "$GITHUB_STEP_SUMMARY"
 
     # Save even when the check failed: tools downloaded by a failing run are still worth keeping.
     # An exact hit is not saved again (the key is immutable).
