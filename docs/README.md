@@ -64,4 +64,4 @@ For contributors: how rtunk is designed and why. These pages describe design, no
 - [Decision Log](Decision-Log.md) — maintainers' recorded decisions
 
 The project's source, license and contribution guide are in the
-[repository](https://github.com/xunleii/rtunk); see also [CONTRIBUTING.md](../CONTRIBUTING.md).
+[repository](https://github.com/axnic/rtunk); see also [CONTRIBUTING.md](../CONTRIBUTING.md).

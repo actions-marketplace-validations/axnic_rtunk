@@ -70,7 +70,7 @@ classDiagram
         name
         exposed shim names
         known-good/pinned version
-        health checks (ignored today)
+        health checks (run after install)
     }
     class RuntimeDefinition {
         kind (go, node, python, php, rust, ruby, ...)
@@ -181,39 +181,39 @@ treating it as a resolvable-to-empty legacy id with a surfaced warning. See
 | -------------------- | -------- | ----------------------------------------------------------- | ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
 | `LinterDefinition`   | name     | tool references, run-from context                           | —                                                      | matched file types, `direct_configs` (config-presence trigger), `suggest_if` (when to recommend enabling) | linter-scoped environment entries               |
 | `CommandDefinition`  | name     | invocation template, batch flag, sandbox mode, target shape | output format, output parser, formatter/in-place flags | version range, platform restriction, enabled flag, success/error exit codes                               | —                                               |
-| `ToolDefinition`     | name     | exposed shim names                                          | —                                                      | known-good/pinned version                                                                                 | health checks (declared, unused today)          |
+| `ToolDefinition`     | name     | exposed shim names                                          | —                                                      | known-good/pinned version                                                                                 | health checks (run after install)               |
 | `RuntimeDefinition`  | kind     | package-install mechanism (by kind)                         | —                                                      | known-good version, "expect present on host"                                                              | runtime-environment + linter-environment tables |
 | `ActionDefinition`   | id       | invocation template, runtime reference                      | —                                                      | triggers (hook/file-change/schedule), interactivity requirement                                           | action-scoped environment entries               |
 | `DownloadRecipe`     | name     | —                                                           | per-OS/CPU URL templates                               | per-entry version range                                                                                   | —                                               |
 | `FileTypeDefinition` | name     | —                                                           | —                                                      | extension/filename/regex/shebang/required-key matchers, inheritance                                       | —                                               |
 
-## Declared fields the current execution engine does not act on
+## Declared fields and whether the execution engine acts on them
 
 The catalog survey below (counts are occurrences across the full real plugin catalog, not just
 distinct ids) groups every field found on `CommandDefinition`/`LinterDefinition`/`ToolDefinition`/
-`ActionDefinition` that a redesign's object model should represent, but that today's engine parses
-and then never consults, or never parses at all because the corresponding struct has no field for
-it. Full detail, evidence, and severity for each is in
+`ActionDefinition` that a redesign's object model should represent, with its status today: the
+v0.11 catalog-fidelity work made the engine act on several of them, while the rest are parsed and
+never consulted, or never parsed at all because the corresponding struct has no field for it. Full detail, evidence, and severity for each is in
 [Decision-Log.md](Decision-Log.md#declared-but-inert-catalog-fields); this is the field-level
 index into that.
 
 | Field                       | Declared on | Catalog occurrences | Status today                                                                                                                                                                                              |
 | --------------------------- | ----------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `suggest_if`                | linter      | 129                 | parsed, never consulted                                                                                                                                                                                   |
-| `run_timeout`               | linter      | 8                   | parsed, never consulted                                                                                                                                                                                   |
+| `suggest_if`                | linter      | 129                 | consulted by `linters list` (v0.11)                                                                                                                                                                       |
+| `run_timeout`               | linter      | 8                   | enforced on the linter's commands (v0.11)                                                                                                                                                                 |
 | `cache_results`             | linter      | 4                   | parsed, never consulted                                                                                                                                                                                   |
 | `cache_results`             | command     | 71                  | not modeled (dropped while parsing)                                                                                                                                                                       |
 | `supported_platforms`       | linter      | 9                   | parsed, never consulted                                                                                                                                                                                   |
 | `platforms`                 | command     | 15                  | modeled, consulted (v0.10)                                                                                                                                                                                |
 | `version` (supported range) | command     | 20                  | parsed, consulted (v0.10)                                                                                                                                                                                 |
-| `is_security`               | command     | 22                  | not modeled (dropped while parsing)                                                                                                                                                                       |
+| `is_security`               | command     | 22                  | modeled; tags findings, `--security-only` filters (v0.11)                                                                                                                                                 |
 | `disable_upstream`          | command     | 13                  | not modeled (dropped while parsing)                                                                                                                                                                       |
 | `fix_prompt` / `fix_verb`   | command     | 3 / 3               | parsed, carried through resolution (v0.10); no consumer yet                                                                                                                                               |
-| `prepare_run`               | command     | 2                   | not modeled (dropped while parsing)                                                                                                                                                                       |
+| `prepare_run`               | command     | 2                   | modeled; run once before the first invocation (v0.11)                                                                                                                                                     |
 | `stdin`                     | command     | 7                   | not modeled (dropped while parsing); its real instances all pair with `formatter: true`/no `in_place`, a shape now run unconditionally piping stdin (v0.10, entry 5) regardless of this field's own value |
-| `max_concurrency`           | command     | 4                   | not modeled (dropped while parsing)                                                                                                                                                                       |
-| `health_checks`             | tool        | 20                  | not modeled (dropped while parsing)                                                                                                                                                                       |
-| `extra_packages`            | tool        | 6                   | not modeled (dropped while parsing)                                                                                                                                                                       |
+| `max_concurrency`           | command     | 4                   | modeled; caps parallel invocations per command (v0.11)                                                                                                                                                    |
+| `health_checks`             | tool        | 20                  | modeled; run after install (v0.11)                                                                                                                                                                        |
+| `extra_packages`            | tool        | 6                   | modeled; installed alongside the tool's package (v0.11)                                                                                                                                                   |
 | `output_type`               | action      | 2                   | not modeled (dropped while parsing)                                                                                                                                                                       |
 
 ## Where to go next

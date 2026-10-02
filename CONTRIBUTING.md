@@ -12,7 +12,7 @@ Use [docs/Installation.md](docs/Installation.md)'s "clone and build" path rather
 `go install` — it's the setup this file assumes:
 
 ```bash
-git clone https://github.com/xunleii/rtunk.git
+git clone https://github.com/axnic/rtunk.git
 cd rtunk
 mise trust    # if mise prompts about this repo's .mise.toml
 mise install  # installs the go and trunk versions .mise.toml declares
@@ -55,8 +55,8 @@ same `golangci-lint2/revive` findings `trunk check` would. Both commands accept 
 scope a run to what you changed; with none, the default is changed files (see `--from`), not the
 whole repository.
 
-There is no CI workflow yet (no `.github/workflows/`) — these four commands are the actual gate
-right now, enforced by review rather than automation.
+CI re-runs the checks on every pull request (see "Submitting a change" below); `mise run ci` runs
+them locally.
 
 For documentation-only changes, this repository's own convention is `./rtunk fmt <path>` then
 `./rtunk check <path>` scoped to the files touched, in place of the full `trunk check` above.
@@ -84,7 +84,7 @@ in the same commit. Page inventory, templates and writing rules:
 ## Submitting a change
 
 1. Fork the repository and branch off `main` — the project's only active integration branch;
-   there is no packaged release yet, so nothing downstream of it to keep separate.
+   releases are tagged from it, so there is no separate branch to keep in sync.
 2. Make the change, running the commands under "Tests and lint" as you go, not only at the end.
 3. Commit following "Commit conventions" above: GPG-signed, `Assisted-by:` if AI-assisted, never
    `--signoff`.
