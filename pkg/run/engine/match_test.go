@@ -206,3 +206,65 @@ func TestFiles_RejectsPathOutsideRepoRoot(t *testing.T) {
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "outside repository root")
 }
+
+// TestFiles_LintIgnore covers trunk.yaml's lint.ignore: a file a rule excludes for a linter (named
+// or via ALL) is never matched for it, while every other file -- and every other linter -- keeps
+// its full set. A rule naming only another linter, or an unmatched path, changes nothing.
+func TestFiles_LintIgnore(t *testing.T) {
+	dir := t.TempDir()
+	for _, name := range []string{"main.go", "vendor/lib.go", "docs/gen.go", "sub/vendor/x.go"} {
+		require.NoError(t, os.MkdirAll(filepath.Dir(filepath.Join(dir, name)), 0o755))
+		mustWrite(t, filepath.Join(dir, name), "package x\n")
+	}
+
+	tests := []struct {
+		name   string
+		linter string
+		rules  []config.IgnoreRule
+		want   []string
+	}{
+		{"no rules", "golint", nil, []string{"docs/gen.go", "main.go", "sub/vendor/x.go", "vendor/lib.go"}},
+		{
+			"ALL applies to every linter", "golint",
+			[]config.IgnoreRule{{Linters: []string{"ALL"}, Paths: []string{"vendor/"}}},
+			[]string{"docs/gen.go", "main.go"},
+		},
+		{
+			"a named linter", "golint",
+			[]config.IgnoreRule{{Linters: []string{"golint"}, Paths: []string{"docs/"}}},
+			[]string{"main.go", "sub/vendor/x.go", "vendor/lib.go"},
+		},
+		{
+			"another linter's rule does not apply", "golint",
+			[]config.IgnoreRule{{Linters: []string{"other"}, Paths: []string{"docs/", "vendor/"}}},
+			[]string{"docs/gen.go", "main.go", "sub/vendor/x.go", "vendor/lib.go"},
+		},
+		{
+			"a leading slash anchors to the repository root", "golint",
+			[]config.IgnoreRule{{Linters: []string{"ALL"}, Paths: []string{"/vendor"}}},
+			[]string{"docs/gen.go", "main.go", "sub/vendor/x.go"},
+		},
+		{
+			"several rules and paths add up", "golint",
+			[]config.IgnoreRule{
+				{Linters: []string{"ALL"}, Paths: []string{"/vendor", "docs/**"}},
+				{Linters: []string{"golint", "other"}, Paths: []string{"main.go"}},
+			},
+			[]string{"sub/vendor/x.go"},
+		},
+	}
+	cfgFiles := map[string]config.FileType{"go": {Name: "go", Extensions: []string{"go"}}}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			cfg := config.Config{Lint: config.LintConfig{Files: cfgFiles, Ignore: tc.rules}}
+			got, err := Files(cfg, config.Linter{Name: tc.linter, Files: []string{"go"}}, dir, []string{dir})
+			require.NoError(t, err)
+
+			rel := make([]string, len(got))
+			for i, f := range got {
+				rel[i], _ = filepath.Rel(dir, f)
+			}
+			assert.ElementsMatch(t, tc.want, rel)
+		})
+	}
+}

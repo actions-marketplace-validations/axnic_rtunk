@@ -3701,3 +3701,90 @@ func TestLogLinterEnd_IgnoresTheNewPhases(t *testing.T) {
 		assert.NotEqual(t, runlog.KindLinterEnd, ev.T)
 	}
 }
+
+// TestRun_LintIgnore proves lint.ignore end to end for both check and fmt: a file a rule excludes
+// is never passed to the linter it names (vendor/bad.txt fails the checker, docs/messy.txt would
+// be rewritten by the formatter, and neither happens), a file it does not exclude still is, and
+// the Done event's Files -- what `Checked N files` counts -- leaves the excluded ones out.
+func TestRun_LintIgnore(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("faketool invoked via sh -c")
+	}
+
+	binPath := buildFakeToolBinary(t)
+	cacheDir := t.TempDir()
+	root, err := download.Root(cacheDir)
+	require.NoError(t, err)
+	shimPath := download.ShimPath(root, "tools", "faketool", "1.0.0", "faketool")
+	require.NoError(t, os.MkdirAll(filepath.Dir(shimPath), 0o755))
+	require.NoError(t, download.WriteShim(shimPath, binPath))
+
+	repoRoot := t.TempDir()
+	for name, content := range map[string]string{
+		"ok.txt":          "formatted\n",
+		"messy.txt":       "messy\n",
+		"vendor/bad.txt":  "FAIL\n",
+		"docs/messy.txt":  "messy\n",
+		"docs/failing.md": "FAIL\n",
+	} {
+		require.NoError(t, os.MkdirAll(filepath.Dir(filepath.Join(repoRoot, name)), 0o755))
+		require.NoError(t, os.WriteFile(filepath.Join(repoRoot, name), []byte(content), 0o644))
+	}
+
+	cfg := config.Config{
+		Tools: map[string]config.Tool{"faketool": {Name: "faketool", KnownGoodVersion: "1.0.0"}},
+		Lint: config.LintConfig{
+			Files: map[string]config.FileType{},
+			Ignore: []config.IgnoreRule{
+				{Linters: []string{"ALL"}, Paths: []string{"vendor/"}},
+				{Linters: []string{"fakefmt"}, Paths: []string{"docs/"}},
+			},
+			CategoryConfig: config.CategoryConfig[config.Linter]{
+				Definitions: map[string]config.Linter{
+					"fakecheck": {
+						Name: "fakecheck", Files: []string{"ALL"}, Tools: []string{"faketool"},
+						Commands: []config.Command{{Name: "check", Run: "faketool passfail ${target}", Output: "pass_fail"}},
+					},
+					"fakefmt": {
+						Name: "fakefmt", Files: []string{"ALL"}, Tools: []string{"faketool"},
+						Commands: []config.Command{{
+							Name: "format", Run: "faketool rewrite ${target}", Output: "rewrite",
+							SuccessCodes: []int{0}, Batch: true, InPlace: true, Formatter: true,
+						}},
+					},
+				},
+			},
+		},
+	}
+
+	done := func(include func(config.Command) bool) map[string]Event {
+		events, err := Run(context.Background(), Env{Cfg: cfg, RepoRoot: repoRoot, CacheDir: cacheDir, Concurrency: 1}, nil, include)
+		require.NoError(t, err)
+		byLinter := map[string]Event{}
+		for ev := range events {
+			if ev.Phase == Done {
+				byLinter[ev.Linter] = ev
+			}
+		}
+		return byLinter
+	}
+
+	t.Run("check", func(t *testing.T) {
+		ev := done(notFormatter)["fakecheck"]
+
+		// ALL drops vendor/ only: docs/ is excluded for fakefmt alone, so the checker still sees it.
+		assert.ElementsMatch(t, []string{"ok.txt", "messy.txt", "docs/messy.txt", "docs/failing.md"}, ev.Files)
+		require.Len(t, ev.Findings, 1, "vendor/bad.txt fails too, but was never passed to the checker")
+		assert.Equal(t, "docs/failing.md", ev.Findings[0].File)
+	})
+
+	t.Run("fmt", func(t *testing.T) {
+		ev := done(func(c config.Command) bool { return c.Formatter })["fakefmt"]
+
+		assert.ElementsMatch(t, []string{"ok.txt", "messy.txt"}, ev.Files)
+		assert.Equal(t, []string{"messy.txt"}, ev.ChangedFiles)
+		data, err := os.ReadFile(filepath.Join(repoRoot, "docs/messy.txt"))
+		require.NoError(t, err)
+		assert.Equal(t, "messy\n", string(data), "an ignored file must not be rewritten")
+	})
+}
