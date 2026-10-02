@@ -1,11 +1,21 @@
 {
   "version": "1.0.0",
-  "gitCommitHash": "342cf51e8ff0e6a95b7a89eaf57a0f544d8c8a9d",
-  "generatedAt": "2026-10-01T01:15:12.324Z",
+  "gitCommitHash": "2e4dd9dc340083cf8d318e576ef0114b65a398e0",
+  "generatedAt": "2026-10-02T12:36:14.780Z",
   "files": {
+    ".agents/skills/create-pr/SKILL.md": {
+      "filePath": ".agents/skills/create-pr/SKILL.md",
+      "contentHash": "35842adf956856d2f67e1b928c66c45a402843954e43786fb24240053f03f3ce",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 100,
+      "hasStructuralAnalysis": false
+    },
     ".agents/skills/git-commit/SKILL.md": {
       "filePath": ".agents/skills/git-commit/SKILL.md",
-      "contentHash": "5249430910cd370d3c650f540724fb5590c359ae9c55af54fea26e3869e1b145",
+      "contentHash": "24cddaa3a07320ed741ce89b297a5848d5eabd8f072504892577834c4083f560",
       "functions": [],
       "classes": [],
       "imports": [],
@@ -13,9 +23,49 @@
       "totalLines": 293,
       "hasStructuralAnalysis": false
     },
+    ".agents/skills/release-notes/SKILL.md": {
+      "filePath": ".agents/skills/release-notes/SKILL.md",
+      "contentHash": "10b0162d0113379499ffbacadaf334fbd6df29ed1cda1ef3db9f21a807a89829",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 58,
+      "hasStructuralAnalysis": false
+    },
+    ".agents/skills/wiki-docs/SKILL.md": {
+      "filePath": ".agents/skills/wiki-docs/SKILL.md",
+      "contentHash": "1d25411f5796b9a3b86835a2948ad3bf40995ca8c6d502616a179f0ded4e565a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 133,
+      "hasStructuralAnalysis": false
+    },
+    ".agents/skills/wiki-docs/references/page-templates.md": {
+      "filePath": ".agents/skills/wiki-docs/references/page-templates.md",
+      "contentHash": "84f44d27f005d2bb469b3639237080b8c1e903b4d5bb2cc0caaf98a733019153",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 132,
+      "hasStructuralAnalysis": false
+    },
+    ".agents/skills/wiki-docs/references/style-guide.md": {
+      "filePath": ".agents/skills/wiki-docs/references/style-guide.md",
+      "contentHash": "51f4801cf03df06c83dc06129272f6f31f68393656153b39d499d017e1f60fd2",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 80,
+      "hasStructuralAnalysis": false
+    },
     ".commitlintrc.js": {
       "filePath": ".commitlintrc.js",
-      "contentHash": "85ea1c21ff258e7969e1b1929bbd3bb0e035a5265a2a3023e45624eb96b09e8c",
+      "contentHash": "0445de9b640ebad62c2a4abc5e9f068f8b9e9e354ab57940224e8379912ae700",
       "functions": [],
       "classes": [],
       "imports": [],
@@ -23,9 +73,29 @@
       "totalLines": 163,
       "hasStructuralAnalysis": true
     },
+    ".devcontainer/devcontainer-lock.json": {
+      "filePath": ".devcontainer/devcontainer-lock.json",
+      "contentHash": "b36c363eaa2fc69e0fa5de358a5ad5139722b2c47ccb993f58b21276ea71698c",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 15,
+      "hasStructuralAnalysis": false
+    },
+    ".devcontainer/devcontainer.json": {
+      "filePath": ".devcontainer/devcontainer.json",
+      "contentHash": "00f00d64a516c4b6f478c33b76631320d8039df19d9341c2ff34ac067f586b6b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 35,
+      "hasStructuralAnalysis": false
+    },
     ".github/ISSUE_TEMPLATE/bug_report.md": {
       "filePath": ".github/ISSUE_TEMPLATE/bug_report.md",
-      "contentHash": "feee529ce81dbbb7e5c157f4053393951067b0c7556011ee7c8a1ea106022bc2",
+      "contentHash": "c351f9f73c00c3a247f786b7edc6574001d3f3e88202072d7c10c757537ff18e",
       "functions": [],
       "classes": [],
       "imports": [],
@@ -45,7 +115,7 @@
     },
     ".github/ISSUE_TEMPLATE/feature_request.md": {
       "filePath": ".github/ISSUE_TEMPLATE/feature_request.md",
-      "contentHash": "49683083125893b58c9dfa0bbf9fc3958a0fa175164571b3f2e05b41e230c067",
+      "contentHash": "c6925a582746a116d8a6f848eace75aee35fd8d1f90660791ecfed8908839bba",
       "functions": [],
       "classes": [],
       "imports": [],
@@ -55,12 +125,72 @@
     },
     ".github/PULL_REQUEST_TEMPLATE.md": {
       "filePath": ".github/PULL_REQUEST_TEMPLATE.md",
-      "contentHash": "55dbdaa1277cff3efeefbd4b9337ae8b0903d2100cff5c3ff18fa6795def5787",
+      "contentHash": "0b2842560eb44449263527bf1d2f0763353a21c7bef4575cc0bb8ab30a3fbdb7",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
       "totalLines": 26,
+      "hasStructuralAnalysis": false
+    },
+    ".github/dependabot.yml": {
+      "filePath": ".github/dependabot.yml",
+      "contentHash": "5e04f774c628443280ac4feaef41fe0a1cfeaa0ccd5de8f24987a1ed8112fda9",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 31,
+      "hasStructuralAnalysis": false
+    },
+    ".github/workflows/merge_group,pull_request,push.ci.yaml": {
+      "filePath": ".github/workflows/merge_group,pull_request,push.ci.yaml",
+      "contentHash": "acab9c667e948dce9ee2366a65358704e223e8ee1349f239aae1d67ab9d81c0f",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 177,
+      "hasStructuralAnalysis": false
+    },
+    ".github/workflows/pull_request.dependabot-auto-merge.yaml": {
+      "filePath": ".github/workflows/pull_request.dependabot-auto-merge.yaml",
+      "contentHash": "97c24e4113a29689ae2f4305b2f6547b9ff4b22d7dc3f30380ec41b05e581d8b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 93,
+      "hasStructuralAnalysis": false
+    },
+    ".github/workflows/push,workflow_dispatch.wiki.yaml": {
+      "filePath": ".github/workflows/push,workflow_dispatch.wiki.yaml",
+      "contentHash": "4919d8bba28eb4af7d26e88fa3c3d15e8f7d877a41545c6ed57b04a7c07aa21d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 46,
+      "hasStructuralAnalysis": false
+    },
+    ".github/workflows/schedule.security.yaml": {
+      "filePath": ".github/workflows/schedule.security.yaml",
+      "contentHash": "b5915aa01b65c47e0dd92ed8895a7b402b12acb7da566c962a42a9b27dc5d583",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 114,
+      "hasStructuralAnalysis": false
+    },
+    ".github/workflows/workflow_dispatch.release.yaml": {
+      "filePath": ".github/workflows/workflow_dispatch.release.yaml",
+      "contentHash": "847acec97d83dfb497ee20c8861dc4536f256efd1a35d326b647ada678297a93",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 359,
       "hasStructuralAnalysis": false
     },
     ".golangci.yml": {
@@ -73,18 +203,48 @@
       "totalLines": 43,
       "hasStructuralAnalysis": false
     },
-    ".mise.toml": {
-      "filePath": ".mise.toml",
-      "contentHash": "f564e3a9de9dd445e1cacf41c1b42538d699a27c0ff98ffb240ec890a95a6373",
+    ".goreleaser.yml": {
+      "filePath": ".goreleaser.yml",
+      "contentHash": "90e2c0ce031aaa6ca86ade8ad2ae62f04f1801ffa0aafbf50825376a7c906d4f",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 17,
+      "totalLines": 48,
       "hasStructuralAnalysis": false
     },
-    ".trunk/configs/.markdownlint.yaml": {
-      "filePath": ".trunk/configs/.markdownlint.yaml",
+    ".mise.toml": {
+      "filePath": ".mise.toml",
+      "contentHash": "8342af07e82c9d54cb1faa0106f12f0f56359b4684bc6f556eeb16f5b386c0ea",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 78,
+      "hasStructuralAnalysis": false
+    },
+    ".mise/locks/npm-commitlint-cli/21.2.3/aube-lock.yaml": {
+      "filePath": ".mise/locks/npm-commitlint-cli/21.2.3/aube-lock.yaml",
+      "contentHash": "8c7adee094a8c509826c562f8bc9904e358c16c06a22c4709c70e21224c763e4",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 818,
+      "hasStructuralAnalysis": false
+    },
+    ".mise/locks/npm-commitlint-cli/21.2.3/package.json": {
+      "filePath": ".mise/locks/npm-commitlint-cli/21.2.3/package.json",
+      "contentHash": "4b768ee949ae03d36b29ab89822adfe3ac76a02652bae940fd4d6c07150b68a2",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 8,
+      "hasStructuralAnalysis": false
+    },
+    ".rtunk/configs/.markdownlint.yaml": {
+      "filePath": ".rtunk/configs/.markdownlint.yaml",
       "contentHash": "697b0377e423ca0f494859a15e68e4a7d6c7727c2fc4c816f0c8e1b4cad0d2ec",
       "functions": [],
       "classes": [],
@@ -93,8 +253,8 @@
       "totalLines": 3,
       "hasStructuralAnalysis": false
     },
-    ".trunk/configs/.yamllint.yaml": {
-      "filePath": ".trunk/configs/.yamllint.yaml",
+    ".rtunk/configs/.yamllint.yaml": {
+      "filePath": ".rtunk/configs/.yamllint.yaml",
       "contentHash": "f9e4256dfb6fda12b1308e128fa1d41ba613eb1b083144ff11c10297fe1ec30a",
       "functions": [],
       "classes": [],
@@ -103,8 +263,8 @@
       "totalLines": 8,
       "hasStructuralAnalysis": false
     },
-    ".trunk/trunk.yaml": {
-      "filePath": ".trunk/trunk.yaml",
+    ".rtunk/rtunk.yaml": {
+      "filePath": ".rtunk/rtunk.yaml",
       "contentHash": "a61f45214089f0d4c23b873d8f6361d81c6409bf66fc5842d140358dcbb60237",
       "functions": [],
       "classes": [],
@@ -115,22 +275,22 @@
     },
     "AGENTS.md": {
       "filePath": "AGENTS.md",
-      "contentHash": "b53f91649e813ab2c7ff3096ad634308b81ae845b89463e3b91b965fbfc5c193",
+      "contentHash": "971fdd96182d44d9ecefedacc16c6ae4e87da311769cbcebde89687d17989d0f",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 134,
+      "totalLines": 135,
       "hasStructuralAnalysis": false
     },
     "CHANGELOG.md": {
       "filePath": "CHANGELOG.md",
-      "contentHash": "98f08ce1c7de381d5152574d38c68262c01869c7d3a14b8215db88cb90ec9b00",
+      "contentHash": "5c70214086564460763d967f5f4aa5e7c4d51eb7be2956248e542505d331f4cc",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 90,
+      "totalLines": 155,
       "hasStructuralAnalysis": false
     },
     "CODE_OF_CONDUCT.md": {
@@ -145,27 +305,27 @@
     },
     "CONTRIBUTING.md": {
       "filePath": "CONTRIBUTING.md",
-      "contentHash": "448a01c0527d7602f29f096042b63c215474a0c759155252204b40ca7cfa4ac9",
+      "contentHash": "9a0f1fdb572870baf3fec670ceff8da6e5b1a84121779438e21f73e73d98d62e",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 79,
+      "totalLines": 97,
       "hasStructuralAnalysis": false
     },
     "README.md": {
       "filePath": "README.md",
-      "contentHash": "c47c91a3779755a748c8500ba26ce7caa1cde7fb9829334fac3d9fbe666b0291",
+      "contentHash": "4525de0655cace7e228529dd4f92a0819ce758039d84a8f509282fd39d4ae6fb",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 100,
+      "totalLines": 99,
       "hasStructuralAnalysis": false
     },
     "ROADMAP.md": {
       "filePath": "ROADMAP.md",
-      "contentHash": "46842064b4a2969f047f028408b0eaecb0ddc75d0789bc37455816b284c7b6f9",
+      "contentHash": "edc48b2ba74641203ad17be1a7032338863e30dbcdc94ab7c22c37abf81865d6",
       "functions": [],
       "classes": [],
       "imports": [],
@@ -175,17 +335,27 @@
     },
     "SECURITY.md": {
       "filePath": "SECURITY.md",
-      "contentHash": "524362b376e83f1b58b77b082d64e87652374b6194892e67da5289d42b56d9d6",
+      "contentHash": "7f97f15a4304842f41e485ff677a17b8fd68c3d9d1d75ce6bed6e0d1ca809374",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 41,
+      "totalLines": 71,
+      "hasStructuralAnalysis": false
+    },
+    "action.yml": {
+      "filePath": "action.yml",
+      "contentHash": "95ef0c79ab7ca485a8e448c1fc8ce67107a706c8427ac7e659ad8a4102380066",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 301,
       "hasStructuralAnalysis": false
     },
     "cmd/rtunk/main.go": {
       "filePath": "cmd/rtunk/main.go",
-      "contentHash": "0be385004ff3b2256c71a8a116f1b4108e56316a31b03a890ebb6b4795f226e5",
+      "contentHash": "ee596213233fdf25ca59eb5b5139de5f756de1d1474e4fb1fb50f55e2596908c",
       "functions": [
         {
           "name": "resolveVersion",
@@ -240,7 +410,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/internal/cli",
+          "source": "github.com/axnic/rtunk/internal/cli",
           "specifiers": [
             "cli"
           ]
@@ -305,144 +475,274 @@
       "totalLines": 47,
       "hasStructuralAnalysis": true
     },
-    "docs/architecture/README.md": {
-      "filePath": "docs/architecture/README.md",
-      "contentHash": "f0e487e75a4bc157c966db16fe5a3dc2136f0ab19914169d12e5773e8c5a99c4",
+    "docs/Actions-And-Git-Hooks.md": {
+      "filePath": "docs/Actions-And-Git-Hooks.md",
+      "contentHash": "1eecc9a916f132be20f4cfeb8c582fc879bb7fe2d83984cd9c590cf2d4aa13ce",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 198,
+      "totalLines": 108,
       "hasStructuralAnalysis": false
     },
-    "docs/architecture/cache.md": {
-      "filePath": "docs/architecture/cache.md",
-      "contentHash": "fb15df197e49b309f006d9acfb82a0e43466bd9c34146cb9b5099a7ebf776bee",
+    "docs/Architecture.md": {
+      "filePath": "docs/Architecture.md",
+      "contentHash": "c72438d48e921a89ff63ac791c221b4bf10c9af49ce0385f2c94bd752203f24b",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 216,
+      "totalLines": 211,
       "hasStructuralAnalysis": false
     },
-    "docs/architecture/flows.md": {
-      "filePath": "docs/architecture/flows.md",
-      "contentHash": "81f18b631d5c102a8a858035c52638326c0f51fc64969cfb209a148ff4a5a356",
+    "docs/CLI-Design.md": {
+      "filePath": "docs/CLI-Design.md",
+      "contentHash": "fe82ca34091f5a5a8941aa707943007c830d1c64156ba5f70515ff72571099c4",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 269,
+      "totalLines": 315,
       "hasStructuralAnalysis": false
     },
-    "docs/architecture/inconsistencies.md": {
-      "filePath": "docs/architecture/inconsistencies.md",
-      "contentHash": "058a6d8b797dee52ed6ae0e50f302e1c2c0ff585f3aedec8f6fe7c197c42d380",
+    "docs/Cache-And-Logs.md": {
+      "filePath": "docs/Cache-And-Logs.md",
+      "contentHash": "1db86d033e59ddf1a2ce0c2026de4e3200106523d441f0a3dc6bdd590be4c598",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 573,
+      "totalLines": 102,
       "hasStructuralAnalysis": false
     },
-    "docs/architecture/plugin-model.md": {
-      "filePath": "docs/architecture/plugin-model.md",
-      "contentHash": "1febc6d1ac0b1266b334646dff4e6314259b5066c5066295d5e3b38d0cbd65dc",
+    "docs/Cache-Architecture.md": {
+      "filePath": "docs/Cache-Architecture.md",
+      "contentHash": "5b499e07af044d27a8e85379280c4f58c6cb967ccb28da86dce19d074ea2e006",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 215,
+      "totalLines": 225,
       "hasStructuralAnalysis": false
     },
-    "docs/architecture/sources.md": {
-      "filePath": "docs/architecture/sources.md",
-      "contentHash": "b8d7b3ba72c2e90ed8f96dcb02e4119fe7a6ee9b114b9ee90d908b888f6efe1d",
+    "docs/Checking-Code.md": {
+      "filePath": "docs/Checking-Code.md",
+      "contentHash": "d26e812f3cd7b99ea63510e1a03dc81f7bde2ff0dc4ba7be6f348e4742a26d37",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 223,
+      "totalLines": 209,
       "hasStructuralAnalysis": false
     },
-    "docs/cli.md": {
-      "filePath": "docs/cli.md",
-      "contentHash": "3b84d744173578ec9292e496e27c95c56c05740d0df72213fdd0776ee43eb127",
+    "docs/Command-Reference.md": {
+      "filePath": "docs/Command-Reference.md",
+      "contentHash": "1e5c3f517b724e791a49ad26274c2c0b8b00334b922e4e80c150701bb7f16c3e",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 295,
+      "totalLines": 691,
       "hasStructuralAnalysis": false
     },
-    "docs/commands.md": {
-      "filePath": "docs/commands.md",
-      "contentHash": "592c59a99f1389f962944b3066f31bc1309c255f35e231f37987a0c57bab3323",
+    "docs/Configuration-Reference.md": {
+      "filePath": "docs/Configuration-Reference.md",
+      "contentHash": "e314df6ea968fcbc00caced8e4ff4cfa2b1a0c6be2297c3372c20515f65792b9",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 633,
+      "totalLines": 244,
       "hasStructuralAnalysis": false
     },
-    "docs/configuration.md": {
-      "filePath": "docs/configuration.md",
-      "contentHash": "9be33464e6112283a34e5e5e5f244fc9418a429b5287e604cf0895527dbbe2f1",
+    "docs/Decision-Log.md": {
+      "filePath": "docs/Decision-Log.md",
+      "contentHash": "0e73224204d5aa0428f021d31fc7bf01e9fd130d3a40e94f8dc13e2d4caf6fdb",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 270,
+      "totalLines": 582,
       "hasStructuralAnalysis": false
     },
-    "docs/installation.md": {
-      "filePath": "docs/installation.md",
-      "contentHash": "0d3f30034eeac23dfa2cd81d33ef1881837ff9178506ca6c6bc9a8fd657a8255",
+    "docs/FAQ.md": {
+      "filePath": "docs/FAQ.md",
+      "contentHash": "074380e8c44a58ec7d083f1c467d047965ca8daf6c338f46ee50dfe7e4ad0427",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 74,
+      "totalLines": 67,
       "hasStructuralAnalysis": false
     },
-    "docs/migration-from-trunk.md": {
-      "filePath": "docs/migration-from-trunk.md",
-      "contentHash": "302ac2d31d7f1609e3970046189f520e3d23c473a8498c10ed42762837b3748a",
+    "docs/Formatting-Code.md": {
+      "filePath": "docs/Formatting-Code.md",
+      "contentHash": "8afce25c51c5b45e0ee9a2d4dfba52bfafff6c820ba5005d4d674b49e042a788",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 156,
+      "totalLines": 87,
       "hasStructuralAnalysis": false
     },
-    "docs/ux.md": {
-      "filePath": "docs/ux.md",
-      "contentHash": "7e91bca5d3b0830cf43911c21fef5713b24c5d50dfc84de95f4a78baed9631cf",
+    "docs/GitHub-Action.md": {
+      "filePath": "docs/GitHub-Action.md",
+      "contentHash": "61e781b4bd4147e3621cd15720d8c64e45ab630ff9cf181dd77e87909c08a3aa",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 227,
+      "totalLines": 116,
+      "hasStructuralAnalysis": false
+    },
+    "docs/Ignoring-Issues.md": {
+      "filePath": "docs/Ignoring-Issues.md",
+      "contentHash": "88ae5c2a316ecbdc9951a6d850d13263df8e8cc7ddcac94d82ceb22dfd6c5cf0",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 123,
+      "hasStructuralAnalysis": false
+    },
+    "docs/Installation.md": {
+      "filePath": "docs/Installation.md",
+      "contentHash": "badf11bf6243b840359c8c0a9d60f91e986e1e08cb30ae6e1b64779575ed62d9",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 175,
+      "hasStructuralAnalysis": false
+    },
+    "docs/Keeping-Tools-Up-To-Date.md": {
+      "filePath": "docs/Keeping-Tools-Up-To-Date.md",
+      "contentHash": "297ecd53e5d929d020b8ced2627ece8300e472ef7192c11ede2feb3a3ba7d54b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 85,
+      "hasStructuralAnalysis": false
+    },
+    "docs/Managing-Linters.md": {
+      "filePath": "docs/Managing-Linters.md",
+      "contentHash": "76a888d3d12c507373d8f10ea51d0198270c2a098444de8e8eef828352c74f89",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 143,
+      "hasStructuralAnalysis": false
+    },
+    "docs/Migrating-From-Trunk.md": {
+      "filePath": "docs/Migrating-From-Trunk.md",
+      "contentHash": "2138697520d9c8b017b5903b659862751a424c50edb5f5131b65cdc5f7fec2e5",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 169,
+      "hasStructuralAnalysis": false
+    },
+    "docs/Plugin-Model.md": {
+      "filePath": "docs/Plugin-Model.md",
+      "contentHash": "f6781eb84db6e80c8f68873dde5e73a7a368e91750b1a42cf99729bc51e6c722",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 224,
+      "hasStructuralAnalysis": false
+    },
+    "docs/Plugin-Sources.md": {
+      "filePath": "docs/Plugin-Sources.md",
+      "contentHash": "267854d57a086ee9080a067aeea59d4045c7a865934a3ca07fba8988889c22d1",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 232,
+      "hasStructuralAnalysis": false
+    },
+    "docs/Quickstart.md": {
+      "filePath": "docs/Quickstart.md",
+      "contentHash": "a45b7fd51d76d3a74259066d8029ccee53b704afed71ac007a01d78f28852473",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 115,
+      "hasStructuralAnalysis": false
+    },
+    "docs/README.md": {
+      "filePath": "docs/README.md",
+      "contentHash": "618a867795ae526911e67b40517668791c94ab0c9fd42eddb3a0aa25821f6787",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 68,
+      "hasStructuralAnalysis": false
+    },
+    "docs/Run-Flows.md": {
+      "filePath": "docs/Run-Flows.md",
+      "contentHash": "c6e41ecfc6e9286344f6c283f35e3b2a09df98115d13c7ff0917cd521cd0abc5",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 278,
+      "hasStructuralAnalysis": false
+    },
+    "docs/Terminal-UX-Design.md": {
+      "filePath": "docs/Terminal-UX-Design.md",
+      "contentHash": "a4c7024168da605d732abe989614a4e39f4af8beebcdd09c995bde7f4c91d82e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 247,
+      "hasStructuralAnalysis": false
+    },
+    "docs/_Footer.md": {
+      "filePath": "docs/_Footer.md",
+      "contentHash": "22f9fc172d6e5fd6ac07675bd5573c7e1bd9feb4a25e4422736aa17fe20c2652",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 5,
+      "hasStructuralAnalysis": false
+    },
+    "docs/_Sidebar.md": {
+      "filePath": "docs/_Sidebar.md",
+      "contentHash": "39a0b6213b0f423b5e0ae5e39ff0ad26d96ff30fbc06c805d7b44f929bfd290d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 38,
       "hasStructuralAnalysis": false
     },
     "go.mod": {
       "filePath": "go.mod",
-      "contentHash": "6fe5b0ffe910bea877832c4bbbcf0904f3bb31a7f378ee1bdba9f2ba33f516a3",
+      "contentHash": "d8671e77da4fdded782fb8c600251c66ba755869ed8993e57062cf67f3258549",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 18,
+      "totalLines": 34,
       "hasStructuralAnalysis": false
     },
     "go.sum": {
       "filePath": "go.sum",
-      "contentHash": "8685980e40f60ccafd083574c50a4e4ee5b2d3b2eac1770478399ded2eaaab81",
+      "contentHash": "35b74c02fe019b9b39b40e09b368e6b1b1f10ac4e80ae3ddfbfc91c5f7545f02",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 25,
+      "totalLines": 63,
       "hasStructuralAnalysis": false
     },
     "internal/cli/actions.go": {
@@ -602,7 +902,7 @@
     },
     "internal/cli/actions_enable.go": {
       "filePath": "internal/cli/actions_enable.go",
-      "contentHash": "eb1b240b5149f9c66f3bcca030494fa98b557fd843884983ba1fdf9eacae7ecc",
+      "contentHash": "fa1b4a6a3ab9b9e6f43eaf45d8031f990e753dd16218545ccfc036c4fe7e7b0a",
       "functions": [
         {
           "name": "Run",
@@ -612,7 +912,7 @@
           ],
           "returnType": "error",
           "exported": true,
-          "lineCount": 6
+          "lineCount": 9
         },
         {
           "name": "interactiveActionsEnable",
@@ -642,12 +942,12 @@
       "exports": [
         "Run"
       ],
-      "totalLines": 31,
+      "totalLines": 34,
       "hasStructuralAnalysis": true
     },
     "internal/cli/actions_history.go": {
       "filePath": "internal/cli/actions_history.go",
-      "contentHash": "2af82be8f96c15dd94bb9ce0503fede11be3c7a56ff9fad8f473e517b59a5daa",
+      "contentHash": "2d49433d6f34995623f5e32365e5fc1604760872a7fc6efbf3bd8bb618a4724f",
       "functions": [
         {
           "name": "Run",
@@ -701,13 +1001,13 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/git",
+          "source": "github.com/axnic/rtunk/pkg/git",
           "specifiers": [
             "git"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/run/actions",
+          "source": "github.com/axnic/rtunk/pkg/run/actions",
           "specifiers": [
             "actions"
           ]
@@ -764,7 +1064,7 @@
     },
     "internal/cli/actions_run.go": {
       "filePath": "internal/cli/actions_run.go",
-      "contentHash": "68711a05b3314a5fdeaef5af2bb9b1146f538b43615c2ffba4283b165542f509",
+      "contentHash": "fe0777a958f9fd1d277145519871578028618cfce184c2e50618da86168cf845",
       "functions": [
         {
           "name": "Run",
@@ -832,25 +1132,25 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/git",
+          "source": "github.com/axnic/rtunk/pkg/git",
           "specifiers": [
             "git"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/run/actions",
+          "source": "github.com/axnic/rtunk/pkg/run/actions",
           "specifiers": [
             "actions"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/run/runlog",
+          "source": "github.com/axnic/rtunk/pkg/run/runlog",
           "specifiers": [
             "runlog"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/config",
+          "source": "github.com/axnic/rtunk/pkg/trunk/config",
           "specifiers": [
             "config"
           ]
@@ -864,7 +1164,7 @@
     },
     "internal/cli/actions_test.go": {
       "filePath": "internal/cli/actions_test.go",
-      "contentHash": "8d882c8296e994599b13761304260ff4a3775b51bea7d105533e2b2d74852b05",
+      "contentHash": "a210bc8b0913af3900e064d84d6144462c5b41fdbe6b6acaedfeac83b4115729",
       "functions": [
         {
           "name": "seedHistoryForTest",
@@ -885,6 +1185,15 @@
           ],
           "exported": true,
           "lineCount": 7
+        },
+        {
+          "name": "TestActionsEnableCmd_UnknownID_Rejected",
+          "owner": "",
+          "params": [
+            "t"
+          ],
+          "exported": true,
+          "lineCount": 14
         },
         {
           "name": "TestActionsEnableCmd_AddsToEnabledAndRemovesFromDisabled",
@@ -989,13 +1298,13 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/git",
+          "source": "github.com/axnic/rtunk/pkg/git",
           "specifiers": [
             "git"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/run/actions",
+          "source": "github.com/axnic/rtunk/pkg/run/actions",
           "specifiers": [
             "actions"
           ]
@@ -1003,6 +1312,7 @@
       ],
       "exports": [
         "TestActionsEnableCmd_NoID_NonTerminal_ErrorsInsteadOfHanging",
+        "TestActionsEnableCmd_UnknownID_Rejected",
         "TestActionsEnableCmd_AddsToEnabledAndRemovesFromDisabled",
         "TestActionsDisableCmd_AddsToDisabledAndRemovesFromEnabled",
         "TestActionsRunCmd_ByID",
@@ -1011,7 +1321,7 @@
         "TestActionsHistoryCmd_ReflectsPastRuns",
         "TestActionsHistoryCmd_CountAlias_MatchesLimitFlag"
       ],
-      "totalLines": 122,
+      "totalLines": 137,
       "hasStructuralAnalysis": true
     },
     "internal/cli/cache.go": {
@@ -1037,18 +1347,74 @@
     },
     "internal/cli/cache_clean.go": {
       "filePath": "internal/cli/cache_clean.go",
-      "contentHash": "bc32e8b193433a914247838ddf33d8bd039a750d54fdf6a69b1ff2f68e8498fd",
+      "contentHash": "2ede6be11ded58ad47d7217e3f4341b6f225bdf61a8a1919ef5273e54f2a5d8a",
       "functions": [
         {
           "name": "Run",
           "owner": "cacheCleanCmd",
           "params": [
             "cli",
-            "_"
+            "stdout"
           ],
           "returnType": "error",
           "exported": true,
-          "lineCount": 13
+          "lineCount": 38
+        },
+        {
+          "name": "removeMeasured",
+          "owner": "",
+          "params": [
+            "path"
+          ],
+          "returnType": "(size int64, err error)",
+          "exported": false,
+          "lineCount": 11
+        },
+        {
+          "name": "humanSize",
+          "owner": "",
+          "params": [
+            "n"
+          ],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 12
+        },
+        {
+          "name": "newCleanModel",
+          "owner": "",
+          "params": [
+            "rows"
+          ],
+          "returnType": "*cleanModel",
+          "exported": false,
+          "lineCount": 8
+        },
+        {
+          "name": "Init",
+          "owner": "cleanModel",
+          "params": [],
+          "returnType": "tea.Cmd",
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "Update",
+          "owner": "cleanModel",
+          "params": [
+            "msg"
+          ],
+          "returnType": "(tea.Model, tea.Cmd)",
+          "exported": true,
+          "lineCount": 14
+        },
+        {
+          "name": "View",
+          "owner": "cleanModel",
+          "params": [],
+          "returnType": "tea.View",
+          "exported": true,
+          "lineCount": 18
         }
       ],
       "classes": [
@@ -1060,13 +1426,66 @@
           "properties": [],
           "exported": false,
           "lineCount": 1
+        },
+        {
+          "name": "cleanRow",
+          "methods": [],
+          "properties": [
+            "name",
+            "path",
+            "size",
+            "done",
+            "err"
+          ],
+          "exported": false,
+          "lineCount": 6
+        },
+        {
+          "name": "cleanModel",
+          "methods": [
+            "Init",
+            "Update",
+            "View"
+          ],
+          "properties": [
+            "rows",
+            "spin",
+            "left",
+            "ok",
+            "bad"
+          ],
+          "exported": false,
+          "lineCount": 6
+        },
+        {
+          "name": "cleanDoneMsg",
+          "methods": [],
+          "properties": [
+            "row",
+            "size",
+            "err"
+          ],
+          "exported": false,
+          "lineCount": 5
         }
       ],
       "imports": [
         {
+          "source": "fmt",
+          "specifiers": [
+            "fmt"
+          ]
+        },
+        {
           "source": "io",
           "specifiers": [
             "io"
+          ]
+        },
+        {
+          "source": "io/fs",
+          "specifiers": [
+            "fs"
           ]
         },
         {
@@ -1082,21 +1501,48 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/cache/download",
+          "source": "strings",
+          "specifiers": [
+            "strings"
+          ]
+        },
+        {
+          "source": "charm.land/bubbles/v2/spinner",
+          "specifiers": [
+            "spinner"
+          ]
+        },
+        {
+          "source": "charm.land/bubbletea/v2",
+          "specifiers": [
+            "tea"
+          ]
+        },
+        {
+          "source": "charm.land/lipgloss/v2",
+          "specifiers": [
+            "v2"
+          ]
+        },
+        {
+          "source": "github.com/axnic/rtunk/pkg/cache/download",
           "specifiers": [
             "download"
           ]
         }
       ],
       "exports": [
-        "Run"
+        "Run",
+        "Init",
+        "Update",
+        "View"
       ],
-      "totalLines": 32,
+      "totalLines": 171,
       "hasStructuralAnalysis": true
     },
     "internal/cli/cache_prune.go": {
       "filePath": "internal/cli/cache_prune.go",
-      "contentHash": "026785573442a5f35ff430321eb80f57eb68c318a15b6b268caf928f1e82f7ce",
+      "contentHash": "57bf8bf4df2dd3f9c96c277ca1414e17fc9fd1245bff51c18cf2db84386a6de9",
       "functions": [
         {
           "name": "Run",
@@ -1129,7 +1575,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/cache/download",
+          "source": "github.com/axnic/rtunk/pkg/cache/download",
           "specifiers": [
             "download"
           ]
@@ -1143,7 +1589,7 @@
     },
     "internal/cli/cache_test.go": {
       "filePath": "internal/cli/cache_test.go",
-      "contentHash": "bbe89ad697fadc4d32c0e8f21067f40d69ba4f27b4760d17ccec4a7c8d5456df",
+      "contentHash": "a3adf285a322da24b4fdb4c06ad6d16e8865fe68c167d34be4c91e8c1e1211bd",
       "functions": [
         {
           "name": "TestCacheClean",
@@ -1152,7 +1598,16 @@
             "t"
           ],
           "exported": true,
-          "lineCount": 24
+          "lineCount": 29
+        },
+        {
+          "name": "TestCleanModel_RowsTurnIntoChecks",
+          "owner": "",
+          "params": [
+            "t"
+          ],
+          "exported": true,
+          "lineCount": 14
         },
         {
           "name": "TestCachePrune_DropsEntryForGoneRepo",
@@ -1206,13 +1661,13 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/cache/download",
+          "source": "github.com/axnic/rtunk/pkg/cache/download",
           "specifiers": [
             "download"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/config",
+          "source": "github.com/axnic/rtunk/pkg/trunk/config",
           "specifiers": [
             "config"
           ]
@@ -1220,10 +1675,11 @@
       ],
       "exports": [
         "TestCacheClean",
+        "TestCleanModel_RowsTurnIntoChecks",
         "TestCachePrune_DropsEntryForGoneRepo",
         "TestCachePrune_KeepsEntryForLiveRepo"
       ],
-      "totalLines": 70,
+      "totalLines": 90,
       "hasStructuralAnalysis": true
     },
     "internal/cli/check.go": {
@@ -1248,7 +1704,7 @@
     },
     "internal/cli/check_run.go": {
       "filePath": "internal/cli/check_run.go",
-      "contentHash": "06d44c5b5de22042a9157df5c97750c10944aea907b59421084cbc5124e9e0a9",
+      "contentHash": "54ffef09485c1fb7073362b9aa677a73f22b8894d2f8728cef8d6c8b36697140",
       "functions": [
         {
           "name": "Run",
@@ -1464,25 +1920,25 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/internal/cli/render",
+          "source": "github.com/axnic/rtunk/internal/cli/render",
           "specifiers": [
             "render"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/run/engine",
+          "source": "github.com/axnic/rtunk/pkg/run/engine",
           "specifiers": [
             "engine"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/config",
+          "source": "github.com/axnic/rtunk/pkg/trunk/config",
           "specifiers": [
             "config"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/output",
+          "source": "github.com/axnic/rtunk/pkg/trunk/output",
           "specifiers": [
             "output"
           ]
@@ -1496,7 +1952,7 @@
     },
     "internal/cli/check_run_test.go": {
       "filePath": "internal/cli/check_run_test.go",
-      "contentHash": "e09d96131037bbd1a0561d9afda5717a341a5f4e9127dda8d67c162a9f035451",
+      "contentHash": "2038994e76af343ddf2adddb921f631b9dd4dd3de51261740b49c8b5bb4df7e2",
       "functions": [
         {
           "name": "TestCheckRunCmd_SkipsUnsupportedFormats",
@@ -1784,7 +2240,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/output",
+          "source": "github.com/axnic/rtunk/pkg/trunk/output",
           "specifiers": [
             "output"
           ]
@@ -1823,7 +2279,7 @@
     },
     "internal/cli/check_test.go": {
       "filePath": "internal/cli/check_test.go",
-      "contentHash": "5b80d08519ca1a6560b7048be7a6d78568d90bf6dc06099ea7b5be1a9fdd7f54",
+      "contentHash": "53142db7cd7319fdb942f2e2a5e73f23002e08003d1f9b7990b1132b77f32cde",
       "functions": [
         {
           "name": "TestCommand_DisableUpstream_RealCatalogShapeDecodes",
@@ -1856,7 +2312,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/config",
+          "source": "github.com/axnic/rtunk/pkg/trunk/config",
           "specifiers": [
             "config"
           ]
@@ -1870,7 +2326,7 @@
     },
     "internal/cli/cli.go": {
       "filePath": "internal/cli/cli.go",
-      "contentHash": "bf7e8f6ccd148f6fd75edb054064c1914d24565512d858882a36104c3e35c679",
+      "contentHash": "b249e16e5779224d879e3698b87dc63c9bf9056a7a823e7d51d1c2598102e0b7",
       "functions": [
         {
           "name": "Run",
@@ -1916,11 +2372,12 @@
             "DeinitCmd",
             "RunCmd",
             "RenovateCmd",
+            "DownloadCmd",
             "ToolboxCmd",
             "LogsCmd"
           ],
           "exported": true,
-          "lineCount": 39
+          "lineCount": 42
         }
       ],
       "imports": [
@@ -1941,7 +2398,7 @@
         "CLI",
         "Run"
       ],
-      "totalLines": 141,
+      "totalLines": 144,
       "hasStructuralAnalysis": true
     },
     "internal/cli/cli_test.go": {
@@ -2224,7 +2681,7 @@
     },
     "internal/cli/deinit.go": {
       "filePath": "internal/cli/deinit.go",
-      "contentHash": "a58c0946b013b56a69dec500070b13b65442ffbe64b32d0792b542e6da72a266",
+      "contentHash": "73a37ca64478751c2184e180eac036e25d6f976266e5558e8aef4ff8eb85136a",
       "functions": [
         {
           "name": "Run",
@@ -2276,13 +2733,13 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/git",
+          "source": "github.com/axnic/rtunk/pkg/git",
           "specifiers": [
             "git"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/run/githooks",
+          "source": "github.com/axnic/rtunk/pkg/run/githooks",
           "specifiers": [
             "githooks"
           ]
@@ -2324,7 +2781,7 @@
     },
     "internal/cli/fmt.go": {
       "filePath": "internal/cli/fmt.go",
-      "contentHash": "fee011e4a7b667700ff2a09f1d7fda258e4bd69eaf07675d3c2cec0e5050ed6c",
+      "contentHash": "f19a40bb2a9be3bbfb47bd43eb32daf6dd91186ad06f11955c48af09f6252aa0",
       "functions": [
         {
           "name": "Run",
@@ -2421,19 +2878,19 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/internal/cli/render",
+          "source": "github.com/axnic/rtunk/internal/cli/render",
           "specifiers": [
             "render"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/run/engine",
+          "source": "github.com/axnic/rtunk/pkg/run/engine",
           "specifiers": [
             "engine"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/config",
+          "source": "github.com/axnic/rtunk/pkg/trunk/config",
           "specifiers": [
             "config"
           ]
@@ -2447,7 +2904,7 @@
     },
     "internal/cli/fmt_recent_run.go": {
       "filePath": "internal/cli/fmt_recent_run.go",
-      "contentHash": "8cf0e2a8f027c2be38b6546a32a8d9ca111db2a865aecbdf55aee5a644f3d2dd",
+      "contentHash": "82fc0b018ba72a48b2892d9b98415cec7cc5662cae96b007ba694aa99ed4f084",
       "functions": [
         {
           "name": "recentFmtRunPath",
@@ -2534,7 +2991,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/cache/download",
+          "source": "github.com/axnic/rtunk/pkg/cache/download",
           "specifiers": [
             "download"
           ]
@@ -2623,7 +3080,7 @@
     },
     "internal/cli/fmt_stability.go": {
       "filePath": "internal/cli/fmt_stability.go",
-      "contentHash": "3dcf21aba0f5c5e3bc8c447c012d81cbe3b3f0a9754fa941df21fd630a7ccd56",
+      "contentHash": "3bf3ed79b58b4c2d3db654e91609d9260ecda38fb66b391ba1376b569d20cf07",
       "functions": [
         {
           "name": "collectChangedByLinter",
@@ -2803,13 +3260,13 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/run/engine",
+          "source": "github.com/axnic/rtunk/pkg/run/engine",
           "specifiers": [
             "engine"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/config",
+          "source": "github.com/axnic/rtunk/pkg/trunk/config",
           "specifiers": [
             "config"
           ]
@@ -3140,7 +3597,7 @@
     },
     "internal/cli/githooks_install.go": {
       "filePath": "internal/cli/githooks_install.go",
-      "contentHash": "45c4929645fd4708ce0b1b0c0f7323eb579a09665b8d3ab6cb0d58eaaadd3ad6",
+      "contentHash": "6910af1a9e39cb9d69bdeff6d33c1a4dd466228c9b9ba6016b0d20fe1e015f58",
       "functions": [
         {
           "name": "Run",
@@ -3187,13 +3644,13 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/git",
+          "source": "github.com/axnic/rtunk/pkg/git",
           "specifiers": [
             "git"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/run/githooks",
+          "source": "github.com/axnic/rtunk/pkg/run/githooks",
           "specifiers": [
             "githooks"
           ]
@@ -3293,7 +3750,7 @@
     },
     "internal/cli/githooks_uninstall.go": {
       "filePath": "internal/cli/githooks_uninstall.go",
-      "contentHash": "dc00e10114fb0bca72d0c4e78308a524d753aeea4c63f20cb4e5d0497700cfc9",
+      "contentHash": "318aff7240c2d7b856f3dfb05445cb903bbfacb21e9634899a4dd2a27c075c9a",
       "functions": [
         {
           "name": "Run",
@@ -3338,13 +3795,13 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/git",
+          "source": "github.com/axnic/rtunk/pkg/git",
           "specifiers": [
             "git"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/run/githooks",
+          "source": "github.com/axnic/rtunk/pkg/run/githooks",
           "specifiers": [
             "githooks"
           ]
@@ -3358,7 +3815,7 @@
     },
     "internal/cli/init.go": {
       "filePath": "internal/cli/init.go",
-      "contentHash": "0411bb8199d78354c362cc29efb94a8de0fa7bb0d5059a02217a02558c45504b",
+      "contentHash": "c41768268d5e4e9c4d44c4097fb1eca4c610292d6043f3352203165584877735",
       "functions": [
         {
           "name": "Run",
@@ -3370,7 +3827,18 @@
           ],
           "returnType": "error",
           "exported": true,
-          "lineCount": 44
+          "lineCount": 56
+        },
+        {
+          "name": "migrateTrunk",
+          "owner": "",
+          "params": [
+            "repoRoot",
+            "w"
+          ],
+          "returnType": "error",
+          "exported": false,
+          "lineCount": 21
         }
       ],
       "classes": [
@@ -3412,7 +3880,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/git",
+          "source": "github.com/axnic/rtunk/pkg/git",
           "specifiers": [
             "git"
           ]
@@ -3421,12 +3889,12 @@
       "exports": [
         "Run"
       ],
-      "totalLines": 76,
+      "totalLines": 125,
       "hasStructuralAnalysis": true
     },
     "internal/cli/init_test.go": {
       "filePath": "internal/cli/init_test.go",
-      "contentHash": "62fb46c958dcbf05d293ff41aaac4741df71eec85db6de13c7b8247dad415b86",
+      "contentHash": "937ff3a6d6507fd638593e6d8a79d0f31bf39210c28fc5b0372b1a8a6a863713",
       "functions": [
         {
           "name": "initGitRepo",
@@ -3485,13 +3953,22 @@
           "lineCount": 16
         },
         {
-          "name": "TestInitCmd_WarnsWhenShadowingExistingTrunkYAML",
+          "name": "TestInitCmd_MigratesTrunkDir",
           "owner": "",
           "params": [
             "t"
           ],
           "exported": true,
-          "lineCount": 11
+          "lineCount": 33
+        },
+        {
+          "name": "TestInitCmd_NonTerminal_PrintsNextSteps",
+          "owner": "",
+          "params": [
+            "t"
+          ],
+          "exported": true,
+          "lineCount": 8
         },
         {
           "name": "TestInitCmd_NoWarningWhenNoExistingTrunkYAML",
@@ -3592,7 +4069,8 @@
         "TestInitCmd_RefusesWithoutForceWhenAlreadyExists",
         "TestInitCmd_ForceOverwrites",
         "TestInitCmd_ScaffoldIsActuallyFoundByFindConfig",
-        "TestInitCmd_WarnsWhenShadowingExistingTrunkYAML",
+        "TestInitCmd_MigratesTrunkDir",
+        "TestInitCmd_NonTerminal_PrintsNextSteps",
         "TestInitCmd_NoWarningWhenNoExistingTrunkYAML",
         "TestDeinitCmd_RemovesRtunkDir",
         "TestDeinitCmd_RemovesInstalledGitHooks",
@@ -3600,12 +4078,12 @@
         "TestDeinitCmd_NothingToDeinit_IsNoOp",
         "TestDeinitCmd_YesFlag_Accepted"
       ],
-      "totalLines": 229,
+      "totalLines": 260,
       "hasStructuralAnalysis": true
     },
     "internal/cli/interactive.go": {
       "filePath": "internal/cli/interactive.go",
-      "contentHash": "eb4042eca70d089d2f18ddb2207ac7248c9948b7452d0691c0e34933d8945bc3",
+      "contentHash": "3499060a3f3da0a64e7180f26eeee21de43eaeccbe988f9c7020091b23151f62",
       "functions": [
         {
           "name": "newChecklistState",
@@ -3616,28 +4094,35 @@
           ],
           "returnType": "*checklistState",
           "exported": false,
-          "lineCount": 5
+          "lineCount": 7
+        },
+        {
+          "name": "refilter",
+          "owner": "checklistState",
+          "params": [],
+          "exported": false,
+          "lineCount": 9
         },
         {
           "name": "up",
           "owner": "checklistState",
           "params": [],
           "exported": false,
-          "lineCount": 1
+          "lineCount": 5
         },
         {
           "name": "down",
           "owner": "checklistState",
           "params": [],
           "exported": false,
-          "lineCount": 1
+          "lineCount": 5
         },
         {
           "name": "toggle",
           "owner": "checklistState",
           "params": [],
           "exported": false,
-          "lineCount": 4
+          "lineCount": 6
         },
         {
           "name": "selected",
@@ -3648,27 +4133,58 @@
           "lineCount": 9
         },
         {
-          "name": "runChecklist",
-          "owner": "",
-          "params": [
-            "s",
-            "r",
-            "w"
-          ],
-          "returnType": "(bool, error)",
+          "name": "rows",
+          "owner": "checklistState",
+          "params": [],
+          "returnType": "[]checklistRow",
           "exported": false,
-          "lineCount": 42
+          "lineCount": 15
         },
         {
-          "name": "renderChecklist",
-          "owner": "",
+          "name": "scroll",
+          "owner": "checklistState",
           "params": [
-            "w",
-            "s",
-            "reprint"
+            "rows"
           ],
           "exported": false,
-          "lineCount": 22
+          "lineCount": 17
+        },
+        {
+          "name": "frame",
+          "owner": "checklistState",
+          "params": [
+            "cols",
+            "termRows"
+          ],
+          "returnType": "[]string",
+          "exported": false,
+          "lineCount": 47
+        },
+        {
+          "name": "Init",
+          "owner": "checklistModel",
+          "params": [],
+          "returnType": "tea.Cmd",
+          "exported": true,
+          "lineCount": 1
+        },
+        {
+          "name": "Update",
+          "owner": "checklistModel",
+          "params": [
+            "msg"
+          ],
+          "returnType": "(tea.Model, tea.Cmd)",
+          "exported": true,
+          "lineCount": 31
+        },
+        {
+          "name": "View",
+          "owner": "checklistModel",
+          "params": [],
+          "returnType": "tea.View",
+          "exported": true,
+          "lineCount": 6
         },
         {
           "name": "interactiveChecklist",
@@ -3680,7 +4196,7 @@
           ],
           "returnType": "(selected []string, ok bool, err error)",
           "exported": false,
-          "lineCount": 24
+          "lineCount": 17
         },
         {
           "name": "diffSelection",
@@ -3698,15 +4214,50 @@
         {
           "name": "checklistState",
           "methods": [
+            "refilter",
             "up",
             "down",
             "toggle",
-            "selected"
+            "selected",
+            "rows",
+            "scroll",
+            "frame"
           ],
           "properties": [
+            "title",
             "items",
             "checked",
-            "cursor"
+            "filter",
+            "visible",
+            "cursor",
+            "offset",
+            "height"
+          ],
+          "exported": false,
+          "lineCount": 10
+        },
+        {
+          "name": "checklistRow",
+          "methods": [],
+          "properties": [
+            "header",
+            "item"
+          ],
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "checklistModel",
+          "methods": [
+            "Init",
+            "Update",
+            "View"
+          ],
+          "properties": [
+            "s",
+            "cols",
+            "rows",
+            "confirmed"
           ],
           "exported": false,
           "lineCount": 5
@@ -3714,21 +4265,9 @@
       ],
       "imports": [
         {
-          "source": "bufio",
-          "specifiers": [
-            "bufio"
-          ]
-        },
-        {
           "source": "fmt",
           "specifiers": [
             "fmt"
-          ]
-        },
-        {
-          "source": "io",
-          "specifiers": [
-            "io"
           ]
         },
         {
@@ -3750,19 +4289,41 @@
           ]
         },
         {
+          "source": "strings",
+          "specifiers": [
+            "strings"
+          ]
+        },
+        {
+          "source": "charm.land/bubbletea/v2",
+          "specifiers": [
+            "tea"
+          ]
+        },
+        {
+          "source": "github.com/charmbracelet/x/ansi",
+          "specifiers": [
+            "ansi"
+          ]
+        },
+        {
           "source": "golang.org/x/term",
           "specifiers": [
             "term"
           ]
         }
       ],
-      "exports": [],
-      "totalLines": 173,
+      "exports": [
+        "Init",
+        "Update",
+        "View"
+      ],
+      "totalLines": 267,
       "hasStructuralAnalysis": true
     },
     "internal/cli/interactive_test.go": {
       "filePath": "internal/cli/interactive_test.go",
-      "contentHash": "720d5ab105abf74dff1b4a52a410cf5f059e17114ae5885df962992c1b7164bf",
+      "contentHash": "e11edf840071bd9a0b261002343a52e9f7fc738e59a8172915952ba565f6d4aa",
       "functions": [
         {
           "name": "testChecklistItems",
@@ -3773,76 +4334,142 @@
           "lineCount": 7
         },
         {
-          "name": "TestRunChecklist_SpaceTogglesCursorItem",
+          "name": "stripAll",
           "owner": "",
           "params": [
-            "t"
+            "lines"
           ],
-          "exported": true,
+          "returnType": "[]string",
+          "exported": false,
+          "lineCount": 6
+        },
+        {
+          "name": "keyText",
+          "owner": "",
+          "params": [
+            "s"
+          ],
+          "returnType": "tea.KeyPressMsg",
+          "exported": false,
+          "lineCount": 1
+        },
+        {
+          "name": "press",
+          "owner": "",
+          "params": [
+            "initial"
+          ],
+          "returnType": "(*checklistModel, bool)",
+          "exported": false,
           "lineCount": 9
         },
         {
-          "name": "TestRunChecklist_ArrowDownMovesCursorBeforeToggle",
+          "name": "TestChecklistModel_SpaceTogglesCursorItem",
           "owner": "",
           "params": [
             "t"
           ],
           "exported": true,
-          "lineCount": 10
+          "lineCount": 7
         },
         {
-          "name": "TestRunChecklist_ArrowUpWrapsToLastItem",
+          "name": "TestChecklistModel_DownMovesCursorBeforeToggle",
           "owner": "",
           "params": [
             "t"
           ],
           "exported": true,
-          "lineCount": 9
+          "lineCount": 4
         },
         {
-          "name": "TestRunChecklist_ToggleTwiceUnchecks",
+          "name": "TestChecklistModel_UpWrapsToLastItem",
           "owner": "",
           "params": [
             "t"
           ],
           "exported": true,
-          "lineCount": 10
+          "lineCount": 4
         },
         {
-          "name": "TestRunChecklist_QCancelsWithoutApplyingToggles",
+          "name": "TestChecklistModel_ToggleTwiceUnchecks",
           "owner": "",
           "params": [
             "t"
           ],
           "exported": true,
-          "lineCount": 8
+          "lineCount": 4
         },
         {
-          "name": "TestRunChecklist_BareEscCancels",
+          "name": "TestChecklistModel_EscAndCtrlCCancel",
           "owner": "",
           "params": [
             "t"
           ],
           "exported": true,
-          "lineCount": 8
+          "lineCount": 7
         },
         {
-          "name": "TestRunChecklist_CtrlCCancels",
+          "name": "TestChecklistModel_FilterNarrowsThenToggles",
           "owner": "",
           "params": [
             "t"
           ],
           "exported": true,
-          "lineCount": 8
+          "lineCount": 6
         },
         {
-          "name": "TestRunChecklist_UnrecognizedKeyIgnored",
+          "name": "TestChecklistModel_FilterWithNoMatchToggleIsNoop",
           "owner": "",
           "params": [
             "t"
           ],
           "exported": true,
-          "lineCount": 9
+          "lineCount": 5
+        },
+        {
+          "name": "TestChecklistModel_ResizeShrinksView",
+          "owner": "",
+          "params": [
+            "t"
+          ],
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "TestChecklistFrame_ViewportFollowsCursorAndFitsTerminal",
+          "owner": "",
+          "params": [
+            "t"
+          ],
+          "exported": true,
+          "lineCount": 31
+        },
+        {
+          "name": "TestChecklistFrame_CutsLinesToWidthAndDimsUnused",
+          "owner": "",
+          "params": [
+            "t"
+          ],
+          "exported": true,
+          "lineCount": 12
+        },
+        {
+          "name": "TestChecklistFrame_CheckedUnusedLinterShowsItsMark",
+          "owner": "",
+          "params": [
+            "t"
+          ],
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "TestChecklistFrame_MoreCountsItemsNotRows",
+          "owner": "",
+          "params": [
+            "t"
+          ],
+          "exported": true,
+          "lineCount": 11
         },
         {
           "name": "TestDiffSelection_AddsAndRemoves",
@@ -3872,29 +4499,26 @@
           "lineCount": 8
         },
         {
-          "name": "TestFlattenListing_SortsAndMarksEnabled",
+          "name": "TestFlattenListing_GroupsBySectionAndMarksEnabled",
           "owner": "",
           "params": [
             "t"
           ],
           "exported": true,
-          "lineCount": 12
+          "lineCount": 13
+        },
+        {
+          "name": "TestReportEnabled_Summary",
+          "owner": "",
+          "params": [
+            "t"
+          ],
+          "exported": true,
+          "lineCount": 5
         }
       ],
       "classes": [],
       "imports": [
-        {
-          "source": "bufio",
-          "specifiers": [
-            "bufio"
-          ]
-        },
-        {
-          "source": "bytes",
-          "specifiers": [
-            "bytes"
-          ]
-        },
         {
           "source": "strings",
           "specifiers": [
@@ -3905,6 +4529,18 @@
           "source": "testing",
           "specifiers": [
             "testing"
+          ]
+        },
+        {
+          "source": "charm.land/bubbletea/v2",
+          "specifiers": [
+            "tea"
+          ]
+        },
+        {
+          "source": "github.com/charmbracelet/x/ansi",
+          "specifiers": [
+            "ansi"
           ]
         },
         {
@@ -3921,25 +4557,30 @@
         }
       ],
       "exports": [
-        "TestRunChecklist_SpaceTogglesCursorItem",
-        "TestRunChecklist_ArrowDownMovesCursorBeforeToggle",
-        "TestRunChecklist_ArrowUpWrapsToLastItem",
-        "TestRunChecklist_ToggleTwiceUnchecks",
-        "TestRunChecklist_QCancelsWithoutApplyingToggles",
-        "TestRunChecklist_BareEscCancels",
-        "TestRunChecklist_CtrlCCancels",
-        "TestRunChecklist_UnrecognizedKeyIgnored",
+        "TestChecklistModel_SpaceTogglesCursorItem",
+        "TestChecklistModel_DownMovesCursorBeforeToggle",
+        "TestChecklistModel_UpWrapsToLastItem",
+        "TestChecklistModel_ToggleTwiceUnchecks",
+        "TestChecklistModel_EscAndCtrlCCancel",
+        "TestChecklistModel_FilterNarrowsThenToggles",
+        "TestChecklistModel_FilterWithNoMatchToggleIsNoop",
+        "TestChecklistModel_ResizeShrinksView",
+        "TestChecklistFrame_ViewportFollowsCursorAndFitsTerminal",
+        "TestChecklistFrame_CutsLinesToWidthAndDimsUnused",
+        "TestChecklistFrame_CheckedUnusedLinterShowsItsMark",
+        "TestChecklistFrame_MoreCountsItemsNotRows",
         "TestDiffSelection_AddsAndRemoves",
         "TestDiffSelection_NoChange",
         "TestInteractiveChecklist_NonTerminal_ErrorsClearly",
-        "TestFlattenListing_SortsAndMarksEnabled"
+        "TestFlattenListing_GroupsBySectionAndMarksEnabled",
+        "TestReportEnabled_Summary"
       ],
-      "totalLines": 135,
+      "totalLines": 209,
       "hasStructuralAnalysis": true
     },
     "internal/cli/link.go": {
       "filePath": "internal/cli/link.go",
-      "contentHash": "0284bc4df5726f4050248b90366c3db0996265c7b8dfb869a97e388fa87ca2c7",
+      "contentHash": "e0d20901362331e28ca12df1dcba4f41deff3dd50ea94ad17f889ef52a6abb1d",
       "functions": [
         {
           "name": "Run",
@@ -3950,7 +4591,7 @@
           ],
           "returnType": "error",
           "exported": true,
-          "lineCount": 39
+          "lineCount": 40
         },
         {
           "name": "linkTools",
@@ -3962,7 +4603,7 @@
           ],
           "returnType": "error",
           "exported": false,
-          "lineCount": 21
+          "lineCount": 22
         },
         {
           "name": "linkPluginSources",
@@ -3974,7 +4615,7 @@
           ],
           "returnType": "error",
           "exported": false,
-          "lineCount": 19
+          "lineCount": 20
         },
         {
           "name": "relink",
@@ -3995,7 +4636,7 @@
           ],
           "returnType": "error",
           "exported": false,
-          "lineCount": 8
+          "lineCount": 25
         }
       ],
       "classes": [
@@ -4035,19 +4676,25 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/cache/download",
+          "source": "strings",
+          "specifiers": [
+            "strings"
+          ]
+        },
+        {
+          "source": "github.com/axnic/rtunk/pkg/cache/download",
           "specifiers": [
             "download"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/run/runlog",
+          "source": "github.com/axnic/rtunk/pkg/run/runlog",
           "specifiers": [
             "runlog"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/config",
+          "source": "github.com/axnic/rtunk/pkg/trunk/config",
           "specifiers": [
             "config"
           ]
@@ -4056,12 +4703,12 @@
       "exports": [
         "Run"
       ],
-      "totalLines": 131,
+      "totalLines": 157,
       "hasStructuralAnalysis": true
     },
     "internal/cli/link_test.go": {
       "filePath": "internal/cli/link_test.go",
-      "contentHash": "2258548648b261c165a405d44528f0698164783ccf4dbc06240533859243a946",
+      "contentHash": "fa727293a5ad7ca6fd850e4d352a9c2e4f48fc1236bc48170b980ed8d1584631",
       "functions": [
         {
           "name": "isSymlink",
@@ -4081,7 +4728,16 @@
             "t"
           ],
           "exported": true,
-          "lineCount": 18
+          "lineCount": 19
+        },
+        {
+          "name": "TestWriteLinkGitignore_CompletesAnExistingFileWithoutRewritingIt",
+          "owner": "",
+          "params": [
+            "t"
+          ],
+          "exported": true,
+          "lineCount": 15
         },
         {
           "name": "TestLinkCmd_LocalPluginSource_NoPluginsSymlink",
@@ -4152,11 +4808,12 @@
       ],
       "exports": [
         "TestLinkCmd_CreatesLogsAndPerToolSymlinks",
+        "TestWriteLinkGitignore_CompletesAnExistingFileWithoutRewritingIt",
         "TestLinkCmd_LocalPluginSource_NoPluginsSymlink",
         "TestLinkCmd_Idempotent",
         "TestInitCmd_AlsoLinksDotRtunk"
       ],
-      "totalLines": 89,
+      "totalLines": 106,
       "hasStructuralAnalysis": true
     },
     "internal/cli/linters.go": {
@@ -4183,17 +4840,18 @@
     },
     "internal/cli/linters_disable.go": {
       "filePath": "internal/cli/linters_disable.go",
-      "contentHash": "12977e922034b1555872d6da04f29cb1e331a3dec52e4349d392ac00f89d2741",
+      "contentHash": "13b6190672478bd7a13147ca7d00a55835518c956f059cd8f07c664c54c28200",
       "functions": [
         {
           "name": "Run",
           "owner": "lintersDisableCmd",
           "params": [
-            "cli"
+            "cli",
+            "stderr"
           ],
           "returnType": "error",
           "exported": true,
-          "lineCount": 5
+          "lineCount": 9
         }
       ],
       "classes": [
@@ -4213,7 +4871,7 @@
       "exports": [
         "Run"
       ],
-      "totalLines": 13,
+      "totalLines": 17,
       "hasStructuralAnalysis": true
     },
     "internal/cli/linters_disable_test.go": {
@@ -4285,7 +4943,7 @@
     },
     "internal/cli/linters_edit.go": {
       "filePath": "internal/cli/linters_edit.go",
-      "contentHash": "fe5a3edf656cb0c176610d45a28047d478ef82d180981e82b798ca3798b529ba",
+      "contentHash": "a44dfd0a569fbd5287647388d1735aa2be8e0dac84d38091b1a1913b3df4ef51",
       "functions": [
         {
           "name": "editEnabled",
@@ -4370,13 +5028,13 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/renovate",
+          "source": "github.com/axnic/rtunk/pkg/renovate",
           "specifiers": [
             "renovate"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/config",
+          "source": "github.com/axnic/rtunk/pkg/trunk/config",
           "specifiers": [
             "config"
           ]
@@ -4388,27 +5046,77 @@
     },
     "internal/cli/linters_enable.go": {
       "filePath": "internal/cli/linters_enable.go",
-      "contentHash": "a3fd4c6be3056945ecc2c706780cbc70ab0582becb6bde95cd452aa9d3872de5",
+      "contentHash": "e321d6a0224b7f9d69bf9edf28eb80635be7bf531197ff2834f0cc76d7f2d4d0",
       "functions": [
         {
           "name": "Run",
           "owner": "lintersEnableCmd",
           "params": [
-            "cli"
+            "cli",
+            "stdout",
+            "stderr"
           ],
           "returnType": "error",
           "exported": true,
+          "lineCount": 24
+        },
+        {
+          "name": "reportEnabled",
+          "owner": "",
+          "params": [
+            "w",
+            "added",
+            "removed"
+          ],
+          "exported": false,
           "lineCount": 8
+        },
+        {
+          "name": "warnOverrides",
+          "owner": "",
+          "params": [
+            "cli",
+            "w",
+            "added",
+            "removed"
+          ],
+          "returnType": "(enabled []string)",
+          "exported": false,
+          "lineCount": 22
+        },
+        {
+          "name": "bareIDs",
+          "owner": "",
+          "params": [
+            "ids"
+          ],
+          "returnType": "[]string",
+          "exported": false,
+          "lineCount": 7
         },
         {
           "name": "interactiveLintersEnable",
           "owner": "",
           "params": [
-            "cli"
+            "cli",
+            "stdout",
+            "stderr"
+          ],
+          "returnType": "([]string, error)",
+          "exported": false,
+          "lineCount": 29
+        },
+        {
+          "name": "rejectUnknownIDs",
+          "owner": "",
+          "params": [
+            "cli",
+            "kind",
+            "ids"
           ],
           "returnType": "error",
           "exported": false,
-          "lineCount": 25
+          "lineCount": 23
         }
       ],
       "classes": [
@@ -4424,16 +5132,35 @@
           "lineCount": 3
         }
       ],
-      "imports": [],
+      "imports": [
+        {
+          "source": "fmt",
+          "specifiers": [
+            "fmt"
+          ]
+        },
+        {
+          "source": "io",
+          "specifiers": [
+            "io"
+          ]
+        },
+        {
+          "source": "strings",
+          "specifiers": [
+            "strings"
+          ]
+        }
+      ],
       "exports": [
         "Run"
       ],
-      "totalLines": 43,
+      "totalLines": 145,
       "hasStructuralAnalysis": true
     },
     "internal/cli/linters_enable_test.go": {
       "filePath": "internal/cli/linters_enable_test.go",
-      "contentHash": "92b4c7823dab433bd31f20fbe0eaa544dc519c1a1f7416b1166eec94d974baaa",
+      "contentHash": "15d589d13722809c947926db2ca5c0620c752452efe97dd12306ca146ae70430",
       "functions": [
         {
           "name": "TestLintersEnableCmd_NoID_NonTerminal_ErrorsInsteadOfHanging",
@@ -4535,13 +5262,42 @@
           "lineCount": 41
         },
         {
-          "name": "TestLintersEnableCmd_UnresolvableNewEntryInAnnotatedCategory_NoCommentNoForcedPin",
+          "name": "writeScratchWithPlugins",
+          "owner": "",
+          "params": [
+            "t",
+            "content"
+          ],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 12
+        },
+        {
+          "name": "TestLintersEnableCmd_UnknownID_Rejected",
           "owner": "",
           "params": [
             "t"
           ],
           "exported": true,
-          "lineCount": 31
+          "lineCount": 17
+        },
+        {
+          "name": "TestLintersEnableCmd_DefinedAndAlreadyEnabled_OK",
+          "owner": "",
+          "params": [
+            "t"
+          ],
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "TestLintersEnableCmd_GoInstalledTool_KeepsExtractVersion",
+          "owner": "",
+          "params": [
+            "t"
+          ],
+          "exported": true,
+          "lineCount": 39
         }
       ],
       "classes": [],
@@ -4595,9 +5351,11 @@
         "TestLintersEnableCmd_AnnotatedSurvivor_KeepsExactComment",
         "TestLintersEnableCmd_AnnotatedPinnedSurvivor_ReEnableBareRepinsToKnownGood",
         "TestLintersEnableCmd_NewEntryInAnnotatedCategory_GetsFreshComment",
-        "TestLintersEnableCmd_UnresolvableNewEntryInAnnotatedCategory_NoCommentNoForcedPin"
+        "TestLintersEnableCmd_UnknownID_Rejected",
+        "TestLintersEnableCmd_DefinedAndAlreadyEnabled_OK",
+        "TestLintersEnableCmd_GoInstalledTool_KeepsExtractVersion"
       ],
-      "totalLines": 235,
+      "totalLines": 289,
       "hasStructuralAnalysis": true
     },
     "internal/cli/linters_list.go": {
@@ -4687,7 +5445,7 @@
     },
     "internal/cli/live_wiring_test.go": {
       "filePath": "internal/cli/live_wiring_test.go",
-      "contentHash": "3970c4069f596744340e77390ab674f8b6a7e69f0c2358335e4c9e51fe7c12b6",
+      "contentHash": "c9afd2efd01dfb88bb5effaa85ab116fcf74d039e7e1d2f581a10435e48c9178",
       "functions": [
         {
           "name": "liveEvents",
@@ -4776,13 +5534,13 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/internal/cli/render",
+          "source": "github.com/axnic/rtunk/internal/cli/render",
           "specifiers": [
             "render"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/run/engine",
+          "source": "github.com/axnic/rtunk/pkg/run/engine",
           "specifiers": [
             "engine"
           ]
@@ -4822,7 +5580,7 @@
     },
     "internal/cli/logs_clean.go": {
       "filePath": "internal/cli/logs_clean.go",
-      "contentHash": "bc37fb474e7cbc6de4637175ee18b49ca2381e08f47fc1bfda4241243b0912e0",
+      "contentHash": "9642be6a3caaa6d5df66692c03f02c4073385e8cb9585d19b43350de41d230cb",
       "functions": [
         {
           "name": "Run",
@@ -4850,7 +5608,7 @@
       ],
       "imports": [
         {
-          "source": "github.com/xunleii/rtunk/pkg/run/runlog",
+          "source": "github.com/axnic/rtunk/pkg/run/runlog",
           "specifiers": [
             "runlog"
           ]
@@ -4864,7 +5622,7 @@
     },
     "internal/cli/logs_list.go": {
       "filePath": "internal/cli/logs_list.go",
-      "contentHash": "bdb5abe24b0ea9149c33a733de88cb050ff24f48c7aca8d51d0296154791c147",
+      "contentHash": "92bc0c7200d38ed204653f870a302d1b69693de985101639e303dd54c27060ad",
       "functions": [
         {
           "name": "Run",
@@ -4909,7 +5667,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/run/runlog",
+          "source": "github.com/axnic/rtunk/pkg/run/runlog",
           "specifiers": [
             "runlog"
           ]
@@ -4923,7 +5681,7 @@
     },
     "internal/cli/logs_show.go": {
       "filePath": "internal/cli/logs_show.go",
-      "contentHash": "ef7293e9f3a1e84e941aa60c04833e6d4c3372170d584bb32b2d7817b46b79c3",
+      "contentHash": "b6282eb0ba839ee4adb904441db0ec7b2ea1e510c69d9a7ed364c2adef81d401",
       "functions": [
         {
           "name": "Run",
@@ -4965,7 +5723,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/run/runlog",
+          "source": "github.com/axnic/rtunk/pkg/run/runlog",
           "specifiers": [
             "runlog"
           ]
@@ -4979,7 +5737,7 @@
     },
     "internal/cli/logs_test.go": {
       "filePath": "internal/cli/logs_test.go",
-      "contentHash": "96c157ef1260e2bb8ce3dafd41ae92d0c249e6943b4bd5d4e4a3b4f0f08cc098",
+      "contentHash": "6443ee47c9c116b1f0b6870f455c0c31c5a51a73224219d9777671b831c2ed69",
       "functions": [
         {
           "name": "TestLogsCmd_ListShowAndClean",
@@ -5036,7 +5794,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/run/runlog",
+          "source": "github.com/axnic/rtunk/pkg/run/runlog",
           "specifiers": [
             "runlog"
           ]
@@ -5185,7 +5943,7 @@
     },
     "internal/cli/render/base.go": {
       "filePath": "internal/cli/render/base.go",
-      "contentHash": "cd9cf2aad64f5a10e922bd516433000907fb59354ebdddf915196519ecfb2bee",
+      "contentHash": "c1344e68d089a27b27232caf565f727ca84c743d1e27e6fe3ba9b7fd6e93a67a",
       "functions": [
         {
           "name": "newBase",
@@ -5346,13 +6104,13 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/run/engine",
+          "source": "github.com/axnic/rtunk/pkg/run/engine",
           "specifiers": [
             "engine"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/output",
+          "source": "github.com/axnic/rtunk/pkg/trunk/output",
           "specifiers": [
             "output"
           ]
@@ -5367,7 +6125,7 @@
     },
     "internal/cli/render/base_test.go": {
       "filePath": "internal/cli/render/base_test.go",
-      "contentHash": "b9ab488afae3f92a03b2d64d7beb6caca7986d226021284c353c58df1240d4b1",
+      "contentHash": "e9e3e1c4d8da511cfbb9d4c7e5c603c8d4b65939d71aad1a6fe29f32ad44e454",
       "functions": [
         {
           "name": "TestBase_IgnoresLiveOnlyPhases",
@@ -5400,7 +6158,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/run/engine",
+          "source": "github.com/axnic/rtunk/pkg/run/engine",
           "specifiers": [
             "engine"
           ]
@@ -5665,7 +6423,7 @@
     },
     "internal/cli/render/human_test.go": {
       "filePath": "internal/cli/render/human_test.go",
-      "contentHash": "e62164441d13e1cfd670e2dd99c45f65513866effe2aac700e35267dd6b0aaf0",
+      "contentHash": "e33888f6f6ac6eccf3389bb30ea885a0b15fa6d34ea0a6eef6da125c11a31b77",
       "functions": [
         {
           "name": "run",
@@ -5837,13 +6595,13 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/run/engine",
+          "source": "github.com/axnic/rtunk/pkg/run/engine",
           "specifiers": [
             "engine"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/output",
+          "source": "github.com/axnic/rtunk/pkg/trunk/output",
           "specifiers": [
             "output"
           ]
@@ -5972,7 +6730,7 @@
     },
     "internal/cli/render/json_test.go": {
       "filePath": "internal/cli/render/json_test.go",
-      "contentHash": "468df4c492717ba5f997202ec839ce03477f6eff52d8044011f53673825155cc",
+      "contentHash": "aef960f60c492d4f24f92373cae7044d273049b6c1487e735d2ab56c3550b1ff",
       "functions": [
         {
           "name": "TestJSON_CleanRunIsExactAndNeverNull",
@@ -6080,13 +6838,13 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/run/engine",
+          "source": "github.com/axnic/rtunk/pkg/run/engine",
           "specifiers": [
             "engine"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/output",
+          "source": "github.com/axnic/rtunk/pkg/trunk/output",
           "specifiers": [
             "output"
           ]
@@ -6105,7 +6863,7 @@
     },
     "internal/cli/render/live.go": {
       "filePath": "internal/cli/render/live.go",
-      "contentHash": "bc1c95d794bbc91f40909ca1fb7fb5a26d1810f616dfd88d9758627283a0b8f4",
+      "contentHash": "06e7234304f673edc46dbb58129ee0d967792ba6b25d4df4464320b323be02a9",
       "functions": [
         {
           "name": "spinFrame",
@@ -6461,7 +7219,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/run/engine",
+          "source": "github.com/axnic/rtunk/pkg/run/engine",
           "specifiers": [
             "engine"
           ]
@@ -6478,7 +7236,7 @@
     },
     "internal/cli/render/live_decorator_test.go": {
       "filePath": "internal/cli/render/live_decorator_test.go",
-      "contentHash": "aba8aa4e22fcd5602636abe2fba7ae7622e83eb5a568c1e27eaa1ee1cd264bb2",
+      "contentHash": "e3bb5676dcaf91e84752805d0704b6c03e0135efa8c637bfc876562b88d21437",
       "functions": [
         {
           "name": "Write",
@@ -6623,13 +7381,13 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/run/engine",
+          "source": "github.com/axnic/rtunk/pkg/run/engine",
           "specifiers": [
             "engine"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/output",
+          "source": "github.com/axnic/rtunk/pkg/trunk/output",
           "specifiers": [
             "output"
           ]
@@ -6648,7 +7406,7 @@
     },
     "internal/cli/render/live_test.go": {
       "filePath": "internal/cli/render/live_test.go",
-      "contentHash": "e267c2e1f4d0f9359e70d68d7a8874484d2e0f7ffe18e8489838be1c500314d3",
+      "contentHash": "f7ab7650c2e27ba4a45e6bb1ef3e42d0f0872ffb456bf3ac52c929e75f180cb6",
       "functions": [
         {
           "name": "liveOf",
@@ -6878,7 +7636,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/run/engine",
+          "source": "github.com/axnic/rtunk/pkg/run/engine",
           "specifiers": [
             "engine"
           ]
@@ -6907,7 +7665,7 @@
     },
     "internal/cli/render/render.go": {
       "filePath": "internal/cli/render/render.go",
-      "contentHash": "44ae4e5f78987e3cc1b6e2ef066abffb658cbb359c4fdb03627956474ef16dfa",
+      "contentHash": "bf1e537d2a1074aa9811d5119a1e54599495442f4ddc3a85a69114056629e209",
       "functions": [
         {
           "name": "New",
@@ -6996,7 +7754,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/run/engine",
+          "source": "github.com/axnic/rtunk/pkg/run/engine",
           "specifiers": [
             "engine"
           ]
@@ -7209,7 +7967,7 @@
     },
     "internal/cli/render/sarif_test.go": {
       "filePath": "internal/cli/render/sarif_test.go",
-      "contentHash": "bbd038bfa068346c8945a9db961fd892732ddc1784101c93bfdfeea96082ea68",
+      "contentHash": "af597a12858039fd2d9f5e149a79ad61acdbacc67c82874e76709d253dfe9ac3",
       "functions": [
         {
           "name": "decodeSARIF",
@@ -7292,13 +8050,13 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/run/engine",
+          "source": "github.com/axnic/rtunk/pkg/run/engine",
           "specifiers": [
             "engine"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/output",
+          "source": "github.com/axnic/rtunk/pkg/trunk/output",
           "specifiers": [
             "output"
           ]
@@ -7776,7 +8534,7 @@
     },
     "internal/cli/renovate_enable.go": {
       "filePath": "internal/cli/renovate_enable.go",
-      "contentHash": "e53b46bff51fa5fbbc7b5771f8d51dcc823cc6776bde3b2dc0aa2f2e8ceddfe5",
+      "contentHash": "f5fb190844563ba09ed39692218e66ab60eb3cbddc127733e91e93b3b3cccee5",
       "functions": [
         {
           "name": "Run",
@@ -7905,13 +8663,13 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/renovate",
+          "source": "github.com/axnic/rtunk/pkg/renovate",
           "specifiers": [
             "renovate"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/config",
+          "source": "github.com/axnic/rtunk/pkg/trunk/config",
           "specifiers": [
             "config"
           ]
@@ -7925,7 +8683,7 @@
     },
     "internal/cli/renovate_test.go": {
       "filePath": "internal/cli/renovate_test.go",
-      "contentHash": "13467f421e50b4485129850cbc8c829de560059e783091018f8e9e497f22a2ac",
+      "contentHash": "5ec427d69ef85c8f6e990cdaca2e4025c0f27f10933b5a8196e49ee35adc724c",
       "functions": [
         {
           "name": "writeToolLinterFixture",
@@ -8086,7 +8844,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/config",
+          "source": "github.com/axnic/rtunk/pkg/trunk/config",
           "specifiers": [
             "config"
           ]
@@ -8109,7 +8867,7 @@
     },
     "internal/cli/runlog_test.go": {
       "filePath": "internal/cli/runlog_test.go",
-      "contentHash": "5b50a5e65ce4440755a501e53063c69aeaca61644322d2d0e458febb70584f18",
+      "contentHash": "3ed2f458c6e88916c505e8bf5ecdde4c9e0f9c2d27205731a107e5a07056d242",
       "functions": [
         {
           "name": "lastRun",
@@ -8299,7 +9057,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/run/runlog",
+          "source": "github.com/axnic/rtunk/pkg/run/runlog",
           "specifiers": [
             "runlog"
           ]
@@ -8323,7 +9081,7 @@
     },
     "internal/cli/shared.go": {
       "filePath": "internal/cli/shared.go",
-      "contentHash": "fbf453f28faa079cd86e65be78e22f1071b80e1060a33107e8d543788886c700",
+      "contentHash": "33a87fc2cd6a73685e07120d87f427190b26bb1fea7c0f15edd0879ed2fa7469",
       "functions": [
         {
           "name": "findConfig",
@@ -8525,6 +9283,14 @@
           "lineCount": 11
         },
         {
+          "name": "unused",
+          "owner": "listItem",
+          "params": [],
+          "returnType": "bool",
+          "exported": false,
+          "lineCount": 1
+        },
+        {
           "name": "name",
           "owner": "listItem",
           "params": [],
@@ -8533,14 +9299,27 @@
           "lineCount": 6
         },
         {
+          "name": "listingGroups",
+          "owner": "",
+          "params": [
+            "l",
+            "noun",
+            "showOther"
+          ],
+          "returnType": "[]listGroup",
+          "exported": false,
+          "lineCount": 11
+        },
+        {
           "name": "flattenListing",
           "owner": "",
           "params": [
-            "l"
+            "l",
+            "noun"
           ],
           "returnType": "([]listItem, map[string]bool)",
           "exported": false,
-          "lineCount": 13
+          "lineCount": 15
         },
         {
           "name": "enabledVersions",
@@ -8583,7 +9362,7 @@
           ],
           "returnType": "listing",
           "exported": false,
-          "lineCount": 30
+          "lineCount": 38
         },
         {
           "name": "suggested",
@@ -8630,6 +9409,19 @@
           "lineCount": 21
         },
         {
+          "name": "listLine",
+          "owner": "",
+          "params": [
+            "cursor",
+            "checked",
+            "it",
+            "width"
+          ],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 14
+        },
+        {
           "name": "writeListing",
           "owner": "",
           "params": [
@@ -8642,7 +9434,7 @@
           ],
           "returnType": "error",
           "exported": false,
-          "lineCount": 58
+          "lineCount": 45
         }
       ],
       "classes": [
@@ -8660,6 +9452,7 @@
         {
           "name": "listItem",
           "methods": [
+            "unused",
             "name"
           ],
           "properties": [
@@ -8667,10 +9460,13 @@
             "Version",
             "Files",
             "Description",
-            "label"
+            "EnabledBy",
+            "DisabledBy",
+            "label",
+            "section"
           ],
           "exported": false,
-          "lineCount": 7
+          "lineCount": 12
         },
         {
           "name": "listing",
@@ -8682,6 +9478,16 @@
           ],
           "exported": false,
           "lineCount": 5
+        },
+        {
+          "name": "listGroup",
+          "methods": [],
+          "properties": [
+            "title",
+            "items"
+          ],
+          "exported": false,
+          "lineCount": 4
         }
       ],
       "imports": [
@@ -8746,55 +9552,61 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/internal/cli/render",
+          "source": "charm.land/lipgloss/v2",
+          "specifiers": [
+            "v2"
+          ]
+        },
+        {
+          "source": "github.com/axnic/rtunk/internal/cli/render",
           "specifiers": [
             "render"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/cache/download",
+          "source": "github.com/axnic/rtunk/pkg/cache/download",
           "specifiers": [
             "download"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/git",
+          "source": "github.com/axnic/rtunk/pkg/git",
           "specifiers": [
             "git"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/run/actions",
+          "source": "github.com/axnic/rtunk/pkg/run/actions",
           "specifiers": [
             "actions"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/run/engine",
+          "source": "github.com/axnic/rtunk/pkg/run/engine",
           "specifiers": [
             "engine"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/run/runlog",
+          "source": "github.com/axnic/rtunk/pkg/run/runlog",
           "specifiers": [
             "runlog"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/config",
+          "source": "github.com/axnic/rtunk/pkg/trunk/config",
           "specifiers": [
             "config"
           ]
         }
       ],
       "exports": [],
-      "totalLines": 667,
+      "totalLines": 724,
       "hasStructuralAnalysis": true
     },
     "internal/cli/shared_test.go": {
       "filePath": "internal/cli/shared_test.go",
-      "contentHash": "2613d3d81c64ac2abfce7cf12fc7e594014f5922fad7918cb97cef14bc4fb455",
+      "contentHash": "fb79ce880874466e0b3f9676e492867abe6987ba2d8152493124129209608ad8",
       "functions": [
         {
           "name": "threeLinterConfig",
@@ -9013,7 +9825,7 @@
             "t"
           ],
           "exported": true,
-          "lineCount": 16
+          "lineCount": 17
         },
         {
           "name": "TestLintersList_AllAddsTheRest",
@@ -9226,6 +10038,34 @@
           ],
           "exported": true,
           "lineCount": 27
+        },
+        {
+          "name": "overrideFixture",
+          "owner": "",
+          "params": [
+            "t"
+          ],
+          "returnType": "(cfgPath string)",
+          "exported": false,
+          "lineCount": 7
+        },
+        {
+          "name": "TestLintersList_ShowsWhereOverridesDecide",
+          "owner": "",
+          "params": [
+            "t"
+          ],
+          "exported": true,
+          "lineCount": 15
+        },
+        {
+          "name": "TestLintersEnableDisable_WarnWhenAnOverrideDecidesOtherwise",
+          "owner": "",
+          "params": [
+            "t"
+          ],
+          "exported": true,
+          "lineCount": 20
         }
       ],
       "classes": [],
@@ -9285,7 +10125,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/config",
+          "source": "github.com/axnic/rtunk/pkg/trunk/config",
           "specifiers": [
             "config"
           ]
@@ -9329,9 +10169,11 @@
         "TestExpandPaths",
         "TestPartiallyStaged",
         "TestCheckFmt_NoPathsOutsideGit_HardError",
-        "TestFmt_DefaultSelectionStagedOnly_SkipsPartiallyStaged"
+        "TestFmt_DefaultSelectionStagedOnly_SkipsPartiallyStaged",
+        "TestLintersList_ShowsWhereOverridesDecide",
+        "TestLintersEnableDisable_WarnWhenAnOverrideDecidesOtherwise"
       ],
-      "totalLines": 690,
+      "totalLines": 738,
       "hasStructuralAnalysis": true
     },
     "internal/cli/toolbox.go": {
@@ -9359,7 +10201,7 @@
     },
     "internal/cli/toolbox_download.go": {
       "filePath": "internal/cli/toolbox_download.go",
-      "contentHash": "65d6e72b915389fe5e2bbfbccc20a3a2d6840d7d9eff12d7410e90a234112f3b",
+      "contentHash": "6d35227ef1396afc58e9a1d541a7eed7350202c0b562bd677418eeb363879bed",
       "functions": [
         {
           "name": "toolboxCategory",
@@ -9376,11 +10218,54 @@
           "owner": "downloadCmd",
           "params": [
             "cli",
-            "stdout"
+            "stdout",
+            "stderr"
           ],
           "returnType": "error",
           "exported": true,
-          "lineCount": 24
+          "lineCount": 51
+        },
+        {
+          "name": "refs",
+          "owner": "downloadCmd",
+          "params": [
+            "cfg"
+          ],
+          "returnType": "([]download.Ref, error)",
+          "exported": false,
+          "lineCount": 39
+        },
+        {
+          "name": "Event",
+          "owner": "nopRenderer",
+          "params": [],
+          "exported": true,
+          "lineCount": 1
+        },
+        {
+          "name": "Close",
+          "owner": "nopRenderer",
+          "params": [],
+          "returnType": "error",
+          "exported": true,
+          "lineCount": 1
+        },
+        {
+          "name": "Event",
+          "owner": "installLines",
+          "params": [
+            "ev"
+          ],
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "Close",
+          "owner": "installLines",
+          "params": [],
+          "returnType": "error",
+          "exported": true,
+          "lineCount": 1
         },
         {
           "name": "cutVersion",
@@ -9391,30 +10276,43 @@
           "returnType": "(id, version string, pinned bool)",
           "exported": false,
           "lineCount": 8
-        },
-        {
-          "name": "formatEvent",
-          "owner": "",
-          "params": [
-            "ev"
-          ],
-          "returnType": "string",
-          "exported": false,
-          "lineCount": 16
         }
       ],
       "classes": [
         {
           "name": "downloadCmd",
           "methods": [
-            "Run"
+            "Run",
+            "refs"
           ],
           "properties": [
             "Category",
-            "ID"
+            "IDs"
           ],
           "exported": false,
           "lineCount": 4
+        },
+        {
+          "name": "nopRenderer",
+          "methods": [
+            "Event",
+            "Close"
+          ],
+          "properties": [],
+          "exported": false,
+          "lineCount": 1
+        },
+        {
+          "name": "installLines",
+          "methods": [
+            "Event",
+            "Close"
+          ],
+          "properties": [
+            "w"
+          ],
+          "exported": false,
+          "lineCount": 1
         }
       ],
       "imports": [
@@ -9431,21 +10329,61 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/cache/download",
+          "source": "maps",
+          "specifiers": [
+            "maps"
+          ]
+        },
+        {
+          "source": "os",
+          "specifiers": [
+            "os"
+          ]
+        },
+        {
+          "source": "slices",
+          "specifiers": [
+            "slices"
+          ]
+        },
+        {
+          "source": "github.com/axnic/rtunk/internal/cli/render",
+          "specifiers": [
+            "render"
+          ]
+        },
+        {
+          "source": "github.com/axnic/rtunk/pkg/cache/download",
           "specifiers": [
             "download"
+          ]
+        },
+        {
+          "source": "github.com/axnic/rtunk/pkg/run/engine",
+          "specifiers": [
+            "engine"
+          ]
+        },
+        {
+          "source": "github.com/axnic/rtunk/pkg/trunk/config",
+          "specifiers": [
+            "config"
           ]
         }
       ],
       "exports": [
-        "Run"
+        "Run",
+        "Event",
+        "Close",
+        "Event",
+        "Close"
       ],
-      "totalLines": 83,
+      "totalLines": 156,
       "hasStructuralAnalysis": true
     },
     "internal/cli/toolbox_download_test.go": {
       "filePath": "internal/cli/toolbox_download_test.go",
-      "contentHash": "0b066c19862bcaa41cf90f1b7374ba05cb2923da0d5aa0c58767df86783de55a",
+      "contentHash": "8e68e7f466b967acd6f934b391d9d80b20e6185dced5d2d7b1b7b8ae63ab7355",
       "functions": [
         {
           "name": "nodeTarGz",
@@ -9475,7 +10413,16 @@
             "t"
           ],
           "exported": true,
-          "lineCount": 12
+          "lineCount": 18
+        },
+        {
+          "name": "TestDownloadCmd_UnknownIDErrors",
+          "owner": "",
+          "params": [
+            "t"
+          ],
+          "exported": true,
+          "lineCount": 5
         },
         {
           "name": "TestDownloadCmd_UnknownCategory",
@@ -9485,6 +10432,15 @@
           ],
           "exported": true,
           "lineCount": 4
+        },
+        {
+          "name": "TestDownloadCmd_CategoryWithoutIDErrors",
+          "owner": "",
+          "params": [
+            "t"
+          ],
+          "exported": true,
+          "lineCount": 5
         }
       ],
       "classes": [],
@@ -9552,14 +10508,16 @@
       ],
       "exports": [
         "TestDownloadCmd_Targeted",
-        "TestDownloadCmd_UnknownCategory"
+        "TestDownloadCmd_UnknownIDErrors",
+        "TestDownloadCmd_UnknownCategory",
+        "TestDownloadCmd_CategoryWithoutIDErrors"
       ],
-      "totalLines": 96,
+      "totalLines": 114,
       "hasStructuralAnalysis": true
     },
     "internal/cli/toolbox_exec.go": {
       "filePath": "internal/cli/toolbox_exec.go",
-      "contentHash": "f375596d2c4c8e3c9838a21d93fd5b0762740f4272487aae99798dd2a84825ed",
+      "contentHash": "08039b77136aeffee5595fb56f418b7587209a947502c505fcc20eaccfc56b02",
       "functions": [
         {
           "name": "Run",
@@ -9616,7 +10574,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/cache/download",
+          "source": "github.com/axnic/rtunk/pkg/cache/download",
           "specifiers": [
             "download"
           ]
@@ -9630,7 +10588,7 @@
     },
     "internal/cli/toolbox_exec_test.go": {
       "filePath": "internal/cli/toolbox_exec_test.go",
-      "contentHash": "dd47199463c8a06cb7cde0071cc73faaf1aa0f02851983af4cfb22726d88e706",
+      "contentHash": "5c77e44bb4cb49664d88c1655f4b0f85175611f9898ab89b870da0543a141f24",
       "functions": [
         {
           "name": "TestExecCmd_UsesExistingShim",
@@ -9711,7 +10669,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/cache/download",
+          "source": "github.com/axnic/rtunk/pkg/cache/download",
           "specifiers": [
             "download"
           ]
@@ -9729,7 +10687,7 @@
     },
     "internal/cli/toolbox_where.go": {
       "filePath": "internal/cli/toolbox_where.go",
-      "contentHash": "0e6f3a000c60eb8280fda67dd6a6c9cfd96316c0491df9d7833a85c263780332",
+      "contentHash": "a70792a1bfe8fdbe7a707e36bc6b7a249b75a06804431c934205747a03d86a26",
       "functions": [
         {
           "name": "Run",
@@ -9783,7 +10741,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/cache/download",
+          "source": "github.com/axnic/rtunk/pkg/cache/download",
           "specifiers": [
             "download"
           ]
@@ -9797,7 +10755,7 @@
     },
     "internal/cli/toolbox_where_test.go": {
       "filePath": "internal/cli/toolbox_where_test.go",
-      "contentHash": "a65fef400138eebff8b756bc6fe544ab988a43274dc0a6e55851959df16be48b",
+      "contentHash": "27056ae87bbcb8ce10cfb81a29ff7b94d208618c23ba48207aab0a4cb24d9fd7",
       "functions": [
         {
           "name": "TestWhereCmd_NotDownloaded",
@@ -9845,7 +10803,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/cache/download",
+          "source": "github.com/axnic/rtunk/pkg/cache/download",
           "specifiers": [
             "download"
           ]
@@ -9950,7 +10908,7 @@
     },
     "pkg/cache/download/blob_test.go": {
       "filePath": "pkg/cache/download/blob_test.go",
-      "contentHash": "5a9b864d41ed87da10af81291abd34331342f418c31e5e439d6927fee1fd0027",
+      "contentHash": "587d7a02ebcab26b5a49db22c10d83a4c27e1a3009474aadde5572a91a6f1169",
       "functions": [
         {
           "name": "TestFetchBlob",
@@ -10025,7 +10983,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/cache/download",
+          "source": "github.com/axnic/rtunk/pkg/cache/download",
           "specifiers": [
             "download"
           ]
@@ -10152,7 +11110,7 @@
     },
     "pkg/cache/download/cache_test.go": {
       "filePath": "pkg/cache/download/cache_test.go",
-      "contentHash": "506423ee3e5201eb0e7fbdea5c86f9eae08934fd55375a1e11bc580739aa8d78",
+      "contentHash": "808fb97d3f0fda588f63590842429f9965d351eae040743ccab53173c870514b",
       "functions": [
         {
           "name": "TestRoot_ExplicitCacheDir",
@@ -10248,7 +11206,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/cache/download",
+          "source": "github.com/axnic/rtunk/pkg/cache/download",
           "specifiers": [
             "download"
           ]
@@ -10277,7 +11235,7 @@
     },
     "pkg/cache/download/download.go": {
       "filePath": "pkg/cache/download/download.go",
-      "contentHash": "d2da651a245b2275b5e8a566d84d761d7d5cacfa585153395d55de8631ede518",
+      "contentHash": "fb488effccb3c8526c1da71a0c06e1adf2298cee273f5ffb727b80fb22acdbea",
       "functions": [
         {
           "name": "Download",
@@ -10365,7 +11323,7 @@
           ],
           "returnType": "error",
           "exported": false,
-          "lineCount": 33
+          "lineCount": 34
         },
         {
           "name": "claimInstall",
@@ -10536,7 +11494,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/config",
+          "source": "github.com/axnic/rtunk/pkg/trunk/config",
           "specifiers": [
             "config"
           ]
@@ -10549,12 +11507,12 @@
         "Pending",
         "ActionPackagesBinDir"
       ],
-      "totalLines": 513,
+      "totalLines": 514,
       "hasStructuralAnalysis": true
     },
     "pkg/cache/download/download_test.go": {
       "filePath": "pkg/cache/download/download_test.go",
-      "contentHash": "5c86ef9f97c86afec88b35034bf99c56e5d16d898f2a1dce9b24374a24baaef2",
+      "contentHash": "b280717569e906e1c030aa17f4f2542d5a7eb837e7eab6852fa7119fedac197a",
       "functions": [
         {
           "name": "tarGzBytes",
@@ -10806,6 +11764,15 @@
           ],
           "exported": true,
           "lineCount": 19
+        },
+        {
+          "name": "TestDownload_RawBinary_RecipeLevelExecutable",
+          "owner": "",
+          "params": [
+            "t"
+          ],
+          "exported": true,
+          "lineCount": 28
         }
       ],
       "classes": [],
@@ -10907,13 +11874,13 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/cache/download",
+          "source": "github.com/axnic/rtunk/pkg/cache/download",
           "specifiers": [
             "download"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/config",
+          "source": "github.com/axnic/rtunk/pkg/trunk/config",
           "specifiers": [
             "config"
           ]
@@ -10941,14 +11908,15 @@
         "TestDownload_ToolRef_RuntimePackage_UnknownRuntime",
         "TestDownload_ActionPackagesRef_RuntimeFetchFailure_EmitsExactlyOneFailedEvent",
         "TestDownload_AllRefs_DefaultsToEveryToolAndRuntime",
-        "TestPending_DedupesRuntimeAndSkipsInstalled"
+        "TestPending_DedupesRuntimeAndSkipsInstalled",
+        "TestDownload_RawBinary_RecipeLevelExecutable"
       ],
-      "totalLines": 808,
+      "totalLines": 840,
       "hasStructuralAnalysis": true
     },
     "pkg/cache/download/env.go": {
       "filePath": "pkg/cache/download/env.go",
-      "contentHash": "e80a31cc6111b1e59d533cc1c77a72a148cb31650637ca80cbfe4c1286f9de7a",
+      "contentHash": "bb2a011ea2ac128a26fbe8c86eeea44a259484e5a814924adfb5b08a84af45b6",
       "functions": [
         {
           "name": "BuildEnv",
@@ -10988,7 +11956,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/config",
+          "source": "github.com/axnic/rtunk/pkg/trunk/config",
           "specifiers": [
             "config"
           ]
@@ -11002,7 +11970,7 @@
     },
     "pkg/cache/download/env_test.go": {
       "filePath": "pkg/cache/download/env_test.go",
-      "contentHash": "a15348af913050e129fca4039a224b52cf60b8c73fc33b9d91d8dcb30c6f2f08",
+      "contentHash": "771dfcd864468c9dd8421d95c28a82728ac0fce8305ccf87a2ce3a94eae939f1",
       "functions": [
         {
           "name": "TestBuildEnv",
@@ -11038,13 +12006,13 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/cache/download",
+          "source": "github.com/axnic/rtunk/pkg/cache/download",
           "specifiers": [
             "download"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/config",
+          "source": "github.com/axnic/rtunk/pkg/trunk/config",
           "specifiers": [
             "config"
           ]
@@ -11059,7 +12027,7 @@
     },
     "pkg/cache/download/extract.go": {
       "filePath": "pkg/cache/download/extract.go",
-      "contentHash": "68ddfae50f51b7c648e2aa62cbf607fa8fe60d7b996cc629f87425c2fab785b3",
+      "contentHash": "b145d6e69bc1a148bbdcc835d424eb2929a1787215309297635d24541ea115f3",
       "functions": [
         {
           "name": "copyLimited",
@@ -11223,13 +12191,13 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/cache/install",
+          "source": "github.com/axnic/rtunk/pkg/cache/install",
           "specifiers": [
             "install"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/config",
+          "source": "github.com/axnic/rtunk/pkg/trunk/config",
           "specifiers": [
             "config"
           ]
@@ -11290,7 +12258,7 @@
     },
     "pkg/cache/download/extract_test.go": {
       "filePath": "pkg/cache/download/extract_test.go",
-      "contentHash": "39e64476d14239052bcebc27136d125b26cc5e903b77bc1bc2adfe27635df75f",
+      "contentHash": "6416e7546eefc8f0281059591fd9f905cb218add70df620360a24e8f18b2c5ed",
       "functions": [
         {
           "name": "makeTarGz",
@@ -11488,13 +12456,13 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/cache/download",
+          "source": "github.com/axnic/rtunk/pkg/cache/download",
           "specifiers": [
             "download"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/config",
+          "source": "github.com/axnic/rtunk/pkg/trunk/config",
           "specifiers": [
             "config"
           ]
@@ -11614,7 +12582,7 @@
     },
     "pkg/cache/download/lock_internal_test.go": {
       "filePath": "pkg/cache/download/lock_internal_test.go",
-      "contentHash": "3c70f292eea06beea34d0a50b367e65cb4e909d2335d8c6c855cc13ad8fb9ba9",
+      "contentHash": "ea17acbe55b8b3195a4a88d48dc4abc9f3d20adc195603d535d58166c3ae9f1f",
       "functions": [
         {
           "name": "TestAcquireInstallLock_SecondLiveClaimFailsFast",
@@ -11756,7 +12724,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/config",
+          "source": "github.com/axnic/rtunk/pkg/trunk/config",
           "specifiers": [
             "config"
           ]
@@ -11775,7 +12743,7 @@
     },
     "pkg/cache/download/osspec.go": {
       "filePath": "pkg/cache/download/osspec.go",
-      "contentHash": "9f9b28a8900b91ec852ca86ce34eaec6fdd99e38586cbbb3c71b88d852b07853",
+      "contentHash": "001d83c0dda0ed9269c128300ea7c8a52218eb726132effeca89e70a62551df5",
       "functions": [
         {
           "name": "HostOSName",
@@ -11842,7 +12810,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/config",
+          "source": "github.com/axnic/rtunk/pkg/trunk/config",
           "specifiers": [
             "config"
           ]
@@ -11858,7 +12826,7 @@
     },
     "pkg/cache/download/osspec_test.go": {
       "filePath": "pkg/cache/download/osspec_test.go",
-      "contentHash": "93ebe1b149e67e1dcf2c7383b884ab407533c99afbab8e727a960cc88ef4e0b7",
+      "contentHash": "b545a33785a0272f7414343e310f06a7bd27dacb5475395bffe05dc0df19d581",
       "functions": [
         {
           "name": "TestMatchEntry",
@@ -11909,13 +12877,13 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/cache/download",
+          "source": "github.com/axnic/rtunk/pkg/cache/download",
           "specifiers": [
             "download"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/config",
+          "source": "github.com/axnic/rtunk/pkg/trunk/config",
           "specifiers": [
             "config"
           ]
@@ -12130,7 +13098,7 @@
     },
     "pkg/cache/download/registry.go": {
       "filePath": "pkg/cache/download/registry.go",
-      "contentHash": "04117b07d5bda14f7ce118424e5560ff671d10f1c18195f1ed58752314c317ab",
+      "contentHash": "e79a24c5ccfb23de599a26554d9937bfb56be3af4d8b169d230ed7388842e1a6",
       "functions": [
         {
           "name": "registryDir",
@@ -12221,7 +13189,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/config",
+          "source": "github.com/axnic/rtunk/pkg/trunk/config",
           "specifiers": [
             "config"
           ]
@@ -12235,7 +13203,7 @@
     },
     "pkg/cache/download/registry_test.go": {
       "filePath": "pkg/cache/download/registry_test.go",
-      "contentHash": "1c26e215cfdef72a189c5cb68d44cffa3c6917026b4bbc21f172f72ad75bc8ec",
+      "contentHash": "ed931f12308fdf96f277fb1d8cec76cd9c305bff85419fe2651df81271de1daa",
       "functions": [
         {
           "name": "TestRecordUsage_WritesRegistryEntry",
@@ -12316,7 +13284,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/config",
+          "source": "github.com/axnic/rtunk/pkg/trunk/config",
           "specifiers": [
             "config"
           ]
@@ -12332,7 +13300,7 @@
     },
     "pkg/cache/download/runtime.go": {
       "filePath": "pkg/cache/download/runtime.go",
-      "contentHash": "f3c32a8097a86d9f372b1b07583dcca495f193243ea96d6a5f1a26429cae5b4e",
+      "contentHash": "4f672705d3a27b559347c027b00463590f217bd649d67a3991ac1ce3ef5f1173",
       "functions": [
         {
           "name": "InstallPackage",
@@ -12383,13 +13351,13 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/cache/runtime",
+          "source": "github.com/axnic/rtunk/pkg/cache/runtime",
           "specifiers": [
             "runtime"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/config",
+          "source": "github.com/axnic/rtunk/pkg/trunk/config",
           "specifiers": [
             "config"
           ]
@@ -12405,7 +13373,7 @@
     },
     "pkg/cache/download/runtime_shim.go": {
       "filePath": "pkg/cache/download/runtime_shim.go",
-      "contentHash": "82dc389e49071f309809a2a34ee34a7579fe47808533658ac7f6dde278e22729",
+      "contentHash": "53f8c456e01c6195c5a28be556c9e71d98a1429a006d7d71ab5b0ccbfada819a",
       "functions": [
         {
           "name": "ResolveRuntimeShimDir",
@@ -12444,7 +13412,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/config",
+          "source": "github.com/axnic/rtunk/pkg/trunk/config",
           "specifiers": [
             "config"
           ]
@@ -12458,7 +13426,7 @@
     },
     "pkg/cache/download/runtime_shim_test.go": {
       "filePath": "pkg/cache/download/runtime_shim_test.go",
-      "contentHash": "a9accb1275f92c7b02bca3abf8d262174e012c5bbdef9a5b24dbe5002c332201",
+      "contentHash": "ef801bc11691f444613e54714e3f878a0fcb066f055f0d555ff5eed0a22fad53",
       "functions": [
         {
           "name": "TestQuoteOne",
@@ -12551,13 +13519,13 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/cache/download",
+          "source": "github.com/axnic/rtunk/pkg/cache/download",
           "specifiers": [
             "download"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/config",
+          "source": "github.com/axnic/rtunk/pkg/trunk/config",
           "specifiers": [
             "config"
           ]
@@ -12575,7 +13543,7 @@
     },
     "pkg/cache/download/runtime_test.go": {
       "filePath": "pkg/cache/download/runtime_test.go",
-      "contentHash": "03376a601917e63e0fab4ffb46974b6cb89ac95c8e0e5ba0a3c7151c96267d03",
+      "contentHash": "7b400d1c8f7486662aa2683c215caccc2f05262698bf58a0d8089b13ca3a8223",
       "functions": [
         {
           "name": "TestInstallPackage_UnsupportedRuntime",
@@ -12647,13 +13615,13 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/cache/download",
+          "source": "github.com/axnic/rtunk/pkg/cache/download",
           "specifiers": [
             "download"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/config",
+          "source": "github.com/axnic/rtunk/pkg/trunk/config",
           "specifiers": [
             "config"
           ]
@@ -12775,7 +13743,7 @@
     },
     "pkg/cache/download/shim_test.go": {
       "filePath": "pkg/cache/download/shim_test.go",
-      "contentHash": "c5fec121df6a17d59a3a8e8253e4602c6242b09fcb7111abff0daff5d440e06e",
+      "contentHash": "7e6bb19e2ebfb62433f35c06ff4950a2241aef5a93874ba3502f989115d55df8",
       "functions": [
         {
           "name": "TestFindShimTarget",
@@ -12853,7 +13821,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/cache/download",
+          "source": "github.com/axnic/rtunk/pkg/cache/download",
           "specifiers": [
             "download"
           ]
@@ -12930,7 +13898,7 @@
     },
     "pkg/cache/download/template_test.go": {
       "filePath": "pkg/cache/download/template_test.go",
-      "contentHash": "bb3fec9b2e3b997505d0798c00e83cf0f819149994457bd655a8e74d212e0a15",
+      "contentHash": "a748cb6030762841bf2373d7f6ae042912936cd9c9c89588afec2bea6bc03663",
       "functions": [
         {
           "name": "TestTemplateURL",
@@ -13008,7 +13976,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/cache/download",
+          "source": "github.com/axnic/rtunk/pkg/cache/download",
           "specifiers": [
             "download"
           ]
@@ -13059,7 +14027,7 @@
     },
     "pkg/cache/download/version_test.go": {
       "filePath": "pkg/cache/download/version_test.go",
-      "contentHash": "47e8200f4ca15c30bcf64ef5e53f1a16c50a59615c79a13197eff9a6e3e20e8b",
+      "contentHash": "ee22a8e3f253fd4fc984124f4f63919bf610e73adefdc9df10585fce555dae70",
       "functions": [
         {
           "name": "TestResolveVersion_Pinned",
@@ -13104,7 +14072,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/cache/download",
+          "source": "github.com/axnic/rtunk/pkg/cache/download",
           "specifiers": [
             "download"
           ]
@@ -13171,7 +14139,7 @@
     },
     "pkg/cache/runtime/go.go": {
       "filePath": "pkg/cache/runtime/go.go",
-      "contentHash": "bc1a849a99d2bb35c984805b7778816dc71a3d80cbcb54783a117360a411ae2c",
+      "contentHash": "096bb625263c4ee84587e1639450e704249b1324960ca70e479aa5a5691e2a4e",
       "functions": [
         {
           "name": "installGoPackage",
@@ -13221,7 +14189,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/cache/install",
+          "source": "github.com/axnic/rtunk/pkg/cache/install",
           "specifiers": [
             "install"
           ]
@@ -13233,7 +14201,7 @@
     },
     "pkg/cache/runtime/go_install_test.go": {
       "filePath": "pkg/cache/runtime/go_install_test.go",
-      "contentHash": "71a673ea379c23679ff9bc59f532fd9039f4b87280f18b49eba9a83e579bdfc7",
+      "contentHash": "1f7bdc21b3a7996a1605e9016a6d2205bdbc539bbeab3200a2238cb4e4e76e5a",
       "functions": [
         {
           "name": "fakeGo",
@@ -13319,13 +14287,13 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/cache/download",
+          "source": "github.com/axnic/rtunk/pkg/cache/download",
           "specifiers": [
             "download"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/cache/runtime",
+          "source": "github.com/axnic/rtunk/pkg/cache/runtime",
           "specifiers": [
             "runtime"
           ]
@@ -13341,7 +14309,7 @@
     },
     "pkg/cache/runtime/node.go": {
       "filePath": "pkg/cache/runtime/node.go",
-      "contentHash": "d252a9a7562a41027d34bd32776911a8c2c4e0c64b04d5e6a5e86bfd7807ab50",
+      "contentHash": "d37d5b7bc083a01acc5f21709af7702e5407fa6d574ecb45e7e34c68c4310f08",
       "functions": [
         {
           "name": "installNodePackage",
@@ -13397,7 +14365,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/cache/install",
+          "source": "github.com/axnic/rtunk/pkg/cache/install",
           "specifiers": [
             "install"
           ]
@@ -13409,7 +14377,7 @@
     },
     "pkg/cache/runtime/node_install_test.go": {
       "filePath": "pkg/cache/runtime/node_install_test.go",
-      "contentHash": "703d3b88c1f0faef8d9e890ad1212a8d68fd6cc565535871b826b008e2e5287d",
+      "contentHash": "64a364879045584cd3845b27db9066baba44a744576c51681a3ef9bd635b8704",
       "functions": [
         {
           "name": "fakeNpm",
@@ -13486,7 +14454,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/cache/runtime",
+          "source": "github.com/axnic/rtunk/pkg/cache/runtime",
           "specifiers": [
             "runtime"
           ]
@@ -13501,7 +14469,7 @@
     },
     "pkg/cache/runtime/php.go": {
       "filePath": "pkg/cache/runtime/php.go",
-      "contentHash": "acf1f22382f3b887afb541b797274ab0a65cf6957b7f75ca9145bf5f904c3fb8",
+      "contentHash": "69eda92a6b9ce111a6471f673b70c0c7d43eb544944831c8914c967488bdbd64",
       "functions": [
         {
           "name": "installPhpPackage",
@@ -13545,7 +14513,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/cache/install",
+          "source": "github.com/axnic/rtunk/pkg/cache/install",
           "specifiers": [
             "install"
           ]
@@ -13557,7 +14525,7 @@
     },
     "pkg/cache/runtime/php_install_test.go": {
       "filePath": "pkg/cache/runtime/php_install_test.go",
-      "contentHash": "06ac8c4cb37024619c2791550fdbf2377a4a724dc93dec59d961bbd9ed0b48fe",
+      "contentHash": "ef57e6e2c0d488626ccfa59e033fdee8ae9244c0f80a92d10718b1e5c1cc1b27",
       "functions": [
         {
           "name": "fakeComposer",
@@ -13634,13 +14602,13 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/cache/download",
+          "source": "github.com/axnic/rtunk/pkg/cache/download",
           "specifiers": [
             "download"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/cache/runtime",
+          "source": "github.com/axnic/rtunk/pkg/cache/runtime",
           "specifiers": [
             "runtime"
           ]
@@ -13655,7 +14623,7 @@
     },
     "pkg/cache/runtime/python.go": {
       "filePath": "pkg/cache/runtime/python.go",
-      "contentHash": "b196a575dc670d2d2f578d4e48d4bc2d44598b43e91c45bb0788622f9a19bbfc",
+      "contentHash": "e6b7492b6c0bca404f17654029003f6b315c1ba11ca89de9afdf8306bcdeef49",
       "functions": [
         {
           "name": "installPythonPackage",
@@ -13719,7 +14687,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/cache/install",
+          "source": "github.com/axnic/rtunk/pkg/cache/install",
           "specifiers": [
             "install"
           ]
@@ -13731,7 +14699,7 @@
     },
     "pkg/cache/runtime/python_install_test.go": {
       "filePath": "pkg/cache/runtime/python_install_test.go",
-      "contentHash": "cd7f33729742cdbfd6f8ec4794f3c680f5c3432b945590c631c16e3e3e9a2dd0",
+      "contentHash": "05c64c250b9b8c0e3cd1c533bb22ff582fc161885073717e3492ad32a9b58dda",
       "functions": [
         {
           "name": "fakePip",
@@ -13808,13 +14776,13 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/cache/download",
+          "source": "github.com/axnic/rtunk/pkg/cache/download",
           "specifiers": [
             "download"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/cache/runtime",
+          "source": "github.com/axnic/rtunk/pkg/cache/runtime",
           "specifiers": [
             "runtime"
           ]
@@ -13908,7 +14876,7 @@
     },
     "pkg/cache/runtime/ruby.go": {
       "filePath": "pkg/cache/runtime/ruby.go",
-      "contentHash": "75e0ba4e575d78b0c351087821b9e1ecb9e7c4a30f49acd52db10366d74ef960",
+      "contentHash": "b2ea9180783fd89dfb1736459a32faf3fdb46430fb48ead7f26acd908d8e0095",
       "functions": [
         {
           "name": "installRubyPackage",
@@ -13952,7 +14920,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/cache/install",
+          "source": "github.com/axnic/rtunk/pkg/cache/install",
           "specifiers": [
             "install"
           ]
@@ -13964,7 +14932,7 @@
     },
     "pkg/cache/runtime/ruby_install_test.go": {
       "filePath": "pkg/cache/runtime/ruby_install_test.go",
-      "contentHash": "f9706f06839ac0c6052883bd3d840097abba6bb8cc414b87dd72432dbdf819c8",
+      "contentHash": "309da7e4a0a31a232707bcfbc0f02e1040396152b5f89afeace2629cc1131c3e",
       "functions": [
         {
           "name": "fakeGem",
@@ -14032,13 +15000,13 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/cache/download",
+          "source": "github.com/axnic/rtunk/pkg/cache/download",
           "specifiers": [
             "download"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/cache/runtime",
+          "source": "github.com/axnic/rtunk/pkg/cache/runtime",
           "specifiers": [
             "runtime"
           ]
@@ -14123,7 +15091,7 @@
     },
     "pkg/cache/runtime/rust.go": {
       "filePath": "pkg/cache/runtime/rust.go",
-      "contentHash": "b73fac85d0849284a6433ac986bedf18882601206b31366af9b1a00670e194bb",
+      "contentHash": "96420d0ac9d46c6208879902a0e3807ee87447be72893ea149235c25fd305f94",
       "functions": [
         {
           "name": "installRustPackage",
@@ -14167,7 +15135,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/cache/install",
+          "source": "github.com/axnic/rtunk/pkg/cache/install",
           "specifiers": [
             "install"
           ]
@@ -14179,7 +15147,7 @@
     },
     "pkg/cache/runtime/rust_install_test.go": {
       "filePath": "pkg/cache/runtime/rust_install_test.go",
-      "contentHash": "b3e5697e363ed68e2451403d3d92422ce92789ba67983dc2a5c866822405b834",
+      "contentHash": "d87806c8f81f2467f8091c06b9fdba13c150029e69ad2813aa5a72bad7364082",
       "functions": [
         {
           "name": "fakeCargo",
@@ -14256,13 +15224,13 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/cache/download",
+          "source": "github.com/axnic/rtunk/pkg/cache/download",
           "specifiers": [
             "download"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/cache/runtime",
+          "source": "github.com/axnic/rtunk/pkg/cache/runtime",
           "specifiers": [
             "runtime"
           ]
@@ -14570,7 +15538,7 @@
     },
     "pkg/ignore/ignore.go": {
       "filePath": "pkg/ignore/ignore.go",
-      "contentHash": "ecded9703e0495c4434277c8b34b726d81598cd0ce2a79eebdc4f4ada5311ac0",
+      "contentHash": "e4c99399caf3a80cd83fd8a2468b3b726931ce489c288629fe992d2c61673164",
       "functions": [
         {
           "name": "hasCommentLeader",
@@ -14750,7 +15718,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/output",
+          "source": "github.com/axnic/rtunk/pkg/trunk/output",
           "specifiers": [
             "output"
           ]
@@ -14764,7 +15732,7 @@
     },
     "pkg/ignore/ignore_test.go": {
       "filePath": "pkg/ignore/ignore_test.go",
-      "contentHash": "6f5844d5ae3ef004b2cd1d04dc8acfd2bea0fea6f307681a70a4da4171535018",
+      "contentHash": "6d88933106671ef437d4e3cb03414fe0d536bd3be13c272b46710669900d0e1a",
       "functions": [
         {
           "name": "write",
@@ -14956,13 +15924,13 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/ignore",
+          "source": "github.com/axnic/rtunk/pkg/ignore",
           "specifiers": [
             "ignore"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/output",
+          "source": "github.com/axnic/rtunk/pkg/trunk/output",
           "specifiers": [
             "output"
           ]
@@ -14990,7 +15958,7 @@
     },
     "pkg/renovate/annotate.go": {
       "filePath": "pkg/renovate/annotate.go",
-      "contentHash": "d0c79442f79071b91f661c8cbf83c0113731ad34157a6faae056988cc3498e5f",
+      "contentHash": "4cb234b79ae88a2c243f2406764ccf456a4e8ea052aea0e985018e8014879b81",
       "functions": [
         {
           "name": "Comment",
@@ -15088,7 +16056,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/config",
+          "source": "github.com/axnic/rtunk/pkg/trunk/config",
           "specifiers": [
             "config"
           ]
@@ -15106,7 +16074,7 @@
     },
     "pkg/renovate/annotate_test.go": {
       "filePath": "pkg/renovate/annotate_test.go",
-      "contentHash": "818a323f7cf496c64660319bbaaed1b3918f9da874edc55aaa022950a4f9210b",
+      "contentHash": "24d6e52bd6350cfb0f0651eb3b8e518368fe766253960da851251c94e4c3bf1d",
       "functions": [
         {
           "name": "TestForLint_DownloadRecipe_AllGitHubEntries_OK",
@@ -15256,7 +16224,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/config",
+          "source": "github.com/axnic/rtunk/pkg/trunk/config",
           "specifiers": [
             "config"
           ]
@@ -15293,7 +16261,7 @@
     },
     "pkg/run/actions/actions.go": {
       "filePath": "pkg/run/actions/actions.go",
-      "contentHash": "4078ca2bd65d796c94a5e13655e7a21ad489447694d46025cb848483ec9abbc1",
+      "contentHash": "56fa2d3682c8cb1a36b851429d50354500fec70b79930dae617d71b36484ebab",
       "functions": [
         {
           "name": "Resolve",
@@ -15322,7 +16290,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/config",
+          "source": "github.com/axnic/rtunk/pkg/trunk/config",
           "specifiers": [
             "config"
           ]
@@ -15336,7 +16304,7 @@
     },
     "pkg/run/actions/actions_test.go": {
       "filePath": "pkg/run/actions/actions_test.go",
-      "contentHash": "b5113f244301ae8d9069fc2ed6707a0e96930bebf8d2fe2a422e57e94628f625",
+      "contentHash": "d28d04007a0c143958e5b338373635c289b7613597c88d261409551b293e475c",
       "functions": [
         {
           "name": "testConfig",
@@ -15395,13 +16363,13 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/run/actions",
+          "source": "github.com/axnic/rtunk/pkg/run/actions",
           "specifiers": [
             "actions"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/config",
+          "source": "github.com/axnic/rtunk/pkg/trunk/config",
           "specifiers": [
             "config"
           ]
@@ -15427,7 +16395,7 @@
     },
     "pkg/run/actions/history.go": {
       "filePath": "pkg/run/actions/history.go",
-      "contentHash": "f40d57430ee3a1757b490e4bc9c75d6724b21ce78774d9568a2ed91658f2b8a0",
+      "contentHash": "dcd55ec449223eaeb4196f759bbe5a2d7fe509f7bce68ea5694f622c263d6413",
       "functions": [
         {
           "name": "historyPath",
@@ -15532,7 +16500,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/cache/download",
+          "source": "github.com/axnic/rtunk/pkg/cache/download",
           "specifiers": [
             "download"
           ]
@@ -15547,7 +16515,7 @@
     },
     "pkg/run/actions/history_test.go": {
       "filePath": "pkg/run/actions/history_test.go",
-      "contentHash": "5d2e96e4d699d9a3be966d5d83f661a6056480bc5d6214d242f2bb0dc0c99299",
+      "contentHash": "63d4946e74c3b4bb2f593a8c7de7667fbc68d9c75271beed985fd8de14db084f",
       "functions": [
         {
           "name": "TestHistory_AppendThenRead_MostRecentFirst",
@@ -15622,7 +16590,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/run/actions",
+          "source": "github.com/axnic/rtunk/pkg/run/actions",
           "specifiers": [
             "actions"
           ]
@@ -15640,7 +16608,7 @@
     },
     "pkg/run/actions/run.go": {
       "filePath": "pkg/run/actions/run.go",
-      "contentHash": "3d05b5951465f91d12e99d162ec0567a695b2a21109273254a80762505dc8679",
+      "contentHash": "01d0040d5e470f5fae14c640335f4f4d9e5d061df1757a88a3c7ce49f1dae486",
       "functions": [
         {
           "name": "findUnsupportedActionVar",
@@ -15798,19 +16766,19 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/cache/download",
+          "source": "github.com/axnic/rtunk/pkg/cache/download",
           "specifiers": [
             "download"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/run/runlog",
+          "source": "github.com/axnic/rtunk/pkg/run/runlog",
           "specifiers": [
             "runlog"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/config",
+          "source": "github.com/axnic/rtunk/pkg/trunk/config",
           "specifiers": [
             "config"
           ]
@@ -15827,7 +16795,7 @@
     },
     "pkg/run/actions/run_log_test.go": {
       "filePath": "pkg/run/actions/run_log_test.go",
-      "contentHash": "878cbaff1322c81d640eb21fc6f9c5ef8664ebe33eab58eb4f8cf7e721387504",
+      "contentHash": "877b4be1103cb2a41d82a1391349b4e5f85e8a82774737c282353530d068bfde",
       "functions": [
         {
           "name": "runLogged",
@@ -15951,19 +16919,19 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/run/actions",
+          "source": "github.com/axnic/rtunk/pkg/run/actions",
           "specifiers": [
             "actions"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/run/runlog",
+          "source": "github.com/axnic/rtunk/pkg/run/runlog",
           "specifiers": [
             "runlog"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/config",
+          "source": "github.com/axnic/rtunk/pkg/trunk/config",
           "specifiers": [
             "config"
           ]
@@ -15982,7 +16950,7 @@
     },
     "pkg/run/actions/run_test.go": {
       "filePath": "pkg/run/actions/run_test.go",
-      "contentHash": "6a10b6208966d0d040743ef9e9724d2addd529bf1d0a588c84d2243427073b21",
+      "contentHash": "c03034cd95ee312dbeb2f035f3c8dfd10451b49ae189377f26c90075232484bb",
       "functions": [
         {
           "name": "TestRun_SubstitutesHookAndArgsAndCwd",
@@ -16117,13 +17085,13 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/run/actions",
+          "source": "github.com/axnic/rtunk/pkg/run/actions",
           "specifiers": [
             "actions"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/config",
+          "source": "github.com/axnic/rtunk/pkg/trunk/config",
           "specifiers": [
             "config"
           ]
@@ -16145,7 +17113,7 @@
     },
     "pkg/run/engine/autofix.go": {
       "filePath": "pkg/run/engine/autofix.go",
-      "contentHash": "18bc3de773fdf1c844d51d626fa78af5dbac05695fb01b22de964206b5f1a39b",
+      "contentHash": "c63b0b4be8a6c4cab5ba234ac529c83e95160caeed6aaee0fb8a238281c7f14e",
       "functions": [
         {
           "name": "ApplyInlineFixes",
@@ -16184,7 +17152,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/output",
+          "source": "github.com/axnic/rtunk/pkg/trunk/output",
           "specifiers": [
             "output"
           ]
@@ -16198,7 +17166,7 @@
     },
     "pkg/run/engine/autofix_test.go": {
       "filePath": "pkg/run/engine/autofix_test.go",
-      "contentHash": "48cea60afd76c9e77e29965a1fb0d982b28425eafff4916f075f82df870c7076",
+      "contentHash": "cdb7e74d6f5b69f4635742796b172bd4aa60a8e28cb3881010b4af031aab8e45",
       "functions": [
         {
           "name": "TestApplyInlineFixes_SingleFix",
@@ -16297,7 +17265,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/output",
+          "source": "github.com/axnic/rtunk/pkg/trunk/output",
           "specifiers": [
             "output"
           ]
@@ -16358,7 +17326,7 @@
     },
     "pkg/run/engine/configlink.go": {
       "filePath": "pkg/run/engine/configlink.go",
-      "contentHash": "c8909a1b5c6b3b79d0c48b7537b6aa737ff42ab801b3e4684b2764f88313cbc3",
+      "contentHash": "a1a006eef60b6f719942dcd81de31875563c3e92617e5a8e6e739fed577b93a8",
       "functions": [
         {
           "name": "linkDirectConfigs",
@@ -16370,7 +17338,7 @@
           ],
           "returnType": "(cleanup func())",
           "exported": false,
-          "lineCount": 32
+          "lineCount": 35
         }
       ],
       "classes": [],
@@ -16395,12 +17363,12 @@
         }
       ],
       "exports": [],
-      "totalLines": 54,
+      "totalLines": 58,
       "hasStructuralAnalysis": true
     },
     "pkg/run/engine/configlink_test.go": {
       "filePath": "pkg/run/engine/configlink_test.go",
-      "contentHash": "f5ec9bf0805b62b1202416ec2438ec6ecbfae70ebcf831328cecedebb298cf1f",
+      "contentHash": "7ccf98f0e4816cefa5ff80e9518862521aa12a572f7937ab52e95199ecd0b9ac",
       "functions": [
         {
           "name": "TestLinkDirectConfigs",
@@ -16410,6 +17378,15 @@
           ],
           "exported": true,
           "lineCount": 26
+        },
+        {
+          "name": "TestLinkDirectConfigs_RtunkConfigsWinOverTrunk",
+          "owner": "",
+          "params": [
+            "t"
+          ],
+          "exported": true,
+          "lineCount": 15
         }
       ],
       "classes": [],
@@ -16446,9 +17423,10 @@
         }
       ],
       "exports": [
-        "TestLinkDirectConfigs"
+        "TestLinkDirectConfigs",
+        "TestLinkDirectConfigs_RtunkConfigsWinOverTrunk"
       ],
-      "totalLines": 38,
+      "totalLines": 54,
       "hasStructuralAnalysis": true
     },
     "pkg/run/engine/docs.go": {
@@ -16463,7 +17441,7 @@
     },
     "pkg/run/engine/engine.go": {
       "filePath": "pkg/run/engine/engine.go",
-      "contentHash": "1336d4632e47ab84b347d42f2d0ba27a2235836519a3e7b6915fe9108044a040",
+      "contentHash": "ed5efd7a6908dab36e98c2a8f3c94e322de216728a2a82cbb42a8a1612b365c5",
       "functions": [
         {
           "name": "Run",
@@ -16717,6 +17695,20 @@
           "returnType": "map[string]error",
           "exported": false,
           "lineCount": 33
+        },
+        {
+          "name": "Install",
+          "owner": "",
+          "params": [
+            "cfg",
+            "cacheDir",
+            "repoRoot",
+            "refs",
+            "emit"
+          ],
+          "returnType": "(map[string]error, error)",
+          "exported": true,
+          "lineCount": 7
         },
         {
           "name": "resolveShimDirs",
@@ -17059,37 +18051,37 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/cache/download",
+          "source": "github.com/axnic/rtunk/pkg/cache/download",
           "specifiers": [
             "download"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/ignore",
+          "source": "github.com/axnic/rtunk/pkg/ignore",
           "specifiers": [
             "ignore"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/run/engine/security",
+          "source": "github.com/axnic/rtunk/pkg/run/engine/security",
           "specifiers": [
             "security"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/run/runlog",
+          "source": "github.com/axnic/rtunk/pkg/run/runlog",
           "specifiers": [
             "runlog"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/config",
+          "source": "github.com/axnic/rtunk/pkg/trunk/config",
           "specifiers": [
             "config"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/output",
+          "source": "github.com/axnic/rtunk/pkg/trunk/output",
           "specifiers": [
             "output"
           ]
@@ -17098,14 +18090,15 @@
       "exports": [
         "Env",
         "Event",
-        "Run"
+        "Run",
+        "Install"
       ],
-      "totalLines": 1609,
+      "totalLines": 1621,
       "hasStructuralAnalysis": true
     },
     "pkg/run/engine/engine_log_test.go": {
       "filePath": "pkg/run/engine/engine_log_test.go",
-      "contentHash": "08faa86dfa4c58a081bca52a0db525f284fac2d0053a9d3f24e17edddd598fa4",
+      "contentHash": "c1ed4dc1bef27cb5367dd2e3eab6d35885d797d3dc878ba827084e8b4f925add",
       "functions": [
         {
           "name": "runLogged",
@@ -17221,19 +18214,19 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/cache/download",
+          "source": "github.com/axnic/rtunk/pkg/cache/download",
           "specifiers": [
             "download"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/run/runlog",
+          "source": "github.com/axnic/rtunk/pkg/run/runlog",
           "specifiers": [
             "runlog"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/config",
+          "source": "github.com/axnic/rtunk/pkg/trunk/config",
           "specifiers": [
             "config"
           ]
@@ -17251,7 +18244,7 @@
     },
     "pkg/run/engine/engine_test.go": {
       "filePath": "pkg/run/engine/engine_test.go",
-      "contentHash": "824fb1c32e3ebe849fc84977c776c52418e150a8a26bf550b9f7c29f56f1c2ce",
+      "contentHash": "9e6cbdd08a22c3daa058fc3af086082f67a3cada2f2dedbc6285ebc0313b94fb",
       "functions": [
         {
           "name": "buildFakeToolBinary",
@@ -17911,25 +18904,25 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/cache/download",
+          "source": "github.com/axnic/rtunk/pkg/cache/download",
           "specifiers": [
             "download"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/run/runlog",
+          "source": "github.com/axnic/rtunk/pkg/run/runlog",
           "specifiers": [
             "runlog"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/config",
+          "source": "github.com/axnic/rtunk/pkg/trunk/config",
           "specifiers": [
             "config"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/output",
+          "source": "github.com/axnic/rtunk/pkg/trunk/output",
           "specifiers": [
             "output"
           ]
@@ -18004,7 +18997,7 @@
     },
     "pkg/run/engine/match.go": {
       "filePath": "pkg/run/engine/match.go",
-      "contentHash": "f0c0ceb29769ca4ecac18e4025f3468806b801c7a7f50626942281639975f54d",
+      "contentHash": "5a3dfe16d4c1020bc47fe0a110a08e050cc8462f0b9b2074d775c08ab2f7d386",
       "functions": [
         {
           "name": "Files",
@@ -18186,7 +19179,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/config",
+          "source": "github.com/axnic/rtunk/pkg/trunk/config",
           "specifiers": [
             "config"
           ]
@@ -18207,7 +19200,7 @@
     },
     "pkg/run/engine/match_test.go": {
       "filePath": "pkg/run/engine/match_test.go",
-      "contentHash": "de2a6e295c0fb254a65f9febc356f9b041983bf360b9c5ef422759785b69d737",
+      "contentHash": "7c6bbea4c58ce530a0b06024117bf40caa017af42a4a7ece054e43d0b4aae97c",
       "functions": [
         {
           "name": "runGit",
@@ -18378,7 +19371,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/config",
+          "source": "github.com/axnic/rtunk/pkg/trunk/config",
           "specifiers": [
             "config"
           ]
@@ -18625,7 +19618,7 @@
     },
     "pkg/run/engine/security/sandbox.go": {
       "filePath": "pkg/run/engine/security/sandbox.go",
-      "contentHash": "229fba6e309d7684b138f941ceb5f29f7d32d73d15f99ad52adec40d3495449c",
+      "contentHash": "ca2f9633d13a512c0789c0671ce0c550d771a2b89867dec6e3f99ef0bb077092",
       "functions": [
         {
           "name": "StageSandbox",
@@ -18697,7 +19690,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/output",
+          "source": "github.com/axnic/rtunk/pkg/trunk/output",
           "specifiers": [
             "output"
           ]
@@ -18712,7 +19705,7 @@
     },
     "pkg/run/engine/security/sandbox_test.go": {
       "filePath": "pkg/run/engine/security/sandbox_test.go",
-      "contentHash": "a1ff0108582196d6284ddc9533c312918ca5ba59d6a3f91f674a1a0790dfaba3",
+      "contentHash": "deb667c9b8db2d48c6e9013f7cc47efdb5b5b0e19352b2d5e5bc6f0e91e3bc5c",
       "functions": [
         {
           "name": "TestStageSandbox_CopyTargetsOnlyStagesGivenFiles",
@@ -18835,7 +19828,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/output",
+          "source": "github.com/axnic/rtunk/pkg/trunk/output",
           "specifiers": [
             "output"
           ]
@@ -18867,7 +19860,7 @@
     },
     "pkg/run/githooks/githooks.go": {
       "filePath": "pkg/run/githooks/githooks.go",
-      "contentHash": "1247c69f14f23fd1f4a44bcfff977e796b126b29c92ebb3073fd22e566d3d625",
+      "contentHash": "abdf26e16a2700aaae1212b3dbf6739398641eb6bf24273960e53682cbab158f",
       "functions": [
         {
           "name": "Install",
@@ -18909,7 +19902,7 @@
           ],
           "returnType": "(bool, error)",
           "exported": false,
-          "lineCount": 10
+          "lineCount": 15
         },
         {
           "name": "hookNamesFor",
@@ -18961,13 +19954,13 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/run/actions",
+          "source": "github.com/axnic/rtunk/pkg/run/actions",
           "specifiers": [
             "actions"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/config",
+          "source": "github.com/axnic/rtunk/pkg/trunk/config",
           "specifiers": [
             "config"
           ]
@@ -18977,12 +19970,12 @@
         "Install",
         "Uninstall"
       ],
-      "totalLines": 146,
+      "totalLines": 155,
       "hasStructuralAnalysis": true
     },
     "pkg/run/githooks/githooks_test.go": {
       "filePath": "pkg/run/githooks/githooks_test.go",
-      "contentHash": "1c4948a385c2beb6baddbdabeced70fecaa7dc240d7727a6386c7c18674aba08",
+      "contentHash": "21bbb0e97e9666f7b2d4e2af85ae209af6b41ad8d9550630597762766920f0ac",
       "functions": [
         {
           "name": "initRepo",
@@ -19009,7 +20002,7 @@
             "t"
           ],
           "exported": true,
-          "lineCount": 15
+          "lineCount": 17
         },
         {
           "name": "TestInstall_SkipsForeignHookWithoutForce",
@@ -19055,6 +20048,24 @@
           ],
           "exported": true,
           "lineCount": 13
+        },
+        {
+          "name": "TestInstall_LegacyMarkerHookIsNotForeign",
+          "owner": "",
+          "params": [
+            "t"
+          ],
+          "exported": true,
+          "lineCount": 13
+        },
+        {
+          "name": "TestUninstall_RemovesLegacyMarkerHook",
+          "owner": "",
+          "params": [
+            "t"
+          ],
+          "exported": true,
+          "lineCount": 10
         }
       ],
       "classes": [],
@@ -19096,13 +20107,13 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/run/githooks",
+          "source": "github.com/axnic/rtunk/pkg/run/githooks",
           "specifiers": [
             "githooks"
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/config",
+          "source": "github.com/axnic/rtunk/pkg/trunk/config",
           "specifiers": [
             "config"
           ]
@@ -19114,9 +20125,11 @@
         "TestInstall_ForceOverwritesForeignHook",
         "TestInstall_RerunIsIdempotent",
         "TestInstall_RespectsCoreHooksPath",
-        "TestUninstall_RemovesOnlyRtunkHooks"
+        "TestUninstall_RemovesOnlyRtunkHooks",
+        "TestInstall_LegacyMarkerHookIsNotForeign",
+        "TestUninstall_RemovesLegacyMarkerHook"
       ],
-      "totalLines": 110,
+      "totalLines": 139,
       "hasStructuralAnalysis": true
     },
     "pkg/run/runlog/README.md": {
@@ -19141,7 +20154,7 @@
     },
     "pkg/run/runlog/event.go": {
       "filePath": "pkg/run/runlog/event.go",
-      "contentHash": "90ee53d70a48ea6b04c09297611d03054605effd7623e1568b2bb16dd5ac42ac",
+      "contentHash": "f08e77fe65c57b5918e04564405a537c102d5675b398fce96d06edbd4103d17e",
       "functions": [],
       "classes": [
         {
@@ -19184,7 +20197,7 @@
       ],
       "imports": [
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/output",
+          "source": "github.com/axnic/rtunk/pkg/trunk/output",
           "specifiers": [
             "output"
           ]
@@ -19433,7 +20446,7 @@
     },
     "pkg/run/runlog/runlog_test.go": {
       "filePath": "pkg/run/runlog/runlog_test.go",
-      "contentHash": "ecec3e4200d5af3ef94f771a1881fb915e0292fe472285bd82d721d23d3432bf",
+      "contentHash": "3e087634eef872c525631a84f339f31b63aeac9372ed096fae6d8fe348cf98b6",
       "functions": [
         {
           "name": "start",
@@ -19656,7 +20669,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/output",
+          "source": "github.com/axnic/rtunk/pkg/trunk/output",
           "specifiers": [
             "output"
           ]
@@ -19685,7 +20698,7 @@
     },
     "pkg/run/runlog/writer.go": {
       "filePath": "pkg/run/runlog/writer.go",
-      "contentHash": "48e36f8fe88e4751d81b4cc540abe52a8174849a29d073bd0f8f0f07b4f8d07e",
+      "contentHash": "fba921154bbf381ad2629e19b8e41cde3df56489d7b20d7c47375147868e72ba",
       "functions": [
         {
           "name": "Start",
@@ -19972,7 +20985,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/cache/download",
+          "source": "github.com/axnic/rtunk/pkg/cache/download",
           "specifiers": [
             "download"
           ]
@@ -19998,7 +21011,7 @@
     },
     "pkg/trunk/config/ARCHITECTURE.md": {
       "filePath": "pkg/trunk/config/ARCHITECTURE.md",
-      "contentHash": "a87cf5f7beb9be2401d64782c30f98afc3997325d889a71cf9034b49303cfcd5",
+      "contentHash": "46c95a8b273c6d072a5f6aeaca7c1665f5021d9d791e09630633b5ff9159db8d",
       "functions": [],
       "classes": [],
       "imports": [],
@@ -20008,7 +21021,7 @@
     },
     "pkg/trunk/config/cache.go": {
       "filePath": "pkg/trunk/config/cache.go",
-      "contentHash": "44e7490722cc0f3c970bac5be9d647e23a0fc0476c6c5a9b8426583ae25d0ed4",
+      "contentHash": "4320a8796f23f2b6100c001321f71bace57cf11532216860aa87f259f112e62a",
       "functions": [
         {
           "name": "SourceHash",
@@ -20156,12 +21169,12 @@
         "PluginsCacheRoot",
         "CheckoutDir"
       ],
-      "totalLines": 151,
+      "totalLines": 152,
       "hasStructuralAnalysis": true
     },
     "pkg/trunk/config/cache_test.go": {
       "filePath": "pkg/trunk/config/cache_test.go",
-      "contentHash": "8a28545ec10c8b31e52655865a64f01551eccf7cd08b50f2355421773829a300",
+      "contentHash": "45582118f5ed0ae387f6954f976dc0ddef16d0e2ebd419c45cb3e5a106e863a8",
       "functions": [
         {
           "name": "TestSaveLoadSourceCache_RoundTrips",
@@ -20191,7 +21204,7 @@
           "lineCount": 12
         },
         {
-          "name": "TestCacheSchemaVersion_Is5",
+          "name": "TestCacheSchemaVersion_Is6",
           "owner": "",
           "params": [
             "t"
@@ -20243,14 +21256,14 @@
         "TestSaveLoadSourceCache_RoundTrips",
         "TestLoadSourceCache_RejectsWrongSchemaVersion",
         "TestLoadSourceCache_RejectsPreVersioningCacheFile",
-        "TestCacheSchemaVersion_Is5"
+        "TestCacheSchemaVersion_Is6"
       ],
       "totalLines": 69,
       "hasStructuralAnalysis": true
     },
     "pkg/trunk/config/config.go": {
       "filePath": "pkg/trunk/config/config.go",
-      "contentHash": "68b9458a9bd41ca40ccd4ab6e508b341c8dd4fe88003a25615d9485cbbefeeb2",
+      "contentHash": "67abe24b0ec4d410c83717da62d87e23a8666d5f7fe6ae0975a67f709b79686e",
       "functions": [],
       "classes": [
         {
@@ -20298,10 +21311,12 @@
           "methods": [],
           "properties": [
             "CommentFormats",
-            "Files"
+            "Files",
+            "EnabledFrom",
+            "DisabledFrom"
           ],
           "exported": true,
-          "lineCount": 5
+          "lineCount": 11
         }
       ],
       "imports": [],
@@ -20311,12 +21326,12 @@
         "CategoryConfig",
         "LintConfig"
       ],
-      "totalLines": 61,
+      "totalLines": 67,
       "hasStructuralAnalysis": true
     },
     "pkg/trunk/config/definitions.go": {
       "filePath": "pkg/trunk/config/definitions.go",
-      "contentHash": "cd177ad4e62c47c41d4f8a2e7b7097846e9b9b0c215e7468846c4c918bfce500",
+      "contentHash": "ffd68614c5ba652841557d440ce26d3b3ec1ded1a1863e8f91cd6b907ef12175",
       "functions": [
         {
           "name": "UnmarshalYAML",
@@ -20376,11 +21391,12 @@
           "properties": [
             "Name",
             "Version",
+            "Executable",
             "Args",
             "Downloads"
           ],
           "exported": true,
-          "lineCount": 13
+          "lineCount": 16
         },
         {
           "name": "DownloadEntry",
@@ -20650,12 +21666,12 @@
         "FileType",
         "CommentFormat"
       ],
-      "totalLines": 388,
+      "totalLines": 391,
       "hasStructuralAnalysis": true
     },
     "pkg/trunk/config/definitions_test.go": {
       "filePath": "pkg/trunk/config/definitions_test.go",
-      "contentHash": "98b65fccdf790a82eb2cea6dce3b4765c638d216b2be3d00d987fae49cf1af10",
+      "contentHash": "02db42c197064503972e556548b1b5b8eb70f1d2087dc857667e37c7daef5c2e",
       "functions": [
         {
           "name": "TestAction_Interactive",
@@ -20748,7 +21764,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/config",
+          "source": "github.com/axnic/rtunk/pkg/trunk/config",
           "specifiers": [
             "config"
           ]
@@ -20825,7 +21841,7 @@
     },
     "pkg/trunk/config/deprecations_test.go": {
       "filePath": "pkg/trunk/config/deprecations_test.go",
-      "contentHash": "5a8bef9abdf43dfbf2a9107dd8fae34ca16ad50377971ede1b715baa92c3aa71",
+      "contentHash": "52fea42be0769a283cd4ad4ff5d59fd31b147169db3d4675b156ac644bdfc0b8",
       "functions": [
         {
           "name": "TestCheckDeprecations_LegacyShape_Refused",
@@ -20900,7 +21916,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/config",
+          "source": "github.com/axnic/rtunk/pkg/trunk/config",
           "specifiers": [
             "config"
           ]
@@ -21135,7 +22151,7 @@
     },
     "pkg/trunk/config/errors_test.go": {
       "filePath": "pkg/trunk/config/errors_test.go",
-      "contentHash": "81ccd863d5a65077407d920b0cc73df8a98de4aba8a82e0e8a27e8926004ed6d",
+      "contentHash": "d12fa1d899504fe1b4cb71e65b499e8e1bae610adfc7f15b1a1c4a3ef6a9c069",
       "functions": [
         {
           "name": "TestReadError_Unwrap",
@@ -21174,7 +22190,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/config",
+          "source": "github.com/axnic/rtunk/pkg/trunk/config",
           "specifiers": [
             "config"
           ]
@@ -21350,7 +22366,7 @@
     },
     "pkg/trunk/config/git_internal_test.go": {
       "filePath": "pkg/trunk/config/git_internal_test.go",
-      "contentHash": "34a269010640afa12aaac1d4b0c16f57c018c60830a6e2d3f1da99a8fe4a3828",
+      "contentHash": "4da62c34b8b81928dd0a32e2ac48f5e8d8c76859c0d67399b90a6c060d424b2d",
       "functions": [
         {
           "name": "gitFixtureInternal",
@@ -21439,7 +22455,7 @@
     },
     "pkg/trunk/config/git_test.go": {
       "filePath": "pkg/trunk/config/git_test.go",
-      "contentHash": "9f59fe476ddca3b39cb60127276fb39c419b0054a01b9f97dba694f93afae151",
+      "contentHash": "1d3cc98faabf480056149b5476a81f5d27c813c36c8d89793f7cc5fe2da961c0",
       "functions": [
         {
           "name": "gitFixture",
@@ -21590,7 +22606,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/config",
+          "source": "github.com/axnic/rtunk/pkg/trunk/config",
           "specifiers": [
             "config"
           ]
@@ -21611,7 +22627,7 @@
     },
     "pkg/trunk/config/resolve.go": {
       "filePath": "pkg/trunk/config/resolve.go",
-      "contentHash": "ec109be59e2c3de796652a303cf3c90f8ec0e7c09d07c8d439dad78394d78d07",
+      "contentHash": "dfc1b99a4b9c514654e1ca638eb939824769539104b93ed52f143db79492f2c9",
       "functions": [
         {
           "name": "Resolve",
@@ -21644,7 +22660,7 @@
           ],
           "returnType": "(cfg Config, err error)",
           "exported": false,
-          "lineCount": 51
+          "lineCount": 52
         },
         {
           "name": "readTrunkFile",
@@ -21653,6 +22669,46 @@
             "path"
           ],
           "returnType": "(trunkFile, error)",
+          "exported": false,
+          "lineCount": 11
+        },
+        {
+          "name": "readLayered",
+          "owner": "",
+          "params": [
+            "path"
+          ],
+          "returnType": "(trunkFile, error)",
+          "exported": false,
+          "lineCount": 33
+        },
+        {
+          "name": "bareID",
+          "owner": "",
+          "params": [
+            "entry"
+          ],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "merge",
+          "owner": "trunkFile",
+          "params": [
+            "o"
+          ],
+          "exported": false,
+          "lineCount": 16
+        },
+        {
+          "name": "mergeEnabled",
+          "owner": "",
+          "params": [
+            "base",
+            "extra"
+          ],
+          "returnType": "[]string",
           "exported": false,
           "lineCount": 11
         },
@@ -21738,17 +22794,21 @@
       "classes": [
         {
           "name": "trunkFile",
-          "methods": [],
+          "methods": [
+            "merge"
+          ],
           "properties": [
             "Version",
             "CLI",
             "Plugins",
             "Runtimes",
             "Lint",
-            "Actions"
+            "Actions",
+            "enabledFrom",
+            "disabledFrom"
           ],
           "exported": false,
-          "lineCount": 19
+          "lineCount": 22
         },
         {
           "name": "pluginFile",
@@ -21766,6 +22826,12 @@
         }
       ],
       "imports": [
+        {
+          "source": "cmp",
+          "specifiers": [
+            "cmp"
+          ]
+        },
         {
           "source": "errors",
           "specifiers": [
@@ -21785,6 +22851,18 @@
           ]
         },
         {
+          "source": "slices",
+          "specifiers": [
+            "slices"
+          ]
+        },
+        {
+          "source": "strings",
+          "specifiers": [
+            "strings"
+          ]
+        },
+        {
           "source": "gopkg.in/yaml.v3",
           "specifiers": [
             "yaml.v3"
@@ -21795,12 +22873,12 @@
         "Resolve",
         "ResolveAll"
       ],
-      "totalLines": 308,
+      "totalLines": 395,
       "hasStructuralAnalysis": true
     },
     "pkg/trunk/config/resolve_network_test.go": {
       "filePath": "pkg/trunk/config/resolve_network_test.go",
-      "contentHash": "aba7288a56dd22436a91e7cd5d646a64d9c1e644fa9f6fc89bb8090f0b7729c4",
+      "contentHash": "4253409ff89855146f3d2e80b314d6ec5fbb63d4a00610ecaf3f4c9f6556c91b",
       "functions": [
         {
           "name": "TestResolve_OfficialPluginsRepo",
@@ -21833,7 +22911,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/config",
+          "source": "github.com/axnic/rtunk/pkg/trunk/config",
           "specifiers": [
             "config"
           ]
@@ -21847,7 +22925,7 @@
     },
     "pkg/trunk/config/resolve_test.go": {
       "filePath": "pkg/trunk/config/resolve_test.go",
-      "contentHash": "d4a522a3066e0ea401d833ff9a9a507bf58baaaae839e122de6adcf5a8913ade",
+      "contentHash": "a0f266d4350e8cbba250eaa339f50b95c6a7fdfa825e5d2d6d0368785fdfe257",
       "functions": [
         {
           "name": "TestResolve_InvalidSource",
@@ -21938,6 +23016,62 @@
           ],
           "exported": true,
           "lineCount": 7
+        },
+        {
+          "name": "writeConfigDir",
+          "owner": "",
+          "params": [
+            "t",
+            "files"
+          ],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 9
+        },
+        {
+          "name": "TestResolve_OverrideFiles_ListsAddUpAndLastFileWins",
+          "owner": "",
+          "params": [
+            "t"
+          ],
+          "exported": true,
+          "lineCount": 15
+        },
+        {
+          "name": "TestResolve_LintDisabledDropsAnyEnabledEntry",
+          "owner": "",
+          "params": [
+            "t"
+          ],
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "TestResolve_OverrideSourcesMergeByIDAndScalarsReplace",
+          "owner": "",
+          "params": [
+            "t"
+          ],
+          "exported": true,
+          "lineCount": 13
+        },
+        {
+          "name": "TestResolve_InvalidOverrideReportsItsOwnPath",
+          "owner": "",
+          "params": [
+            "t"
+          ],
+          "exported": true,
+          "lineCount": 12
+        },
+        {
+          "name": "TestResolve_OverrideProvenance",
+          "owner": "",
+          "params": [
+            "t"
+          ],
+          "exported": true,
+          "lineCount": 14
         }
       ],
       "classes": [],
@@ -21973,7 +23107,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/config",
+          "source": "github.com/axnic/rtunk/pkg/trunk/config",
           "specifiers": [
             "config"
           ]
@@ -21989,9 +23123,14 @@
         "TestResolve_DanglingReference",
         "TestResolve_SourceNotFound",
         "TestResolve_LocalSource_StampsActionSourceDirAndRoot",
-        "TestResolve_ActionsDisabledList_Parsed"
+        "TestResolve_ActionsDisabledList_Parsed",
+        "TestResolve_OverrideFiles_ListsAddUpAndLastFileWins",
+        "TestResolve_LintDisabledDropsAnyEnabledEntry",
+        "TestResolve_OverrideSourcesMergeByIDAndScalarsReplace",
+        "TestResolve_InvalidOverrideReportsItsOwnPath",
+        "TestResolve_OverrideProvenance"
       ],
-      "totalLines": 181,
+      "totalLines": 263,
       "hasStructuralAnalysis": true
     },
     "pkg/trunk/config/testdata/pluginrepo-dangling/linters/orphan/plugin.yaml": {
@@ -22076,7 +23215,7 @@
     },
     "pkg/trunk/config/testdata/pluginrepo/linters/plugin.yaml": {
       "filePath": "pkg/trunk/config/testdata/pluginrepo/linters/plugin.yaml",
-      "contentHash": "3f1d75f0a319e3db2f4288ebbdcb36e98e96abb13000ea1ed7e62590f7445c0f",
+      "contentHash": "8ed8cf6d80ff848c651dca7d3bc37ea0f9a3a19fb922839f1eb0659936eee367",
       "functions": [],
       "classes": [],
       "imports": [],
@@ -22232,7 +23371,7 @@
     },
     "pkg/trunk/config/validate_test.go": {
       "filePath": "pkg/trunk/config/validate_test.go",
-      "contentHash": "0b3c27559eb6aa5ce7e067aad768b711dfb51215e41a6b9eebf936495a9cb8bc",
+      "contentHash": "8ec7d912803877964450a3b69b8e12cd2d8acfb08e21deb51ee697bcbdafa521",
       "functions": [
         {
           "name": "TestConfig_Validate_Empty",
@@ -22292,7 +23431,7 @@
           ]
         },
         {
-          "source": "github.com/xunleii/rtunk/pkg/trunk/config",
+          "source": "github.com/axnic/rtunk/pkg/trunk/config",
           "specifiers": [
             "config"
           ]
@@ -24078,6 +25217,157 @@
         "TestParseTaplo"
       ],
       "totalLines": 34,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/generate-release-notes.mjs": {
+      "filePath": "scripts/generate-release-notes.mjs",
+      "contentHash": "062996496671ed0d45c60f6497bfc8528a81074e5b400e32b840f9220c074497",
+      "functions": [
+        {
+          "name": "parseCommits",
+          "params": [
+            "raw"
+          ],
+          "exported": true,
+          "lineCount": 16
+        },
+        {
+          "name": "parseSubject",
+          "params": [
+            "subject"
+          ],
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "isBot",
+          "params": [
+            "login"
+          ],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "buildChangeLine",
+          "params": [
+            "pr"
+          ],
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "buildContributorsSection",
+          "params": [
+            "contributors"
+          ],
+          "exported": false,
+          "lineCount": 8
+        },
+        {
+          "name": "generateReleaseNotes",
+          "params": [
+            "version",
+            "commits",
+            "prBySha"
+          ],
+          "exported": true,
+          "lineCount": 35
+        },
+        {
+          "name": "buildLlmContext",
+          "params": [
+            "commits",
+            "prBySha"
+          ],
+          "exported": true,
+          "lineCount": 18
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "node:fs",
+          "specifiers": [
+            "readFileSync",
+            "writeFileSync"
+          ]
+        },
+        {
+          "source": "node:url",
+          "specifiers": [
+            "fileURLToPath"
+          ]
+        },
+        {
+          "source": "node:util",
+          "specifiers": [
+            "parseArgs"
+          ]
+        }
+      ],
+      "exports": [
+        "SUMMARY_PLACEHOLDER",
+        "parseCommits",
+        "parseSubject",
+        "isBot",
+        "buildChangeLine",
+        "generateReleaseNotes",
+        "buildLlmContext"
+      ],
+      "totalLines": 217,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/generate-release-notes.test.mjs": {
+      "filePath": "scripts/generate-release-notes.test.mjs",
+      "contentHash": "9baab2a6978436d4cf5c5f90c602d83fd942d4ba39d334bfe31a455fb87284b1",
+      "functions": [
+        {
+          "name": "sha",
+          "params": [
+            "n"
+          ],
+          "exported": false,
+          "lineCount": 1
+        },
+        {
+          "name": "commit",
+          "params": [
+            "n",
+            "subject"
+          ],
+          "exported": false,
+          "lineCount": 7
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "node:assert/strict",
+          "specifiers": [
+            "assert"
+          ]
+        },
+        {
+          "source": "node:test",
+          "specifiers": [
+            "test"
+          ]
+        },
+        {
+          "source": "./generate-release-notes.mjs",
+          "specifiers": [
+            "SUMMARY_PLACEHOLDER",
+            "buildChangeLine",
+            "buildLlmContext",
+            "generateReleaseNotes",
+            "isBot",
+            "parseCommits",
+            "parseSubject"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 93,
       "hasStructuralAnalysis": true
     },
     "scripts/verify-renovate-e2e.sh": {
