@@ -93,7 +93,7 @@ export function buildChangeLine({ prefix, scope, description, breaking }, pr) {
   const scopePart = scope ? ` ❲${scope}❳:` : "";
   const flag = breaking ? " ⚠ BREAKING" : "";
   const prPart = pr
-    ? ` ([#${pr.number}](${pr.url})${pr.login ? ` by [@${pr.login}](https://github.com/${pr.login})` : ""})`
+    ? ` ([#${pr.number}](${pr.url})${pr.login && !isBot(pr.login) ? ` by [@${pr.login}](https://github.com/${pr.login})` : ""})`
     : "";
   return `- ${open}${prefix}${flag}${scopePart} ${description}${close}${prPart}`;
 }

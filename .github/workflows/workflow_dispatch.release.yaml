@@ -36,12 +36,14 @@
 #   Stage 0 — if the `notes` input is set, it is used as-is and nothing is generated.
 #   Stage 1 — scripts/generate-release-notes.mjs writes the deterministic draft
 #             (also the fallback).
-#   Stage 2 — the OpenRouter model env.OPENROUTER_MODEL rewrites the draft's summary
-#             placeholder, using .agents/skills/release-notes/SKILL.md as its prompt.
+#   Stage 2 — the OpenRouter model env.OPENROUTER_MODEL writes the summary paragraph that
+#             replaces the draft's placeholder, using .agents/skills/release-notes/SKILL.md
+#             as its prompt. Only that paragraph comes from the model: the changes list,
+#             links and contributors stay exactly as the draft built them.
 #   Stage 3 — if the OPENROUTER_API_KEY secret is missing, or the call or its output is
 #             unusable, the deterministic draft is used as-is: notes never block a release.
-#   The commit log and PR descriptions are only data for the model; its output is plain
-#   Markdown that is never executed.
+#   The commit log and PR descriptions are only data for the model; its output is a plain
+#   paragraph that is never executed.
 #
 # Prerequisites:
 #   • OPENROUTER_API_KEY secret (optional): without it the notes stay deterministic.
@@ -264,13 +266,13 @@ jobs:
 
           # The SKILL file minus its YAML frontmatter is the system prompt.
           SYSTEM=$(awk '/^---$/{n++; next} n>=2' .agents/skills/release-notes/SKILL.md)
-          PROMPT="Generate the release notes for v${VERSION} (previous tag: ${PREV_TAG}).
+          PROMPT="Write the summary paragraph of the release notes for v${VERSION} (previous tag: ${PREV_TAG}).
 
           ## Commit log
 
           $(cat "$DIR/llm-context.md")
 
-          ## Deterministic draft to improve
+          ## Deterministic draft (context only)
 
           $(cat "$DIR/notes-draft.md")"
 
@@ -285,7 +287,7 @@ jobs:
             ]
           }' > "$DIR/payload.json"
 
-          BODY=""
+          SUMMARY=""
           for attempt in 1 2 3; do
             if curl -sS --fail-with-body --max-time 120 \
                  https://openrouter.ai/api/v1/chat/completions \
@@ -294,23 +296,25 @@ jobs:
                  -H "HTTP-Referer: https://github.com/${{ github.repository }}" \
                  -H "X-Title: rtunk release notes" \
                  -d @"$DIR/payload.json" -o "$DIR/response.json"; then
-              # Drop a Markdown fence the model may have wrapped its answer in.
-              BODY=$(jq -r '.choices[0].message.content // empty' "$DIR/response.json" \
-                | sed -e '1{/^```/d}' -e '${/^```$/d}')
-              [[ -n "$BODY" ]] && break
+              SUMMARY=$(jq -r '.choices[0].message.content // empty' "$DIR/response.json")
+              [[ -n "$SUMMARY" ]] && break
             fi
             echo "::warning::OpenRouter attempt ${attempt}/3 failed or returned nothing."
             [[ $attempt -lt 3 ]] && sleep 5
           done
 
-          if [[ -z "$BODY" ]]; then
+          # A usable summary is one short paragraph: no heading, no fence, no leftover placeholder.
+          if [[ -z "$SUMMARY" ]]; then
             echo "::warning::OpenRouter gave no usable answer - using the deterministic release notes."
-          elif ! grep -q "^## What's new in v${VERSION}" <<<"$BODY" || grep -q "SUMMARY_PLACEHOLDER" <<<"$BODY"; then
-            echo "::warning::OpenRouter output does not match the expected format - using the deterministic release notes."
+          elif [[ ${#SUMMARY} -gt 1200 ]] || grep -qE '^(#|```)|SUMMARY_PLACEHOLDER' <<<"$SUMMARY"; then
+            echo "::warning::OpenRouter answer is not a plain summary paragraph - using the deterministic release notes. Answer starts with: $(head -c 300 <<<"$SUMMARY" | tr '\n' ' ')"
           else
-            printf '%s\n\n---\n\n<sup>Release notes polished by %s via [OpenRouter](https://openrouter.ai)</sup>\n' \
-              "$BODY" "$OPENROUTER_MODEL" > "$DIR/release-notes.md"
-            echo "::notice::Release notes polished by ${OPENROUTER_MODEL}."
+            # ENVIRON keeps backslashes in the summary literal (awk -v would interpret them).
+            SUMMARY="$SUMMARY" awk '/SUMMARY_PLACEHOLDER/ { print ENVIRON["SUMMARY"]; next } { print }' \
+              "$DIR/notes-draft.md" > "$DIR/release-notes.md"
+            printf '\n---\n\n<sup>Summary written by %s via [OpenRouter](https://openrouter.ai)</sup>\n' \
+              "$OPENROUTER_MODEL" >> "$DIR/release-notes.md"
+            echo "::notice::Release notes summary written by ${OPENROUTER_MODEL}."
           fi
 
       - name: 📋 Use manual release notes override

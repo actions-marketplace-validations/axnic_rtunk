@@ -69,7 +69,7 @@ test("generateReleaseNotes: sections, breaking flag, PR links, bots left out of 
   assert.match(out, /^## What's new in v0\.13\.1/);
   assert.ok(out.includes(SUMMARY_PLACEHOLDER));
   assert.ok(out.includes("`✦ ⚠ BREAKING ❲cli❳: Drop the old flag` ([#10](https://x/pull/10) by [@alice]"));
-  assert.ok(out.includes("`⚙ ❲deps❳: Bump github.com/x/y from 1 to 2` ([#11]"));
+  assert.ok(out.includes("`⚙ ❲deps❳: Bump github.com/x/y from 1 to 2` ([#11](https://x/pull/11))")); // no "by @bot" link
   assert.ok(out.includes("`✱ Merge branch 'main'`")); // non-conforming subject falls back to the wildcard marker
   assert.ok(out.includes("- [@alice](https://github.com/alice) ([#10](https://x/pull/10))"));
   assert.ok(!out.includes("dependabot[bot](")); // bots are not listed as contributors
