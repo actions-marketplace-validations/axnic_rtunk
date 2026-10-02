@@ -7,6 +7,9 @@
 # push to main (main only accepts merged PRs, so a push is the merge commit):
 #
 #   lint        — golangci-lint (drives .golangci.yml)
+#   rtunk       — rtunk's own lint stack (.rtunk/rtunk.yaml) through the repository's
+#                 GitHub Action (action.yml), built from the checkout: rtunk dogfoods itself
+#                 and the action. Changed files only; findings become annotations
 #   commitlint  — rtunk commit convention on every commit in the PR. Skipped
 #                 for Dependabot PRs: its own commit messages never follow the
 #                 `type[scope]: Subject` convention; the dependabot-auto-merge
@@ -60,6 +63,29 @@ jobs:
 
       - name: 🔍 Run golangci-lint
         run: mise run lint
+
+  # ---------------------------------------------------------------------------
+  # rtunk — dogfood: rtunk checks this repository through its own action
+  # ---------------------------------------------------------------------------
+  rtunk:
+    name: 🧹 rtunk
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      # Full history: changed-since-base needs the base commit of the PR / merge-queue entry / push.
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      # version: source builds rtunk from this very checkout, so a PR is linted by its own code.
+      - name: 🧹 Run rtunk check
+        uses: ./
+        with:
+          version: source
+          check-mode: changed-since-base
 
   # ---------------------------------------------------------------------------
   # commitlint — every commit must follow the rtunk commit convention

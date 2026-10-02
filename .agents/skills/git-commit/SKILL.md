@@ -91,12 +91,12 @@ like `project:*`/`catalog:*` would be.
 | `renovate` | Renovate annotation generation (`rtunk renovate`)                                  |
 | `cli`      | Top-level CLI wiring, flag compatibility, entrypoints                              |
 | `deps`     | Go module or tool version bumps                                                    |
-| `ci`       | `.github/` workflows, `.trunk/` dogfood config, `mise.toml`                        |
+| `ci`       | `.github/` workflows, `.rtunk/` dogfood config, `mise.toml`                        |
 | `docs`     | README, AGENTS.md, ROADMAP.md, ADRs                                                |
 
 Decision tree: which files did the change touch?
 
-1. Only `.github/`, `.trunk/`, `mise.toml` → `ci`.
+1. Only `.github/`, `.rtunk/`, `mise.toml` → `ci`.
 2. Only `go.mod`/`go.sum` (or a pinned tool version) with no code change →
    `deps`.
 3. Only `*.md` prose (no code) → `docs`.
