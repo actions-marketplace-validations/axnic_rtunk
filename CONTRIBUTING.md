@@ -15,12 +15,13 @@ Use [docs/Installation.md](docs/Installation.md)'s "clone and build" path rather
 git clone https://github.com/axnic/rtunk.git
 cd rtunk
 mise trust    # if mise prompts about this repo's .mise.toml
-mise install  # installs the go and trunk versions .mise.toml declares
+mise install  # installs the Go toolchain and dev tools .mise.toml declares
 go build -o rtunk ./cmd/rtunk
 ```
 
 `mise install` resolves the toolchain declared in [`.mise.toml`](.mise.toml): the Go compiler
-matching `go.mod`'s floor, and `trunk`, the metalinter used below. See
+matching `go.mod`'s floor and the dev tools. The metalinter used below is rtunk itself, built from
+your clone, so there is nothing else to install. See
 [docs/Installation.md](docs/Installation.md) for prerequisites and platform support (macOS and
 Linux only) — this file doesn't repeat that.
 
@@ -41,25 +42,24 @@ Run all of the following before opening a pull request:
 go test ./...
 go vet ./...
 gofmt -l .
-trunk check   # or: ./rtunk check, once self-hosting is stable enough to require it
+./rtunk check
 ```
 
 `go test ./...` and `go vet ./...` exit `0` with no output on success. `gofmt -l .` exits `0` and
-prints nothing when the tree is already formatted; any path it lists needs `gofmt -w`. `trunk
-check` runs the full lint stack declared in [`.trunk/trunk.yaml`](.trunk/trunk.yaml) — `gofmt`,
-`golangci-lint2`, `markdownlint`, `prettier`, `yamllint`, `taplo`, plus the security scanners
-(`grype`, `osv-scanner`, `checkov`, `trufflehog`); it's read-only and exits non-zero on any
-finding. `./rtunk check` reads the same `.trunk/trunk.yaml` and already covers `gofmt` and
-`golangci-lint2` findings the same way — e.g. `./rtunk check internal/cli/config.go` reports the
-same `golangci-lint2/revive` findings `trunk check` would. Both commands accept path arguments to
-scope a run to what you changed; with none, the default is changed files (see `--from`), not the
-whole repository.
+prints nothing when the tree is already formatted; any path it lists needs `gofmt -w`. `./rtunk
+check` (build it first with `mise run build`, or run `mise run rtunk`, which does) runs the full
+lint stack declared in [`.rtunk/rtunk.yaml`](.rtunk/rtunk.yaml) — `gofmt`, `golangci-lint2`,
+`markdownlint`, `prettier`, `yamllint`, `taplo`, plus the security scanners (`grype`,
+`osv-scanner`, `checkov`, `trufflehog`); it's read-only and exits non-zero on any finding. It
+accepts path arguments to scope a run to what you changed; with none, the default is changed files
+(see `--from`), not the whole repository.
 
-CI re-runs the checks on every pull request (see "Submitting a change" below); `mise run ci` runs
-them locally.
+CI runs `./rtunk check` through the repository's own [GitHub Action](docs/GitHub-Action.md) on the
+files a pull request changes. `mise run ci` runs lint, build
+and tests locally.
 
 For documentation-only changes, this repository's own convention is `./rtunk fmt <path>` then
-`./rtunk check <path>` scoped to the files touched, in place of the full `trunk check` above.
+`./rtunk check <path>` scoped to the files touched, in place of the full `./rtunk check` above.
 
 ## Commit conventions
 

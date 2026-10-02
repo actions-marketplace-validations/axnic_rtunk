@@ -150,16 +150,16 @@ the setup [CONTRIBUTING.md](../CONTRIBUTING.md) assumes, and it requires
 git clone https://github.com/axnic/rtunk.git
 cd rtunk
 mise trust    # if mise prompts about this repo's .mise.toml
-mise install  # installs the go and trunk versions .mise.toml declares
+mise install  # installs the Go toolchain and dev tools .mise.toml declares
 go build -o rtunk ./cmd/rtunk
 ./rtunk --version
 ```
 
 `mise install` resolves the toolchain declared in [`.mise.toml`](../.mise.toml): the Go compiler
-(matching the `go 1.27.0` floor in `go.mod`) and `trunk`, the metalinter rtunk dogfoods on its own
-source and docs. Only Go is required to build rtunk itself; `trunk` is needed for the lint stack
-(`./rtunk fmt`, `./rtunk check`) that contributors run before committing. The output of
-`--version` and `help` is the same as with `go install`.
+(matching the `go 1.27.0` floor in `go.mod`) and the dev tools. rtunk dogfoods itself: the binary
+you just built runs the lint stack of [`.rtunk/rtunk.yaml`](../.rtunk/rtunk.yaml) on its own source
+and docs (`./rtunk fmt`, `./rtunk check`, or `mise run rtunk`), downloading those linters into
+its cache on first use. The output of `--version` and `help` is the same as with `go install`.
 
 ## Upgrade rtunk
 

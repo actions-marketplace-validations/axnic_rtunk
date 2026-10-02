@@ -91,7 +91,7 @@ const scopes = [
   { value: "deps", name: "deps      — Go module or tool version bumps" },
   {
     value: "ci",
-    name: "ci        — .github workflows, .trunk dogfood config, mise.toml",
+    name: "ci        — .github workflows, .rtunk dogfood config, mise.toml",
   },
   { value: "docs", name: "docs      — README, AGENTS.md, ROADMAP.md, ADRs" },
 ];

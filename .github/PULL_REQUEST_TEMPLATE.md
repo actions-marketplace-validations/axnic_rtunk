@@ -11,7 +11,7 @@
 - [ ] `go test ./...`
 - [ ] `go vet ./...`
 - [ ] `gofmt -l .`
-- [ ] `trunk check` (or `./rtunk check <path>` scoped to files touched, per
+- [ ] `./rtunk check` (or `./rtunk check <path>` scoped to files touched, per
       [CONTRIBUTING.md](https://github.com/axnic/rtunk/blob/main/CONTRIBUTING.md#tests-and-lint))
 
 Or manual steps, if the change isn't covered by the above:
