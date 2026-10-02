@@ -33,7 +33,8 @@ while true; do
   comm -13 <(printf '%s\n' "${prev}") <(printf '%s\n' "${cur}") | grep -v '^$' || true
   prev=${cur}
 
-  state=$(gh pr view "${pr}" -R "${repo}" --json state --jq .state)
+  # A transient failure (network, 5xx, rate limit) must not end a watch meant to run until the PR leaves OPEN.
+  state=$(gh pr view "${pr}" -R "${repo}" --json state --jq .state) || { sleep "${poll}"; continue; }
   if [[ ${state} != "OPEN" ]]; then
     echo "[state] PR #${pr} is now ${state}"
     exit 0

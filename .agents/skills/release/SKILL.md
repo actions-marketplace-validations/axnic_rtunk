@@ -134,7 +134,7 @@ gh release view "$tag" --repo axnic/rtunk --json isDraft,isPrerelease,assets --j
 # expect, per os/arch: rtunk-$tag-<os>-<arch>.tar.gz and its .sbom.json,
 # plus checksums.txt and checksums.txt.sigstore.json
 
-mkdir -p "$TMPDIR/rtunk-verify" && cd "$TMPDIR/rtunk-verify"
+mkdir -p "${TMPDIR:-/tmp}/rtunk-verify" && cd "${TMPDIR:-/tmp}/rtunk-verify"
 gh release download "$tag" --repo axnic/rtunk \
   -p checksums.txt -p checksums.txt.sigstore.json -p "rtunk-$tag-linux-amd64.tar.gz"
 
