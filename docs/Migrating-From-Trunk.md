@@ -147,7 +147,9 @@ does not spend time re-verifying something that already matches.
 
 1. **Point CI and pre-commit hooks at the `rtunk` binary instead of `trunk`.** Same invocation shape
    for the commands both tools share (`check`, `fmt`); adjust any script that depended on item 2's
-   flag split above.
+   flag split above. On GitHub Actions, replace `trunk-io/trunk-action` with the
+   [GitHub Action](GitHub-Action.md) (`axnic/rtunk`), which installs, verifies and caches rtunk
+   and reports findings as annotations (`check-mode: changed-since-base` limits it to the changed files).
 2. **Leave `.trunk/trunk.yaml` in place, or move it to `.rtunk/rtunk.yaml`.** Both work: `rtunk`
    reads `.trunk/trunk.yaml` when no `.rtunk/rtunk.yaml` exists. Renaming is optional and can happen
    later, at your own pace — see [Configuration
@@ -164,5 +166,5 @@ does not spend time re-verifying something that already matches.
 
 - [Checking Code](Checking-Code.md) — how `rtunk check` selects files, reports and sets exit codes
 - [Formatting Code](Formatting-Code.md) — `rtunk fmt`, the replacement for trunk's formatting pass
-- [Actions and Git Hooks](Actions-And-Git-Hooks.md) — running actions and installing hooks
+- [GitHub Action](GitHub-Action.md) — run rtunk in GitHub Actions, in place of `trunk-action`
 - [Decision Log](Decision-Log.md) — the full rationale behind each difference
