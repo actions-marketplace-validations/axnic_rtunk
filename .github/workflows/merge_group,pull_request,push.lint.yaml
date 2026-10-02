@@ -7,7 +7,7 @@
 # push to main (main only accepts merged PRs, so a push is the merge commit).
 # Always runs, on every file: no path filter.
 #
-#   lint        — golangci-lint (drives .golangci.yml)
+#   lint        — golangci-lint (drives .golangci.yml) and the action.yml Marketplace check
 #   rtunk       — rtunk's own lint stack (.rtunk/rtunk.yaml) through the repository's
 #                 GitHub Action (action.yml) on its latest release: rtunk dogfoods itself
 #                 and the action. Findings become annotations
@@ -61,6 +61,10 @@ jobs:
 
       - name: 🔍 Run golangci-lint
         run: mise run ci:lint
+
+      # A name or description the Marketplace refuses only shows up when the release is published.
+      - name: 🏪 Check action.yml can be published to the Marketplace
+        run: mise run ci:action
 
   # ---------------------------------------------------------------------------
   # rtunk — dogfood: rtunk checks this repository through its own action

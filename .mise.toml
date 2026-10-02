@@ -67,6 +67,20 @@ syft = "latest"       # SBOM generation for release archives (goreleaser `sboms`
 description = "Run golangci-lint on every Go package"
 run = "golangci-lint run ./..."
 
+[tasks."ci:action"]
+description = "Check that action.yml can be published to the GitHub Marketplace (a name, and a description of at most 125 characters)"
+run = '''
+name=$(sed -n 's/^name: *//p' action.yml)
+desc=$(sed -n 's/^description: *//p' action.yml)
+[ -n "$name" ] || { echo "action.yml: no single-line name"; exit 1; }
+[ -n "$desc" ] || { echo "action.yml: no single-line description"; exit 1; }
+case "$desc" in ">"*|"|"*) echo "action.yml: write the description on a single line, a folded one cannot be checked"; exit 1 ;; esac
+# wc -c rather than the shell length expansion: mise treats a brace followed by a hash in a task
+# script as the start of a template comment.
+len=$(printf '%s' "$desc" | wc -c)
+[ "$len" -le 125 ] || { echo "action.yml: the description has $len characters, the Marketplace allows at most 125"; exit 1; }
+'''
+
 [tasks."ci:rtunk"]
 description = "Run rtunk's own lint stack (.rtunk/rtunk.yaml) on the changed files; extra arguments go to rtunk check"
 run = "rtunk check"
@@ -114,4 +128,4 @@ run = 'node --test "scripts/*.test.mjs"'
 
 [tasks.ci]
 description = "Local equivalent of the CI quality gate (commit messages excluded)"
-depends = ["ci:lint", "ci:build", "ci:coverage", "ci:scripts"]
+depends = ["ci:lint", "ci:action", "ci:build", "ci:coverage", "ci:scripts"]

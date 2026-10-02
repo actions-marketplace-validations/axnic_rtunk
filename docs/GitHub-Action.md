@@ -5,6 +5,10 @@ runs `rtunk check` and reports the findings as annotations and a job summary. It
 counterpart of `trunk-io/trunk-action`, on Linux and macOS runners. It is a composite action
 defined by [`action.yml`](../action.yml) at the root of the repository.
 
+Once a release has been published with "Publish this Release to the GitHub Marketplace" ticked, the action is
+listed on the GitHub Marketplace as `rtunk check` (the name `rtunk` is taken by a GitHub user). The listing name
+does not change how the action is referenced: it stays `uses: axnic/rtunk@<tag>`.
+
 ```yaml
 name: rtunk
 on: pull_request
