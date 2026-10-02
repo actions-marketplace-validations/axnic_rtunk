@@ -1,0 +1,65 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+#
+# =============================================================================
+# CodeQL — static analysis (SAST) of the Go code
+# =============================================================================
+# GitHub's SAST engine, with the security-and-quality query suite. Findings are surfaced in the
+# repository's Security tab (code scanning).
+#
+# It runs on every pull request and push to main, not only on a schedule: a finding is reported
+# on the change that introduces it, and OpenSSF Scorecard's SAST check (which looks for a SAST
+# tool run on the repository's changes) is satisfied. The daily run (06:00 UTC) also catches
+# findings from query updates on code that did not change.
+#
+# Skipped for Dependabot and for pull requests from forks: their token cannot write the
+# code-scanning results (security-events: write).
+# =============================================================================
+
+name: CodeQL
+
+on:
+  pull_request: {}
+  push:
+    branches: [main]
+  schedule:
+    # Daily at 06:00 UTC
+    - cron: 0 6 * * *
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+# Minimal top-level permissions — the job declares what it needs.
+permissions: {}
+
+jobs:
+  codeql:
+    name: 🧬 CodeQL
+    if: >-
+      github.event_name != 'pull_request' || (
+        github.actor != 'dependabot[bot]' &&
+        github.event.pull_request.head.repo.full_name == github.repository
+      )
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    steps:
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: 🔧 Initialize CodeQL
+        uses: github/codeql-action/init@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v3
+        with:
+          languages: go
+          queries: security-and-quality
+
+      - name: 🏗️ Autobuild
+        uses: github/codeql-action/autobuild@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v3
+
+      - name: 🔍 Run CodeQL analysis
+        uses: github/codeql-action/analyze@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v3
+        with:
+          category: /language:go

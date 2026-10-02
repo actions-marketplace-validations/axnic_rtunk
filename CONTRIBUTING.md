@@ -76,6 +76,17 @@ lint stack declared in [`.rtunk/rtunk.yaml`](.rtunk/rtunk.yaml) — `gofmt`, `go
 accepts path arguments to scope a run to what you changed; with none, the default is changed files
 (see `--from`), not the whole repository.
 
+Two Go native fuzz tests, `FuzzPathMatches` (`pkg/ignore/path_fuzz_test.go`) and
+`FuzzInstallDownloadTarGz` (`pkg/cache/download/extract_fuzz_test.go`), run their seed corpus with
+every `go test ./...`. To explore beyond it:
+
+```bash
+go test -run '^$' -fuzz=FuzzPathMatches -fuzztime=30s ./pkg/ignore
+go test -run '^$' -fuzz=FuzzInstallDownloadTarGz -fuzztime=30s ./pkg/cache/download
+```
+
+A crash writes a reproducer under `testdata/fuzz/` next to the test; commit it with the fix.
+
 `mise run ci` runs lint, build, tests with the coverage floor and the release-tooling tests
 locally: the same gate the `lint`, `build` and `test` jobs below run, without the `rtunk` and
 `commitlint` jobs.
@@ -87,15 +98,16 @@ For documentation-only changes, this repository's own convention is `./rtunk fmt
 
 Workflows live in [`.github/workflows/`](.github/workflows), named `<triggers>.<name>.yaml`.
 
-| Workflow                                   | Runs                                                                                                                                                                |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `merge_group,pull_request,push.lint.yaml`  | `Lint`, on pull requests, merge-queue entries and pushes to `main`, always: `lint`, `rtunk`, `commitlint`                                                           |
-| `pull_request,push.go.yaml`                | `Go`, on pull requests and pushes to `main`, path-filtered: `build`, `test`                                                                                         |
-| `schedule.security.yaml`                   | Daily `govulncheck`, CodeQL and OpenSSF Scorecard                                                                                                                   |
-| `push,workflow_dispatch.wiki.yaml`         | Publishes `docs/` to the GitHub Wiki on pushes to `main` that touch it                                                                                              |
-| `pull_request.dependabot-auto-merge.yaml`  | Approves and auto-merges Dependabot patch and security updates                                                                                                      |
-| `issue_comment,pull_request.pr-agent.yaml` | Posts a comment listing the commands when a pull request is opened; runs `/describe`, `/review`, `/improve`, `/ask`, `/help` comments from allowed users (PR Agent) |
-| `workflow_dispatch.release.yaml`           | Cuts a release (run manually, see below)                                                                                                                            |
+| Workflow                                   | Runs                                                                                                                                                                                                      |
+| ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `merge_group,pull_request,push.lint.yaml`  | `Lint`, on pull requests, merge-queue entries and pushes to `main`, always: `lint`, `rtunk`, `commitlint`                                                                                                 |
+| `pull_request,push.go.yaml`                | `Go`, on pull requests and pushes to `main`, path-filtered: `build`, `test`                                                                                                                               |
+| `pull_request,push,schedule.codeql.yaml`   | `CodeQL` (`security-and-quality` suite), on every pull request and push to `main`, plus daily at 06:00 UTC; skipped for Dependabot and fork pull requests, whose token cannot write code-scanning results |
+| `schedule.security.yaml`                   | Daily `govulncheck` and OpenSSF Scorecard                                                                                                                                                                 |
+| `push,workflow_dispatch.wiki.yaml`         | Publishes `docs/` to the GitHub Wiki on pushes to `main` that touch it                                                                                                                                    |
+| `pull_request.dependabot-auto-merge.yaml`  | Approves and auto-merges Dependabot patch and security updates                                                                                                                                            |
+| `issue_comment,pull_request.pr-agent.yaml` | Posts a comment listing the commands when a pull request is opened; runs `/describe`, `/review`, `/improve`, `/ask`, `/help` comments from allowed users (PR Agent)                                       |
+| `workflow_dispatch.release.yaml`           | Cuts a release (run manually, see below)                                                                                                                                                                  |
 
 The `lint` workflow always runs, on every file, with no path filter. `lint` runs golangci-lint; the
 `rtunk` job dogfoods the tool and the [GitHub Action](docs/GitHub-Action.md) on its latest release:
