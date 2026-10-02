@@ -13,8 +13,8 @@
 # Docs: docs/GitHub-Action.md. Linux and macOS runners only.
 #
 # Step order matters: the cache is saved with `if: always()` and the job only fails in the
-# last step, so a failing check still warms the cache. Releases older than v0.15 have no
-# `--format github`: they run with the human format and produce no annotations.
+# last step, so a failing check still warms the cache. The action always passes
+# `--format github`, which rtunk has had since v0.15: older releases are not supported.
 # =============================================================================
 
 name: rtunk
@@ -27,7 +27,8 @@ branding:
 inputs:
   version:
     description: >-
-      rtunk version to install: `latest` (newest published release), a tag such as `v0.13.2`, or
+      rtunk version to install: `latest` (newest published release), a tag such as `v0.15.0`
+      (v0.15.0 is the oldest supported release: it is the first with `--format github`), or
       `source` to build rtunk from this action's own checkout (needs Go; set up automatically).
     default: latest
   check-mode:
@@ -237,13 +238,7 @@ runs:
         esac
         read -r -a extra <<< "$ARGUMENTS"
         # rtunk writes the annotations and, through GITHUB_STEP_SUMMARY, the job summary itself.
-        # Releases that predate `--format github` still run, without annotations.
-        help=$(rtunk check run --help 2>&1 | tr -s ' \n' ' ' || true)
-        if [[ "$help" == *"annotations and job summary"* ]]; then
-          args+=(--format github)
-        else
-          echo "::warning::this rtunk release has no --format github: findings are only in the log, no annotations"
-        fi
+        args+=(--format github)
         rtunk check "${args[@]}" ${extra[@]+"${extra[@]}"}
         code=$?
         echo "exit-code=$code" >> "$GITHUB_OUTPUT"
