@@ -39,7 +39,7 @@ while IFS= read -r sha; do
     G | U) echo "OK   [${short}] signed" ;;
     E) echo "WARN [${short}] signature cannot be checked here (missing key); verify manually" ;;
     *)
-      echo "FAIL [${short}] not signed or bad signature (${sig}) - ask the user to re-sign with their own key (the AI never passes -S)"
+      echo "FAIL [${short}] not signed or bad signature (${sig}) - re-sign with the key configured in git (the AI never uses another key or --no-gpg-sign)"
       failed=1
       ;;
   esac

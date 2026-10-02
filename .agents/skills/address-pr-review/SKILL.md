@@ -57,8 +57,8 @@ answers.
 
 One commit per coherent unit (same area or same kind of fix), not one per thread. Follow
 [`.agents/skills/git-commit/SKILL.md`](../git-commit/SKILL.md): `type[scope]: Subject`, body
-explaining why, a plain `git commit` (signing comes from the user's git config: no `-S`, no
-`--signoff`), `Assisted-by:` trailer only, no `Co-Authored-By` for the tool. Do not commit without
+explaining why, a signed `git commit` (signing comes from the user's git config; never `--signoff`, never
+`--no-gpg-sign`), `Assisted-by:` trailer only, no `Co-Authored-By` for the tool. Do not commit without
 the user asking for it.
 
 ## 6. Get approval, then push

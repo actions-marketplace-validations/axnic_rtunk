@@ -152,16 +152,17 @@ Assisted-by: anthropic:claude-sonnet-5.5
 
 Commits made without AI help carry no trailer.
 
-## Signing and DCO: the AI must stay out of this
+## Signing and DCO
 
-Commits are signed by the human's own key, configured in their git config (GPG or SSH). The AI's
-command is always a plain `git commit`; signing happens on its own.
+Every commit is signed with the key the user configured in git (GPG or SSH); signing comes from
+the git config, so a plain `git commit` or `git commit -S` are both fine.
 
-- Never `-S` (it can pick another identity or key than the human's configured one).
-- Never `-s`/`--signoff` or a `Signed-off-by:` trailer: the DCO sign-off is the human's
-  attestation that they may submit the change, which an AI cannot give.
-- Never `--no-gpg-sign` to get past a signing failure, and never `--no-verify` to skip hooks.
-  If signing or a hook fails, stop and tell the user.
+- Never switch to another key or identity (no `-S<keyid>`, no `user.signingkey` or `user.*`
+  override).
+- If signing fails (key unavailable, agent locked), stop and tell the user. Never commit unsigned
+  with `--no-gpg-sign`, and never use `--no-verify` to skip hooks.
+- Never `-s`/`--signoff` or a `Signed-off-by:` trailer: the DCO sign-off is the human committer's
+  own attestation that they may submit the change, which an AI cannot give.
 
 ## Commitlint rules (canonical reference)
 
@@ -191,7 +192,7 @@ Header pattern: `^(\S+?)\[([^\]]+)\]:\s(.+)$` (breaking: `^([+~-]!)\[([^\]]+)\]:
 | `footer-leading-blank`        | off   | built-in disabled, replaced by `squash-footer-leading-blank`                                                                          |
 | `squash-footer-leading-blank` | error | always: blank line before the footer, skipped when the subject ends with `(#N)` (GitHub squash-merge: the body is the PR description) |
 | `footer-max-line-length`      | error | 80                                                                                                                                    |
-| `signed-off-by`               | off   | no DCO sign-off required (and never added by the AI)                                                                                  |
+| `signed-off-by`               | off   | no DCO sign-off required in the message (and never added by the AI)                                                                   |
 
 Prompt configuration (for interactive commit tooling, if wired up later):
 `allowBreakingChanges: ["+!", "~!", "-!"]`, `allowCustomScopes: false`,
@@ -245,7 +246,8 @@ Prompt configuration (for interactive commit tooling, if wired up later):
    (`git commit -m "$(cat <<'EOF' ... EOF)"`), so multi-line bodies and trailers stay intact.
    Include the `Assisted-by:` trailer (see "AI trailers") when the AI helped, and strip any
    `Co-Authored-By:` the tooling adds.
-8. Never add `-S`, `-s`/`--signoff`, `--no-gpg-sign` or `--no-verify` (see "Signing and DCO").
+8. The commit must be signed with the configured key. Never add `-s`/`--signoff`, `--no-gpg-sign` or
+   `--no-verify` (see "Signing and DCO").
 
 ## Examples
 
@@ -291,7 +293,7 @@ Updated config.go to add new validation function
 Missing `type[scope]:` entirely, and the body (if any) would just repeat
 what the diff already shows instead of explaining why validation was added.
 
-**Bad — Co-Authored-By for the tool, forbidden signing flags:**
+**Bad — Co-Authored-By for the tool, forbidden sign-off flag:**
 
 ```text
 ![check]: Fix nil pointer in report renderer
@@ -299,9 +301,9 @@ what the diff already shows instead of explaining why validation was added.
 Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
 ```
 
-committed with `git commit -s -S`. The AI tool is not a co-author: the trailer must be
+committed with `git commit -s`. The AI tool is not a co-author: the trailer must be
 `Assisted-by: <provider>:<model-id>` only (and it is missing here), and the command must never
-carry `-s` or `-S`.
+carry `-s`.
 
 **Bad — invalid type:**
 
