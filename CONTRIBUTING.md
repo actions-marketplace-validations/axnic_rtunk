@@ -76,6 +76,11 @@ lint stack declared in [`.rtunk/rtunk.yaml`](.rtunk/rtunk.yaml) — `gofmt`, `go
 accepts path arguments to scope a run to what you changed; with none, the default is changed files
 (see `--from`), not the whole repository.
 
+Testing policy: every new feature and every bug fix adds or updates automated tests of that
+behavior in the same pull request; a fix starts with a test that fails without it. The pull
+request states how the change was tested in the "How this was tested" section of its template,
+and a change that cannot be tested automatically says why there.
+
 Two Go native fuzz tests, `FuzzPathMatches` (`pkg/ignore/path_fuzz_test.go`) and
 `FuzzInstallDownloadTarGz` (`pkg/cache/download/extract_fuzz_test.go`), run their seed corpus with
 every `go test ./...`. To explore beyond it:
@@ -181,7 +186,8 @@ in the same commit. Page inventory, templates and writing rules:
 
 1. Fork the repository and branch off `main` — the project's only active integration branch;
    releases are tagged from it, so there is no separate branch to keep in sync.
-2. Make the change, running the commands under "Tests and lint" as you go, not only at the end.
+2. Make the change, with its tests (see the testing policy under "Tests and lint"), running the
+   commands there as you go, not only at the end.
 3. Commit following "Commit conventions" above: GPG-signed, `Assisted-by:` if AI-assisted (no
    `Co-Authored-By:` for the tool), never `--signoff`.
 4. Open a pull request against `main` using the repository's pull request template

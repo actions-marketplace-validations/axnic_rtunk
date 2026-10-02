@@ -7,6 +7,7 @@
 <p align="center">
 <a href="go.mod"><img alt="Go version" src="https://img.shields.io/github/go-mod/go-version/axnic/rtunk"></a>
 <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/github/license/axnic/rtunk"></a>
+<a href="https://www.bestpractices.dev/projects/15174"><img alt="OpenSSF Best Practices" src="https://www.bestpractices.dev/projects/15174/badge"></a>
 <a href="https://github.com/axnic/rtunk/wiki"><img alt="Docs: wiki" src="https://img.shields.io/badge/docs-wiki-blue"></a>
 </p>
 
