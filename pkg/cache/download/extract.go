@@ -157,6 +157,14 @@ func InstallDownload(blobPath, url, destDir string, entry config.DownloadEntry, 
 // v0.2 originally did, believing regular files were enough) silently produced a node runtime with
 // no working npm.
 func extractTar(r io.Reader, destDir string, strip int) error {
+	// Every write goes through root, not through destDir joined to an archive-controlled name:
+	// os.Root refuses to follow a symlink out of destDir, which the lexical checks below cannot
+	// see (a chain of in-tree symlinks that each look harmless can still climb out, CWE-59).
+	root, err := os.OpenRoot(destDir)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = root.Close() }()
 	tr := tar.NewReader(r)
 	for {
 		hdr, err := tr.Next()
@@ -176,11 +184,11 @@ func extractTar(r io.Reader, destDir string, strip int) error {
 			if err := verifyWithinDest(destDir, dst, hdr.Name); err != nil {
 				return err
 			}
-			if err := os.MkdirAll(filepath.Dir(dst), 0o750); err != nil {
+			if err := root.MkdirAll(filepath.Dir(name), 0o750); err != nil {
 				return err
 			}
-			//nolint:gosec // dst is checked by verifyWithinDest above; the mode is the archive entry's own
-			out, err := os.OpenFile(dst, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, os.FileMode(hdr.Mode))
+			//nolint:gosec // the path is confined by root; the mode is the archive entry's own
+			out, err := root.OpenFile(name, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, os.FileMode(hdr.Mode))
 			if err != nil {
 				return err
 			}
@@ -199,10 +207,10 @@ func extractTar(r io.Reader, destDir string, strip int) error {
 			if err := verifySymlinkWithinDest(destDir, dst, hdr.Linkname, hdr.Name); err != nil {
 				return err
 			}
-			if err := os.MkdirAll(filepath.Dir(dst), 0o750); err != nil {
+			if err := root.MkdirAll(filepath.Dir(name), 0o750); err != nil {
 				return err
 			}
-			if err := os.Symlink(hdr.Linkname, dst); err != nil {
+			if err := root.Symlink(hdr.Linkname, name); err != nil {
 				return err
 			}
 		default:
@@ -213,6 +221,11 @@ func extractTar(r io.Reader, destDir string, strip int) error {
 
 // extractZip is extractTar's archive/zip equivalent.
 func extractZip(zr *zip.Reader, destDir string, strip int) error {
+	root, err := os.OpenRoot(destDir) // see extractTar: writes are confined to destDir by root
+	if err != nil {
+		return err
+	}
+	defer func() { _ = root.Close() }()
 	for _, f := range zr.File {
 		if f.FileInfo().IsDir() {
 			continue
@@ -225,15 +238,15 @@ func extractZip(zr *zip.Reader, destDir string, strip int) error {
 		if err := verifyWithinDest(destDir, dst, f.Name); err != nil {
 			return err
 		}
-		if err := os.MkdirAll(filepath.Dir(dst), 0o750); err != nil {
+		if err := root.MkdirAll(filepath.Dir(name), 0o750); err != nil {
 			return err
 		}
 		rc, err := f.Open()
 		if err != nil {
 			return err
 		}
-		//nolint:gosec // dst is checked by verifyWithinDest above; the mode is the archive entry's own
-		out, err := os.OpenFile(dst, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, f.Mode())
+		//nolint:gosec // the path is confined by root; the mode is the archive entry's own
+		out, err := root.OpenFile(name, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, f.Mode())
 		if err != nil {
 			_ = rc.Close()
 			return err

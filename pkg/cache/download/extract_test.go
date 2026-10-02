@@ -310,3 +310,36 @@ func TestInstallDownload_UnrecognizedFormat(t *testing.T) {
 	err := download.InstallDownload(blob, "https://example.com/tool.unknown", filepath.Join(dir, "install"), config.DownloadEntry{}, "")
 	assert.Error(t, err)
 }
+
+// TestInstallDownload_TarGz_SymlinkChainEscape covers what the per-entry checks cannot see: three
+// entries that each look harmless on their own path and target, yet chain into an escape once the
+// filesystem resolves them. `s` points at "." (inside destDir), so `s/s/s/up -> ../..` looks like
+// it resolves to destDir/s, but physically the link sits at destDir/up and climbs to destDir's
+// grandparent; the third entry then writes through it. Extraction must refuse to follow a link out
+// of destDir (CWE-59), not just validate paths lexically.
+func TestInstallDownload_TarGz_SymlinkChainEscape(t *testing.T) {
+	dir := t.TempDir()
+	blob := filepath.Join(dir, "blob")
+
+	var buf bytes.Buffer
+	gz := gzip.NewWriter(&buf)
+	tw := tar.NewWriter(gz)
+	require.NoError(t, tw.WriteHeader(&tar.Header{Name: "top/s", Typeflag: tar.TypeSymlink, Linkname: "."}))
+	require.NoError(t, tw.WriteHeader(&tar.Header{Name: "top/s/s/s/up", Typeflag: tar.TypeSymlink, Linkname: "../.."}))
+	require.NoError(t, tw.WriteHeader(&tar.Header{Name: "top/s/s/s/up/pwned.txt", Mode: 0o644, Size: 5}))
+	_, err := tw.Write([]byte("pwned"))
+	require.NoError(t, err)
+	require.NoError(t, tw.Close())
+	require.NoError(t, gz.Close())
+	require.NoError(t, os.WriteFile(blob, buf.Bytes(), 0o644))
+
+	// dest sits two levels below dir, so the chain's target (destDir's grandparent) is dir itself,
+	// still under t.TempDir(): a pre-fix failure self-cleans.
+	dest := filepath.Join(dir, "a", "install")
+	entry := config.DownloadEntry{StripComponents: 1}
+	err = download.InstallDownload(blob, "https://example.com/archive.tar.gz", dest, entry, "")
+	assert.Error(t, err)
+
+	_, statErr := os.Stat(filepath.Join(dir, "pwned.txt"))
+	assert.True(t, os.IsNotExist(statErr), "a file must not be written outside destDir through a chain of symlinks")
+}
