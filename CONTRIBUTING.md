@@ -119,9 +119,13 @@ Experiment, `*` Wildcard; `+!`/`~!`/`-!` for breaking changes), a mandatory brac
 an imperative, sentence-case subject with no trailing period. commitlint also requires a header of
 at most 100 characters that is the very first line of the message, a sentence-case body (first
 letter a capital, so never start it with a lowercase word such as a command name) and body and
-footer lines of at most 80 characters. An AI-assisted commit carries an
-`Assisted-by: <provider>:<model-id>` trailer, never `Co-authored-by:` — a tool a human directs
-isn't a co-author. Every commit is GPG-signed (`git commit -S`); never add `-s`/`--signoff`, since
+footer lines of at most 80 characters, with a blank line before the footer. An AI-assisted commit
+must carry an `Assisted-by: <provider>:<model-id>` trailer (dots in version numbers, not hyphens),
+and must not carry `Co-authored-by:`/`Co-Authored-By:` for the AI tool: a tool a human directs isn't
+a co-author. commitlint has no rule on trailers, so it does not reject a `Co-Authored-By:` line that
+an assistant adds on its own; the rule is a project convention, enforced in review. If your tooling
+adds that trailer, strip it (amend the message or disable the tool's attribution setting) and keep
+`Assisted-by:`. Every commit is GPG-signed (`git commit -S`); never add `-s`/`--signoff`, since
 DCO sign-off is the human committer's own attestation and an AI assistant must stay out of it.
 Full type/scope tables, the commitlint rules commits are checked against, and the drafting
 workflow: [`.agents/skills/git-commit/SKILL.md`](.agents/skills/git-commit/SKILL.md) — the
@@ -139,8 +143,8 @@ in the same commit. Page inventory, templates and writing rules:
 1. Fork the repository and branch off `main` — the project's only active integration branch;
    releases are tagged from it, so there is no separate branch to keep in sync.
 2. Make the change, running the commands under "Tests and lint" as you go, not only at the end.
-3. Commit following "Commit conventions" above: GPG-signed, `Assisted-by:` if AI-assisted, never
-   `--signoff`.
+3. Commit following "Commit conventions" above: GPG-signed, `Assisted-by:` if AI-assisted (no
+   `Co-Authored-By:` for the tool), never `--signoff`.
 4. Open a pull request against `main` using the repository's pull request template
    (`.github/PULL_REQUEST_TEMPLATE.md`). `main` is protected: changes land through a pull request
    only, never by a direct push. The repository only allows merge commits (no squash, no rebase),
