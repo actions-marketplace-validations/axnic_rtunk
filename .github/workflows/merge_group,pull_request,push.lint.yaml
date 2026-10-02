@@ -18,7 +18,7 @@
 #                 push only that merge commit (--last) is validated, since the
 #                 PR's own commits were already checked (or exempted) above.
 #
-# Build and tests live in merge_group,pull_request,push.go.yaml and only run when Go
+# Build and tests live in pull_request,push.go.yaml and only run when Go
 # code changes. Every job calls a `ci:*` task defined in .mise.toml.
 # =============================================================================
 

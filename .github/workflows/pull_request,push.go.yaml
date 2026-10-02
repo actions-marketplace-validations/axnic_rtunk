@@ -25,14 +25,14 @@ on:
       - "**.go"
       - go.mod
       - go.sum
-      - .github/workflows/merge_group,pull_request,push.go.yaml
+      - .github/workflows/pull_request,push.go.yaml
   push:
     branches: [main]
     paths:
       - "**.go"
       - go.mod
       - go.sum
-      - .github/workflows/merge_group,pull_request,push.go.yaml
+      - .github/workflows/pull_request,push.go.yaml
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
