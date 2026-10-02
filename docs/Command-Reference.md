@@ -240,8 +240,8 @@ rtunk linters list [flags]
 | `--format` | string | `human` | Output format: `human` or `json`.                                                        |
 
 A linter enabled or re-pinned by a [local override
-file](Configuration-Reference.md#local-override-files) shows ` (from <file>)` after its file count
-(`✔ vet  2 go files (from user.yaml)`); one kept off by `lint.disabled` shows ` (disabled by <file>)`
+file](Configuration-Reference.md#local-override-files) shows `(from <file>)` after its file count
+(`✔ vet  2 go files (from user.yaml)`); one kept off by `lint.disabled` shows `(disabled by <file>)`
 (`◯ mdlint  1 markdown file (disabled by rtunk.local.yaml)`). In `--format json`, items gain
 `enabled_by` and `disabled_by` (file name, omitted when empty).
 

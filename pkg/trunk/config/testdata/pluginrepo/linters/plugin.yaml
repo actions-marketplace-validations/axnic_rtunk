@@ -4,11 +4,11 @@ lint:
     - name: hash
       leading_delimiter: "#"
     - name: slashes-inline
-      leading_delimiter: "//"
+      leading_delimiter: //
   files:
     - name: github-workflow
       extensions: [yaml, yml]
-      filenames: [".github/workflows/*.yml", ".github/workflows/*.yaml"]
+      filenames: [.github/workflows/*.yml, .github/workflows/*.yaml]
       comments: [hash]
     - name: javascript
       extensions: [js, jsx, mjs, cjs]
