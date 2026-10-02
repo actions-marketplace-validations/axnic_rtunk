@@ -16,7 +16,7 @@
 #      Dependabot's own commit/PR-title text never matches the
 #      `type[scope]: Subject` convention, so this builds the subject itself
 #      rather than trusting Dependabot's title. The PR's own raw commits skip
-#      commitlint validation (see ci.yaml) - this merge-commit subject is what
+#      commitlint validation (see push.lint.yaml) - this merge-commit subject is what
 #      actually lands on main and gets re-validated there (push runs --last).
 #   3. Minor/major, non-security updates are left untouched - they stay open
 #      for manual review, per .github/dependabot.yml's policy.

@@ -1,58 +1,102 @@
 # =============================================================================
 # rtunk Development Environment Configuration
 # =============================================================================
-# mise manages the toolchain needed to build, lint, test and release rtunk, and
-# defines the tasks shared by local development and CI (.github/workflows/*).
-# CI never calls the tools directly: it runs `mise run <task>`, so a green
-# local `mise run ci` is the same gate a pull request goes through.
+# This mise configuration provides the complete toolchain needed to build,
+# lint, test and release rtunk, and defines the tasks shared by local
+# development and CI (.github/workflows/*). CI never calls the tools directly:
+# it runs `mise run ci:<task>`, so a green local `mise run ci` is the same gate
+# a pull request goes through.
 #
 # Usage:
 #   mise install     # Install all tools
 #   mise trust       # Trust this configuration (if prompted)
 #   mise tasks       # List the available tasks
-#   mise run ci      # Run lint + build + test, as the CI quality gate does
+#   mise run ci      # Run the whole CI quality gate (commit messages excluded)
+#
+# Tool versions are resolved into mise.lock (`mise lock`); CI installs with
+# `--locked`, so a version only changes through a reviewed lockfile update.
 # =============================================================================
 
+# =============================================================================
+# Tool Installation Matrix
+# =============================================================================
+# Tools are organized by functional category. All tools default to "latest"
+# version unless stability requires pinning.
+
 [tools]
+# -----------------------------------------------------------------------------
+# Go Toolchain
+# -----------------------------------------------------------------------------
+# Compiler and Go-specific tooling used to build, analyze and scan rtunk
 
-go = "latest" # rtunk is implemented in Go (see AGENTS.md)
+go = "latest"                                     # rtunk is implemented in Go (see AGENTS.md)
+"go:golang.org/x/tools/gopls" = "latest"          # Go language server, used by editors/agents (Serena)
+golangci-lint = "latest"                          # Go linter, drives .golangci.yml (`ci:lint`)
+"go:golang.org/x/vuln/cmd/govulncheck" = "latest" # Known-CVE scan of Go dependencies (`ci:vulncheck`)
 
-"go:golang.org/x/tools/gopls" = "latest" # Go language server, used by editors/agents (Serena)
+# -----------------------------------------------------------------------------
+# Lint and Convention Tools
+# -----------------------------------------------------------------------------
+# Tools enforcing the repository conventions
 
-golangci-lint = "latest"                          # Go linter, drives .golangci.yml (`mise run lint`)
-"go:golang.org/x/vuln/cmd/govulncheck" = "latest" # Known-CVE scan of Go dependencies (security workflow)
-goreleaser = "latest"                             # Cross-platform release builds, drives .goreleaser.yml
-cosign = "latest"                                 # Keyless signing of release checksums (goreleaser `signs`)
-syft = "latest"                                   # SBOM generation for release archives (goreleaser `sboms`)
-node = "lts"                                      # Runtime for commitlint
-"npm:@commitlint/cli" = "latest"                  # Commit convention check, drives .commitlintrc.js
+"github:axnic/rtunk" = "latest"                              # rtunk lints itself with its own release (`ci:rtunk`), never a local build
+node = "lts"                                                   # Runtime for commitlint and the release tooling in scripts/
+"npm:@commitlint/cli" = "latest"                               # Commit convention check, drives .commitlintrc.js (`ci:commitlint`)
+
+# -----------------------------------------------------------------------------
+# Release Tools
+# -----------------------------------------------------------------------------
+# Tools used by the release workflow only (.github/workflows/*release*)
+
+goreleaser = "latest" # Cross-platform release builds, drives .goreleaser.yml
+cosign = "latest"     # Keyless signing of release checksums (goreleaser `signs`)
+syft = "latest"       # SBOM generation for release archives (goreleaser `sboms`)
 
 # =============================================================================
 # Tasks
 # =============================================================================
+# `ci:*` tasks are the units the CI workflows run, one per job. Each is also
+# the exact command to run locally; `ci` chains them as the quality gate.
 
-[tasks.lint]
-description = "Run golangci-lint"
+# -----------------------------------------------------------------------------
+# Quality Gate
+# -----------------------------------------------------------------------------
+# Static analysis of the whole repository
+
+[tasks."ci:lint"]
+description = "Run golangci-lint on every Go package"
 run = "golangci-lint run ./..."
 
-[tasks.build]
+[tasks."ci:rtunk"]
+description = "Run rtunk's own lint stack (.rtunk/rtunk.yaml) on the changed files; extra arguments go to rtunk check"
+run = "rtunk check"
+
+[tasks."ci:commitlint"]
+description = "Validate commit messages in a range (usage: mise run ci:commitlint -- --from <sha> --to <sha>)"
+run = "commitlint --verbose"
+
+[tasks."ci:vulncheck"]
+description = "Scan Go dependencies for known vulnerabilities"
+run = "govulncheck ./..."
+
+# -----------------------------------------------------------------------------
+# Build and Test
+# -----------------------------------------------------------------------------
+# Compilation and unit tests; only needed when Go code (or what feeds it) changes
+
+[tasks."ci:build"]
 description = "Build the rtunk binary"
 run = "go build -o rtunk ./cmd/rtunk"
 
-[tasks.rtunk]
-description = "Run rtunk's own lint stack (.rtunk/rtunk.yaml) on the changed files; extra arguments go to rtunk check"
-depends = ["build"]
-run = "./rtunk check"
-
-[tasks.test]
-description = "Run the unit tests with a coverage profile"
+[tasks."ci:test"]
+description = "Run the unit tests with the race detector and a coverage profile"
 run = "go test -race -covermode=atomic -coverprofile=coverage.txt ./..."
 
 # A floor, not a target: it catches coverage regressions without pinning today's exact number.
 # Raise it as coverage improves; never lower it to make a failing PR pass.
-[tasks.coverage]
+[tasks."ci:coverage"]
 description = "Fail if total statement coverage is below the floor (default 80%)"
-depends = ["test"]
+depends = ["ci:test"]
 env = { COVERAGE_FLOOR = "80" }
 run = '''
 total=$(go tool cover -func=coverage.txt | tail -1 | awk '{print $NF}' | tr -d '%')
@@ -60,18 +104,14 @@ echo "Total statement coverage: ${total}%"
 awk -v total="$total" -v floor="$COVERAGE_FLOOR" 'BEGIN { if (total + 0 < floor + 0) { print "coverage " total "% is below the " floor "% floor"; exit 1 } }'
 '''
 
-[tasks."test:scripts"]
+[tasks."ci:scripts"]
 description = "Run the tests of the release tooling in scripts/ (Node's built-in runner)"
 run = 'node --test "scripts/*.test.mjs"'
 
-[tasks.commitlint]
-description = "Validate commit messages in a range (usage: mise run commitlint -- --from <sha> --to <sha>)"
-run = "commitlint --verbose"
-
-[tasks.vulncheck]
-description = "Scan Go dependencies for known vulnerabilities"
-run = "govulncheck ./..."
+# -----------------------------------------------------------------------------
+# Aggregate
+# -----------------------------------------------------------------------------
 
 [tasks.ci]
 description = "Local equivalent of the CI quality gate (commit messages excluded)"
-depends = ["lint", "build", "coverage", "test:scripts"]
+depends = ["ci:lint", "ci:build", "ci:coverage", "ci:scripts"]

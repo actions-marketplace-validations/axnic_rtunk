@@ -45,7 +45,7 @@ jobs:
           cache_key: "mise-v1-{{platform}}-{{file_hash}}"
 
       - name: 🔍 Run govulncheck
-        run: mise run vulncheck
+        run: mise run ci:vulncheck
 
   # ---------------------------------------------------------------------------
   # codeql — Static Application Security Testing (SAST)

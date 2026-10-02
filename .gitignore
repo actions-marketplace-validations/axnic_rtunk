@@ -10,7 +10,7 @@
 # behind anywhere in the tree.
 rtunk-check-sandbox-*/
 
-# Build and test artifacts of the mise tasks (`mise run build` / `mise run test`). They must stay
+# Build and test artifacts of the mise tasks (`mise run ci:build` / `mise run ci:test`). They must stay
 # ignored: goreleaser refuses to release from a dirty tree, and the release workflow runs
 # `mise run ci` just before it.
 /rtunk

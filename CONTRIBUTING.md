@@ -40,19 +40,21 @@ the `rtunk-mise-data` volume and survive rebuilds. `mise run ci` is the gate the
 CI never calls a tool directly: every job runs a task of `.mise.toml`, so a green local run is the
 same gate a pull request goes through. `mise tasks` lists them.
 
-| Task                    | What it does                                                                   |
-| ----------------------- | ------------------------------------------------------------------------------ |
-| `mise run lint`         | `golangci-lint run ./...`                                                      |
-| `mise run build`        | Builds `./rtunk`                                                               |
-| `mise run rtunk`        | Builds, then runs `./rtunk check` (rtunk's own lint stack, changed files)      |
-| `mise run test`         | `go test -race` with a coverage profile                                        |
-| `mise run coverage`     | `test`, then fails under the 80% statement-coverage floor                      |
-| `mise run test:scripts` | Tests of the release tooling in `scripts/` (Node's built-in runner)            |
-| `mise run commitlint`   | Validates commit messages (`-- --from <sha> --to <sha>`)                       |
-| `mise run vulncheck`    | `govulncheck ./...`                                                            |
-| `mise run ci`           | `lint`, `build`, `coverage`, `test:scripts`: the CI gate minus commit messages |
+| Task                     | What it does                                                                                         |
+| ------------------------ | ---------------------------------------------------------------------------------------------------- |
+| `mise run ci:lint`       | `golangci-lint run ./...`                                                                            |
+| `mise run ci:build`      | Builds `./rtunk`                                                                                     |
+| `mise run ci:rtunk`      | `rtunk check` with the released rtunk mise installs (pinned by `mise.lock`), changed files           |
+| `mise run ci:test`       | `go test -race` with a coverage profile                                                              |
+| `mise run ci:coverage`   | `ci:test`, then fails under the 80% statement-coverage floor                                         |
+| `mise run ci:scripts`    | Tests of the release tooling in `scripts/` (Node's built-in runner)                                  |
+| `mise run ci:commitlint` | Validates commit messages (`-- --from <sha> --to <sha>`)                                             |
+| `mise run ci:vulncheck`  | `govulncheck ./...`                                                                                  |
+| `mise run ci`            | `ci:lint`, `ci:build`, `ci:coverage`, `ci:scripts`: the CI gate minus `ci:rtunk` and commit messages |
 
-Extra arguments reach rtunk through the task: `mise run rtunk -- docs/Installation.md`.
+Extra arguments reach rtunk through the task: `mise run ci:rtunk -- docs/Installation.md`. `ci:rtunk`
+does not build: it runs the released rtunk, not `./rtunk`, so use `./rtunk` (after `mise run ci:build`)
+to exercise your own changes.
 
 ## Tests and lint
 
@@ -67,7 +69,7 @@ gofmt -l .
 
 `go test ./...` and `go vet ./...` exit `0` with no output on success. `gofmt -l .` exits `0` and
 prints nothing when the tree is already formatted; any path it lists needs `gofmt -w`. `./rtunk
-check` (build it first with `mise run build`, or run `mise run rtunk`, which does) runs the full
+check` (build it first with `mise run ci:build`; `mise run ci:rtunk` runs the released rtunk instead) runs the full
 lint stack declared in [`.rtunk/rtunk.yaml`](.rtunk/rtunk.yaml) — `gofmt`, `golangci-lint2`,
 `markdownlint`, `prettier`, `yamllint`, `taplo`, plus the security scanners (`grype`,
 `osv-scanner`, `checkov`, `trufflehog`); it's read-only and exits non-zero on any finding. It
@@ -75,7 +77,8 @@ accepts path arguments to scope a run to what you changed; with none, the defaul
 (see `--from`), not the whole repository.
 
 `mise run ci` runs lint, build, tests with the coverage floor and the release-tooling tests
-locally: the same gate the CI jobs below run, commit messages excluded.
+locally: the same gate the `lint`, `build` and `test` jobs below run, without the `rtunk` and
+`commitlint` jobs.
 
 For documentation-only changes, this repository's own convention is `./rtunk fmt <path>` then
 `./rtunk check <path>` scoped to the files touched, in place of the full `./rtunk check` above.
@@ -86,17 +89,24 @@ Workflows live in [`.github/workflows/`](.github/workflows), named `<triggers>.<
 
 | Workflow                                   | Runs                                                                                                                                                                |
 | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `merge_group,pull_request,push.ci.yaml`    | On pull requests, merge-queue entries and pushes to `main`: `lint`, `rtunk`, `commitlint`, `build` and `test`                                                       |
+| `merge_group,pull_request,push.lint.yaml`  | `Lint`, on pull requests, merge-queue entries and pushes to `main`, always: `lint`, `rtunk`, `commitlint`                                                           |
+| `pull_request,push.go.yaml`                | `Go`, on pull requests and pushes to `main`, path-filtered: `build`, `test`                                                                                         |
 | `schedule.security.yaml`                   | Daily `govulncheck`, CodeQL and OpenSSF Scorecard                                                                                                                   |
 | `push,workflow_dispatch.wiki.yaml`         | Publishes `docs/` to the GitHub Wiki on pushes to `main` that touch it                                                                                              |
 | `pull_request.dependabot-auto-merge.yaml`  | Approves and auto-merges Dependabot patch and security updates                                                                                                      |
 | `issue_comment,pull_request.pr-agent.yaml` | Posts a comment listing the commands when a pull request is opened; runs `/describe`, `/review`, `/improve`, `/ask`, `/help` comments from allowed users (PR Agent) |
 | `workflow_dispatch.release.yaml`           | Cuts a release (run manually, see below)                                                                                                                            |
 
-The `test` job runs on Linux and macOS (`fail-fast: false`, so one platform's failure does not hide
-the other's); the release-tooling tests run on Linux only. The `rtunk` job dogfoods the tool and the
-[GitHub Action](docs/GitHub-Action.md): it checks the files the pull request changes with
-`version: source`, so a change is linted by its own code, and findings appear as annotations.
+The `lint` workflow always runs, on every file, with no path filter. `lint` runs golangci-lint; the
+`rtunk` job dogfoods the tool and the [GitHub Action](docs/GitHub-Action.md) on its latest release:
+it checks every file, and findings appear as annotations; `commitlint` validates the commit messages.
+
+The `go` workflow runs `build` and `test`. It has no `merge_group` trigger: it runs on pull requests
+and pushes to `main` only, and only when `**.go`, `go.mod`, `go.sum` or the workflow file itself
+changed. Merge-queue entries do not run it, since the pull request already passed it; `Lint` still
+runs on them. The `test` job runs on Linux and
+macOS (`fail-fast: false`, so one platform's failure does not hide the other's); the release-tooling
+tests run on Linux only.
 
 [PR Agent](https://github.com/The-PR-Agent/pr-agent) (pinned by SHA, v0.47.0) never runs on its own
 on pull requests or pushes. When a pull request is opened, a `welcome` job posts one comment listing
