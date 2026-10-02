@@ -12,7 +12,13 @@ releases list only what changed since the previous tag. A build with no version 
 
 ## [Unreleased]
 
-Nothing yet.
+### Added (Unreleased)
+
+- `lint.ignore` is honored: each entry's `paths` (gitignore-style globs relative to the repository
+  root) are kept out of the file sets of the linters it names, or of every linter with `ALL`, for
+  `check` and `fmt`. A file ignored for every linter that would match it no longer counts toward
+  `Checked N files`. Negated (`!`) paths are rejected as a configuration error. See
+  [docs/Configuration-Reference.md](./docs/Configuration-Reference.md#lintignore).
 
 ## [0.14.0] - 2026-10-02
 

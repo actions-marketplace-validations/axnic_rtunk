@@ -88,6 +88,7 @@ A config file has six top-level sections. A missing section decodes to its zero 
 | `runtimes.enabled` | list of string | `[]`    | Runtime ids (optionally `id@version`) to activate.                                                                                                 |
 | `lint.enabled`     | list of string | `[]`    | Linter ids (optionally `id@version`) to activate.                                                                                                  |
 | `lint.disabled`    | list of string | `[]`    | Linter ids to switch off, any `@version` ignored; removes them from the effective enabled list. See [Local override files](#local-override-files). |
+| `lint.ignore`      | list of rule   | `[]`    | Paths to keep out of the named linters' file sets. See [below](#lintignore).                                                                       |
 | `actions.enabled`  | list of string | `[]`    | Action ids (optionally `id@version`) to activate.                                                                                                  |
 | `actions.disabled` | list of string | `[]`    | Action ids `rtunk actions disable` records as turned off. See [below](#actionsdisabled).                                                           |
 
@@ -116,6 +117,43 @@ A git source's parsed definitions (not its raw checkout) are cached under the re
 directory, keyed by `uri`+`ref`, so a pinned ref is fetched from the network only once. See [Cache
 directory](#cache-directory) for where that cache lives and [Plugin Sources](Plugin-Sources.md) for
 how sources are resolved.
+
+### `lint.ignore`
+
+Each entry names `linters` (linter ids, or `ALL` for every linter) and `paths`: gitignore-style
+globs relative to the repository root. A file a path matches is never passed to the linters the
+entry names, for `check` and `fmt` alike, whether it was found by a walk or named on the command
+line. Entries from override files are added after the base file's.
+
+```yaml
+lint:
+  ignore:
+    - linters: [ALL]
+      paths:
+        - .mise/
+    - linters: [prettier, yamllint]
+      paths:
+        - docs/generated/**
+        - "*.lock"
+```
+
+A glob follows gitignore's rules for the subset below:
+
+- `*`, `?` and `[...]` match inside one path segment; `**` as a whole segment matches any number of
+  segments, none included.
+- A pattern with a `/` at its start or in its middle is anchored to the repository root; one
+  without (`*.lock`, `.mise`) matches at any depth.
+- A trailing `/` limits the pattern to directories, and a pattern that matches a directory covers
+  everything under it.
+
+Not supported: negation (a path starting with `!` is a configuration error, reported by the
+validation step, rather than silently ignored), backslash escapes, and `.gitignore` files as a
+source of patterns (git-ignored files are already skipped separately). The `lint.ignore` that a
+plugin source's own `plugin.yaml` may declare, such as trunk's defaults for lockfiles, is not read.
+
+An ignored file is left out of that linter's file set, so it does not count toward `Checked N
+files` unless another linter still checks it; the count of every file no rule touches is unchanged.
+`rtunk linters list` counts files per linter without applying `lint.ignore`.
 
 ### `actions.disabled`
 
@@ -225,7 +263,8 @@ how the live view uses them.
 ## Ignoring issues
 
 Inline `rtunk-ignore` and `trunk-ignore` comments are documented in [Ignoring
-Issues](Ignoring-Issues.md), not in the config file.
+Issues](Ignoring-Issues.md), not in the config file. To keep whole paths away from linters, see
+[`lint.ignore`](#lintignore).
 
 ## Inspecting the resolved configuration
 
