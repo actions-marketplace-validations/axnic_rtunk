@@ -23,6 +23,8 @@ trunk = "latest" # Metalinter/formatter, drives .trunk/trunk.yaml
 golangci-lint = "latest"                                 # Go linter, drives .golangci.yml (`mise run lint`)
 "go:golang.org/x/vuln/cmd/govulncheck" = "latest"        # Known-CVE scan of Go dependencies (security workflow)
 goreleaser = "latest"                                    # Cross-platform release builds, drives .goreleaser.yml
+cosign = "latest"                                        # Keyless signing of release checksums (goreleaser `signs`)
+syft = "latest"                                          # SBOM generation for release archives (goreleaser `sboms`)
 node = "lts"                                             # Runtime for commitlint
 "npm:@commitlint/cli" = "latest"                         # Commit convention check, drives .commitlintrc.js
 
