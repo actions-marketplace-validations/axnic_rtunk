@@ -13,9 +13,39 @@
   "frameworks": [],
   "files": [
     {
+      "path": ".agents/skills/create-pr/SKILL.md",
+      "language": "markdown",
+      "sizeLines": 99,
+      "fileCategory": "docs"
+    },
+    {
       "path": ".agents/skills/git-commit/SKILL.md",
       "language": "markdown",
       "sizeLines": 292,
+      "fileCategory": "docs"
+    },
+    {
+      "path": ".agents/skills/release-notes/SKILL.md",
+      "language": "markdown",
+      "sizeLines": 57,
+      "fileCategory": "docs"
+    },
+    {
+      "path": ".agents/skills/wiki-docs/SKILL.md",
+      "language": "markdown",
+      "sizeLines": 132,
+      "fileCategory": "docs"
+    },
+    {
+      "path": ".agents/skills/wiki-docs/references/page-templates.md",
+      "language": "markdown",
+      "sizeLines": 131,
+      "fileCategory": "docs"
+    },
+    {
+      "path": ".agents/skills/wiki-docs/references/style-guide.md",
+      "language": "markdown",
+      "sizeLines": 79,
       "fileCategory": "docs"
     },
     {
@@ -23,6 +53,18 @@
       "language": "javascript",
       "sizeLines": 162,
       "fileCategory": "code"
+    },
+    {
+      "path": ".devcontainer/devcontainer-lock.json",
+      "language": "json",
+      "sizeLines": 14,
+      "fileCategory": "config"
+    },
+    {
+      "path": ".devcontainer/devcontainer.json",
+      "language": "json",
+      "sizeLines": 34,
+      "fileCategory": "config"
     },
     {
       "path": ".github/ISSUE_TEMPLATE/bug_report.md",
@@ -49,31 +91,85 @@
       "fileCategory": "docs"
     },
     {
+      "path": ".github/dependabot.yml",
+      "language": "yaml",
+      "sizeLines": 30,
+      "fileCategory": "config"
+    },
+    {
+      "path": ".github/workflows/merge_group,pull_request,push.ci.yaml",
+      "language": "yaml",
+      "sizeLines": 176,
+      "fileCategory": "infra"
+    },
+    {
+      "path": ".github/workflows/pull_request.dependabot-auto-merge.yaml",
+      "language": "yaml",
+      "sizeLines": 92,
+      "fileCategory": "infra"
+    },
+    {
+      "path": ".github/workflows/push,workflow_dispatch.wiki.yaml",
+      "language": "yaml",
+      "sizeLines": 45,
+      "fileCategory": "infra"
+    },
+    {
+      "path": ".github/workflows/schedule.security.yaml",
+      "language": "yaml",
+      "sizeLines": 113,
+      "fileCategory": "infra"
+    },
+    {
+      "path": ".github/workflows/workflow_dispatch.release.yaml",
+      "language": "yaml",
+      "sizeLines": 358,
+      "fileCategory": "infra"
+    },
+    {
       "path": ".golangci.yml",
       "language": "yaml",
       "sizeLines": 42,
       "fileCategory": "config"
     },
     {
-      "path": ".mise.toml",
-      "language": "toml",
-      "sizeLines": 16,
+      "path": ".goreleaser.yml",
+      "language": "yaml",
+      "sizeLines": 47,
       "fileCategory": "config"
     },
     {
-      "path": ".trunk/configs/.markdownlint.yaml",
+      "path": ".mise.toml",
+      "language": "toml",
+      "sizeLines": 77,
+      "fileCategory": "config"
+    },
+    {
+      "path": ".mise/locks/npm-commitlint-cli/21.2.3/aube-lock.yaml",
+      "language": "yaml",
+      "sizeLines": 817,
+      "fileCategory": "config"
+    },
+    {
+      "path": ".mise/locks/npm-commitlint-cli/21.2.3/package.json",
+      "language": "json",
+      "sizeLines": 7,
+      "fileCategory": "config"
+    },
+    {
+      "path": ".rtunk/configs/.markdownlint.yaml",
       "language": "yaml",
       "sizeLines": 2,
       "fileCategory": "config"
     },
     {
-      "path": ".trunk/configs/.yamllint.yaml",
+      "path": ".rtunk/configs/.yamllint.yaml",
       "language": "yaml",
       "sizeLines": 7,
       "fileCategory": "config"
     },
     {
-      "path": ".trunk/trunk.yaml",
+      "path": ".rtunk/rtunk.yaml",
       "language": "yaml",
       "sizeLines": 49,
       "fileCategory": "config"
@@ -81,13 +177,13 @@
     {
       "path": "AGENTS.md",
       "language": "markdown",
-      "sizeLines": 133,
+      "sizeLines": 134,
       "fileCategory": "docs"
     },
     {
       "path": "CHANGELOG.md",
       "language": "markdown",
-      "sizeLines": 89,
+      "sizeLines": 154,
       "fileCategory": "docs"
     },
     {
@@ -99,13 +195,13 @@
     {
       "path": "CONTRIBUTING.md",
       "language": "markdown",
-      "sizeLines": 78,
+      "sizeLines": 96,
       "fileCategory": "docs"
     },
     {
       "path": "README.md",
       "language": "markdown",
-      "sizeLines": 99,
+      "sizeLines": 98,
       "fileCategory": "docs"
     },
     {
@@ -117,8 +213,14 @@
     {
       "path": "SECURITY.md",
       "language": "markdown",
-      "sizeLines": 40,
+      "sizeLines": 70,
       "fileCategory": "docs"
+    },
+    {
+      "path": "action.yml",
+      "language": "yaml",
+      "sizeLines": 300,
+      "fileCategory": "config"
     },
     {
       "path": "cmd/rtunk/main.go",
@@ -133,87 +235,165 @@
       "fileCategory": "code"
     },
     {
-      "path": "docs/architecture/README.md",
+      "path": "docs/Actions-And-Git-Hooks.md",
       "language": "markdown",
-      "sizeLines": 197,
+      "sizeLines": 107,
       "fileCategory": "docs"
     },
     {
-      "path": "docs/architecture/cache.md",
+      "path": "docs/Architecture.md",
       "language": "markdown",
-      "sizeLines": 215,
+      "sizeLines": 210,
       "fileCategory": "docs"
     },
     {
-      "path": "docs/architecture/flows.md",
+      "path": "docs/CLI-Design.md",
       "language": "markdown",
-      "sizeLines": 268,
+      "sizeLines": 314,
       "fileCategory": "docs"
     },
     {
-      "path": "docs/architecture/inconsistencies.md",
+      "path": "docs/Cache-And-Logs.md",
       "language": "markdown",
-      "sizeLines": 572,
+      "sizeLines": 101,
       "fileCategory": "docs"
     },
     {
-      "path": "docs/architecture/plugin-model.md",
+      "path": "docs/Cache-Architecture.md",
       "language": "markdown",
-      "sizeLines": 214,
+      "sizeLines": 224,
       "fileCategory": "docs"
     },
     {
-      "path": "docs/architecture/sources.md",
+      "path": "docs/Checking-Code.md",
       "language": "markdown",
-      "sizeLines": 222,
+      "sizeLines": 208,
       "fileCategory": "docs"
     },
     {
-      "path": "docs/cli.md",
+      "path": "docs/Command-Reference.md",
       "language": "markdown",
-      "sizeLines": 294,
+      "sizeLines": 690,
       "fileCategory": "docs"
     },
     {
-      "path": "docs/commands.md",
+      "path": "docs/Configuration-Reference.md",
       "language": "markdown",
-      "sizeLines": 632,
+      "sizeLines": 243,
       "fileCategory": "docs"
     },
     {
-      "path": "docs/configuration.md",
+      "path": "docs/Decision-Log.md",
       "language": "markdown",
-      "sizeLines": 269,
+      "sizeLines": 581,
       "fileCategory": "docs"
     },
     {
-      "path": "docs/installation.md",
+      "path": "docs/FAQ.md",
       "language": "markdown",
-      "sizeLines": 73,
+      "sizeLines": 66,
       "fileCategory": "docs"
     },
     {
-      "path": "docs/migration-from-trunk.md",
+      "path": "docs/Formatting-Code.md",
       "language": "markdown",
-      "sizeLines": 155,
+      "sizeLines": 86,
       "fileCategory": "docs"
     },
     {
-      "path": "docs/ux.md",
+      "path": "docs/GitHub-Action.md",
       "language": "markdown",
-      "sizeLines": 226,
+      "sizeLines": 115,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "docs/Ignoring-Issues.md",
+      "language": "markdown",
+      "sizeLines": 122,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "docs/Installation.md",
+      "language": "markdown",
+      "sizeLines": 174,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "docs/Keeping-Tools-Up-To-Date.md",
+      "language": "markdown",
+      "sizeLines": 84,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "docs/Managing-Linters.md",
+      "language": "markdown",
+      "sizeLines": 142,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "docs/Migrating-From-Trunk.md",
+      "language": "markdown",
+      "sizeLines": 168,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "docs/Plugin-Model.md",
+      "language": "markdown",
+      "sizeLines": 223,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "docs/Plugin-Sources.md",
+      "language": "markdown",
+      "sizeLines": 231,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "docs/Quickstart.md",
+      "language": "markdown",
+      "sizeLines": 114,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "docs/README.md",
+      "language": "markdown",
+      "sizeLines": 67,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "docs/Run-Flows.md",
+      "language": "markdown",
+      "sizeLines": 277,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "docs/Terminal-UX-Design.md",
+      "language": "markdown",
+      "sizeLines": 246,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "docs/_Footer.md",
+      "language": "markdown",
+      "sizeLines": 4,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "docs/_Sidebar.md",
+      "language": "markdown",
+      "sizeLines": 37,
       "fileCategory": "docs"
     },
     {
       "path": "go.mod",
       "language": "mod",
-      "sizeLines": 17,
+      "sizeLines": 33,
       "fileCategory": "config"
     },
     {
       "path": "go.sum",
       "language": "sum",
-      "sizeLines": 24,
+      "sizeLines": 62,
       "fileCategory": "config"
     },
     {
@@ -237,7 +417,7 @@
     {
       "path": "internal/cli/actions_enable.go",
       "language": "go",
-      "sizeLines": 30,
+      "sizeLines": 33,
       "fileCategory": "code"
     },
     {
@@ -261,7 +441,7 @@
     {
       "path": "internal/cli/actions_test.go",
       "language": "go",
-      "sizeLines": 121,
+      "sizeLines": 136,
       "fileCategory": "code"
     },
     {
@@ -273,7 +453,7 @@
     {
       "path": "internal/cli/cache_clean.go",
       "language": "go",
-      "sizeLines": 31,
+      "sizeLines": 170,
       "fileCategory": "code"
     },
     {
@@ -285,7 +465,7 @@
     {
       "path": "internal/cli/cache_test.go",
       "language": "go",
-      "sizeLines": 69,
+      "sizeLines": 89,
       "fileCategory": "code"
     },
     {
@@ -315,7 +495,7 @@
     {
       "path": "internal/cli/cli.go",
       "language": "go",
-      "sizeLines": 140,
+      "sizeLines": 143,
       "fileCategory": "code"
     },
     {
@@ -411,37 +591,37 @@
     {
       "path": "internal/cli/init.go",
       "language": "go",
-      "sizeLines": 75,
+      "sizeLines": 124,
       "fileCategory": "code"
     },
     {
       "path": "internal/cli/init_test.go",
       "language": "go",
-      "sizeLines": 228,
+      "sizeLines": 259,
       "fileCategory": "code"
     },
     {
       "path": "internal/cli/interactive.go",
       "language": "go",
-      "sizeLines": 172,
+      "sizeLines": 266,
       "fileCategory": "code"
     },
     {
       "path": "internal/cli/interactive_test.go",
       "language": "go",
-      "sizeLines": 134,
+      "sizeLines": 208,
       "fileCategory": "code"
     },
     {
       "path": "internal/cli/link.go",
       "language": "go",
-      "sizeLines": 130,
+      "sizeLines": 156,
       "fileCategory": "code"
     },
     {
       "path": "internal/cli/link_test.go",
       "language": "go",
-      "sizeLines": 88,
+      "sizeLines": 105,
       "fileCategory": "code"
     },
     {
@@ -453,7 +633,7 @@
     {
       "path": "internal/cli/linters_disable.go",
       "language": "go",
-      "sizeLines": 12,
+      "sizeLines": 16,
       "fileCategory": "code"
     },
     {
@@ -471,13 +651,13 @@
     {
       "path": "internal/cli/linters_enable.go",
       "language": "go",
-      "sizeLines": 42,
+      "sizeLines": 144,
       "fileCategory": "code"
     },
     {
       "path": "internal/cli/linters_enable_test.go",
       "language": "go",
-      "sizeLines": 234,
+      "sizeLines": 288,
       "fileCategory": "code"
     },
     {
@@ -705,13 +885,13 @@
     {
       "path": "internal/cli/shared.go",
       "language": "go",
-      "sizeLines": 666,
+      "sizeLines": 723,
       "fileCategory": "code"
     },
     {
       "path": "internal/cli/shared_test.go",
       "language": "go",
-      "sizeLines": 689,
+      "sizeLines": 737,
       "fileCategory": "code"
     },
     {
@@ -723,13 +903,13 @@
     {
       "path": "internal/cli/toolbox_download.go",
       "language": "go",
-      "sizeLines": 82,
+      "sizeLines": 155,
       "fileCategory": "code"
     },
     {
       "path": "internal/cli/toolbox_download_test.go",
       "language": "go",
-      "sizeLines": 95,
+      "sizeLines": 113,
       "fileCategory": "code"
     },
     {
@@ -789,13 +969,13 @@
     {
       "path": "pkg/cache/download/download.go",
       "language": "go",
-      "sizeLines": 512,
+      "sizeLines": 513,
       "fileCategory": "code"
     },
     {
       "path": "pkg/cache/download/download_test.go",
       "language": "go",
-      "sizeLines": 807,
+      "sizeLines": 839,
       "fileCategory": "code"
     },
     {
@@ -1167,13 +1347,13 @@
     {
       "path": "pkg/run/engine/configlink.go",
       "language": "go",
-      "sizeLines": 53,
+      "sizeLines": 57,
       "fileCategory": "code"
     },
     {
       "path": "pkg/run/engine/configlink_test.go",
       "language": "go",
-      "sizeLines": 37,
+      "sizeLines": 53,
       "fileCategory": "code"
     },
     {
@@ -1185,7 +1365,7 @@
     {
       "path": "pkg/run/engine/engine.go",
       "language": "go",
-      "sizeLines": 1608,
+      "sizeLines": 1620,
       "fileCategory": "code"
     },
     {
@@ -1251,13 +1431,13 @@
     {
       "path": "pkg/run/githooks/githooks.go",
       "language": "go",
-      "sizeLines": 145,
+      "sizeLines": 154,
       "fileCategory": "code"
     },
     {
       "path": "pkg/run/githooks/githooks_test.go",
       "language": "go",
-      "sizeLines": 109,
+      "sizeLines": 138,
       "fileCategory": "code"
     },
     {
@@ -1311,7 +1491,7 @@
     {
       "path": "pkg/trunk/config/cache.go",
       "language": "go",
-      "sizeLines": 150,
+      "sizeLines": 151,
       "fileCategory": "code"
     },
     {
@@ -1323,13 +1503,13 @@
     {
       "path": "pkg/trunk/config/config.go",
       "language": "go",
-      "sizeLines": 60,
+      "sizeLines": 66,
       "fileCategory": "code"
     },
     {
       "path": "pkg/trunk/config/definitions.go",
       "language": "go",
-      "sizeLines": 387,
+      "sizeLines": 390,
       "fileCategory": "code"
     },
     {
@@ -1401,7 +1581,7 @@
     {
       "path": "pkg/trunk/config/resolve.go",
       "language": "go",
-      "sizeLines": 307,
+      "sizeLines": 394,
       "fileCategory": "code"
     },
     {
@@ -1413,7 +1593,7 @@
     {
       "path": "pkg/trunk/config/resolve_test.go",
       "language": "go",
-      "sizeLines": 180,
+      "sizeLines": 262,
       "fileCategory": "code"
     },
     {
@@ -1747,27 +1927,55 @@
       "fileCategory": "code"
     },
     {
+      "path": "scripts/generate-release-notes.mjs",
+      "language": "javascript",
+      "sizeLines": 216,
+      "fileCategory": "code"
+    },
+    {
+      "path": "scripts/generate-release-notes.test.mjs",
+      "language": "javascript",
+      "sizeLines": 92,
+      "fileCategory": "code"
+    },
+    {
       "path": "scripts/verify-renovate-e2e.sh",
       "language": "shell",
       "sizeLines": 113,
       "fileCategory": "script"
     }
   ],
-  "totalFiles": 290,
-  "filteredByIgnore": 1,
+  "totalFiles": 322,
+  "filteredByIgnore": 0,
   "estimatedComplexity": "large",
   "importMap": {
+    ".agents/skills/create-pr/SKILL.md": [],
     ".agents/skills/git-commit/SKILL.md": [],
+    ".agents/skills/release-notes/SKILL.md": [],
+    ".agents/skills/wiki-docs/SKILL.md": [],
+    ".agents/skills/wiki-docs/references/page-templates.md": [],
+    ".agents/skills/wiki-docs/references/style-guide.md": [],
     ".commitlintrc.js": [],
+    ".devcontainer/devcontainer-lock.json": [],
+    ".devcontainer/devcontainer.json": [],
     ".github/ISSUE_TEMPLATE/bug_report.md": [],
     ".github/ISSUE_TEMPLATE/config.yml": [],
     ".github/ISSUE_TEMPLATE/feature_request.md": [],
     ".github/PULL_REQUEST_TEMPLATE.md": [],
+    ".github/dependabot.yml": [],
+    ".github/workflows/merge_group,pull_request,push.ci.yaml": [],
+    ".github/workflows/pull_request.dependabot-auto-merge.yaml": [],
+    ".github/workflows/push,workflow_dispatch.wiki.yaml": [],
+    ".github/workflows/schedule.security.yaml": [],
+    ".github/workflows/workflow_dispatch.release.yaml": [],
     ".golangci.yml": [],
+    ".goreleaser.yml": [],
     ".mise.toml": [],
-    ".trunk/configs/.markdownlint.yaml": [],
-    ".trunk/configs/.yamllint.yaml": [],
-    ".trunk/trunk.yaml": [],
+    ".mise/locks/npm-commitlint-cli/21.2.3/aube-lock.yaml": [],
+    ".mise/locks/npm-commitlint-cli/21.2.3/package.json": [],
+    ".rtunk/configs/.markdownlint.yaml": [],
+    ".rtunk/configs/.yamllint.yaml": [],
+    ".rtunk/rtunk.yaml": [],
     "AGENTS.md": [],
     "CHANGELOG.md": [],
     "CODE_OF_CONDUCT.md": [],
@@ -1775,6 +1983,7 @@
     "README.md": [],
     "ROADMAP.md": [],
     "SECURITY.md": [],
+    "action.yml": [],
     "cmd/rtunk/main.go": [
       "internal/cli/actions.go",
       "internal/cli/actions_disable.go",
@@ -1848,18 +2057,31 @@
       "internal/cli/toolbox_where_test.go"
     ],
     "cmd/rtunk/main_test.go": [],
-    "docs/architecture/README.md": [],
-    "docs/architecture/cache.md": [],
-    "docs/architecture/flows.md": [],
-    "docs/architecture/inconsistencies.md": [],
-    "docs/architecture/plugin-model.md": [],
-    "docs/architecture/sources.md": [],
-    "docs/cli.md": [],
-    "docs/commands.md": [],
-    "docs/configuration.md": [],
-    "docs/installation.md": [],
-    "docs/migration-from-trunk.md": [],
-    "docs/ux.md": [],
+    "docs/Actions-And-Git-Hooks.md": [],
+    "docs/Architecture.md": [],
+    "docs/CLI-Design.md": [],
+    "docs/Cache-And-Logs.md": [],
+    "docs/Cache-Architecture.md": [],
+    "docs/Checking-Code.md": [],
+    "docs/Command-Reference.md": [],
+    "docs/Configuration-Reference.md": [],
+    "docs/Decision-Log.md": [],
+    "docs/FAQ.md": [],
+    "docs/Formatting-Code.md": [],
+    "docs/GitHub-Action.md": [],
+    "docs/Ignoring-Issues.md": [],
+    "docs/Installation.md": [],
+    "docs/Keeping-Tools-Up-To-Date.md": [],
+    "docs/Managing-Linters.md": [],
+    "docs/Migrating-From-Trunk.md": [],
+    "docs/Plugin-Model.md": [],
+    "docs/Plugin-Sources.md": [],
+    "docs/Quickstart.md": [],
+    "docs/README.md": [],
+    "docs/Run-Flows.md": [],
+    "docs/Terminal-UX-Design.md": [],
+    "docs/_Footer.md": [],
+    "docs/_Sidebar.md": [],
     "go.mod": [],
     "go.sum": [],
     "internal/cli/actions.go": [],
@@ -3000,6 +3222,26 @@
     ],
     "internal/cli/toolbox.go": [],
     "internal/cli/toolbox_download.go": [
+      "internal/cli/render/base.go",
+      "internal/cli/render/base_test.go",
+      "internal/cli/render/color.go",
+      "internal/cli/render/color_test.go",
+      "internal/cli/render/detect.go",
+      "internal/cli/render/detect_test.go",
+      "internal/cli/render/human.go",
+      "internal/cli/render/human_test.go",
+      "internal/cli/render/json.go",
+      "internal/cli/render/json_test.go",
+      "internal/cli/render/live.go",
+      "internal/cli/render/live_decorator_test.go",
+      "internal/cli/render/live_test.go",
+      "internal/cli/render/render.go",
+      "internal/cli/render/sarif.go",
+      "internal/cli/render/sarif_test.go",
+      "internal/cli/render/screen.go",
+      "internal/cli/render/screen_test.go",
+      "internal/cli/render/termsize_other.go",
+      "internal/cli/render/termsize_unix.go",
       "pkg/cache/download/blob.go",
       "pkg/cache/download/blob_test.go",
       "pkg/cache/download/cache.go",
@@ -3030,7 +3272,38 @@
       "pkg/cache/download/template.go",
       "pkg/cache/download/template_test.go",
       "pkg/cache/download/version.go",
-      "pkg/cache/download/version_test.go"
+      "pkg/cache/download/version_test.go",
+      "pkg/run/engine/autofix.go",
+      "pkg/run/engine/autofix_test.go",
+      "pkg/run/engine/baseenv_test.go",
+      "pkg/run/engine/configlink.go",
+      "pkg/run/engine/configlink_test.go",
+      "pkg/run/engine/docs.go",
+      "pkg/run/engine/engine.go",
+      "pkg/run/engine/engine_log_test.go",
+      "pkg/run/engine/engine_test.go",
+      "pkg/run/engine/match.go",
+      "pkg/run/engine/match_test.go",
+      "pkg/trunk/config/cache.go",
+      "pkg/trunk/config/cache_test.go",
+      "pkg/trunk/config/config.go",
+      "pkg/trunk/config/definitions.go",
+      "pkg/trunk/config/definitions_test.go",
+      "pkg/trunk/config/deprecations.go",
+      "pkg/trunk/config/deprecations_test.go",
+      "pkg/trunk/config/docs.go",
+      "pkg/trunk/config/errors.go",
+      "pkg/trunk/config/errors_test.go",
+      "pkg/trunk/config/filter.go",
+      "pkg/trunk/config/filter_test.go",
+      "pkg/trunk/config/git.go",
+      "pkg/trunk/config/git_internal_test.go",
+      "pkg/trunk/config/git_test.go",
+      "pkg/trunk/config/resolve.go",
+      "pkg/trunk/config/resolve_network_test.go",
+      "pkg/trunk/config/resolve_test.go",
+      "pkg/trunk/config/validate.go",
+      "pkg/trunk/config/validate_test.go"
     ],
     "internal/cli/toolbox_download_test.go": [],
     "internal/cli/toolbox_exec.go": [
@@ -5356,6 +5629,11 @@
     "pkg/trunk/output/stylelint_test.go": [],
     "pkg/trunk/output/taplo.go": [],
     "pkg/trunk/output/taplo_test.go": [],
+    "scripts/generate-release-notes.mjs": [],
+    "scripts/generate-release-notes.test.mjs": [
+      "scripts/generate-release-notes.mjs"
+    ],
     "scripts/verify-renovate-e2e.sh": []
-  }
+  },
+  "contentDigest": "fb8dd3ec804f059e894fa736d3e9a929edb4c5991f23a48248b3e8016133269d"
 }

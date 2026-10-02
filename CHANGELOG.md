@@ -14,11 +14,27 @@ releases list only what changed since the previous tag. A build with no version 
 
 ### Added (Unreleased)
 
+- `rtunk check --format github` writes one GitHub Actions workflow command per finding (an
+  `::error`, `::warning` or `::notice` annotation with `file`, `line`, `col` and `title`), and
+  appends a Markdown job summary to `$GITHUB_STEP_SUMMARY` when it is set. See
+  [docs/Checking-Code.md](./docs/Checking-Code.md#github-actions-annotations).
 - `lint.ignore` is honored: each entry's `paths` (gitignore-style globs relative to the repository
   root) are kept out of the file sets of the linters it names, or of every linter with `ALL`, for
   `check` and `fmt`. A file ignored for every linter that would match it no longer counts toward
   `Checked N files`. Negated (`!`) paths are rejected as a configuration error. See
   [docs/Configuration-Reference.md](./docs/Configuration-Reference.md#lintignore).
+
+### Changed (Unreleased)
+
+- The GitHub Action runs `rtunk check --format github` instead of post-processing a JSON report, so
+  rtunk itself writes the annotations and the job summary. **Breaking for workflows:** the
+  `results-file` output is removed, and `jq` is no longer needed. A release without the format
+  (`v0.14.0` and earlier) still runs, with the human format and a `::warning::`, and produces no
+  annotations. See [docs/GitHub-Action.md](./docs/GitHub-Action.md#annotations-and-job-summary).
+- `.mise/` local state is ignored, except the tracked `.mise/locks/` directories that `mise.lock`
+  references, and is excluded from yamllint.
+- A documentation pass after `v0.14.0`: the GitHub Action guide, installation, contributing and
+  security pages, and the README match the released state.
 
 ## [0.14.0] - 2026-10-02
 
