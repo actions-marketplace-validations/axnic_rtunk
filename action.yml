@@ -1,0 +1,300 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-action.json
+#
+# =============================================================================
+# rtunk — GitHub Action
+# =============================================================================
+# Installs rtunk, restores its tool/plugin cache, runs `rtunk check` and reports
+# the result (annotations + job summary). The equivalent of trunk-io/trunk-action.
+#
+#   - uses: actions/checkout@<sha>
+#     with: { fetch-depth: 0 }                 # needed by check-mode: changed-since-base
+#   - uses: axnic/rtunk@<ref>
+#
+# Docs: docs/GitHub-Action.md. Linux and macOS runners only.
+#
+# Step order matters: the cache is saved and the results reported with
+# `if: always()`, and the job only fails in the last step, so a failing check
+# still warms the cache and still annotates the pull request.
+# =============================================================================
+
+name: rtunk
+description: Install rtunk, cache its tools and plugins, run `rtunk check` and report findings as annotations and a job summary.
+author: axnic
+branding:
+  icon: check-circle
+  color: blue
+
+inputs:
+  version:
+    description: >-
+      rtunk version to install: `latest` (newest published release), a tag such as `v0.13.2`, or
+      `source` to build rtunk from this action's own checkout (needs Go; set up automatically).
+    default: latest
+  check-mode:
+    description: >-
+      `all` checks every file under working-directory; `changed-since-base` checks the files
+      changed since the base of the pull request, merge-queue entry or push (needs fetch-depth: 0).
+    default: all
+  arguments:
+    description: >-
+      Extra arguments for `rtunk check`, split on spaces (no quoting), e.g. `--filter=shellcheck`.
+      `--format` is set by the action.
+    default: ""
+  working-directory:
+    description: Directory rtunk runs in, relative to the workspace.
+    default: .
+  require-attestation:
+    description: >-
+      Fail when the release has no signature bundle to verify (releases published before signing
+      was introduced). When `false`, such a release is checked against checksums.txt only.
+    default: "false"
+  token:
+    description: Token used to resolve and download the release (gh CLI).
+    default: ${{ github.token }}
+
+outputs:
+  version:
+    description: The rtunk version that ran (a tag, or `source`).
+    value: ${{ steps.install.outputs.version }}
+  exit-code:
+    description: Exit code of `rtunk check` (0 = clean).
+    value: ${{ steps.check.outputs.exit-code }}
+  results-file:
+    description: Path of the JSON report written by `rtunk check --format json` (empty when no file was checked).
+    value: ${{ steps.check.outputs.results-file }}
+
+runs:
+  using: composite
+  steps:
+    - name: Resolve platform and version
+      id: resolve
+      shell: bash
+      env:
+        VERSION: ${{ inputs.version }}
+        GH_TOKEN: ${{ inputs.token }}
+      run: |
+        set -euo pipefail
+        case "$RUNNER_OS" in
+          Linux) os=linux ;;
+          macOS) os=darwin ;;
+          *) echo "::error::rtunk supports Linux and macOS runners only (got $RUNNER_OS)"; exit 1 ;;
+        esac
+        case "$RUNNER_ARCH" in
+          X64) arch=amd64 ;;
+          ARM64) arch=arm64 ;;
+          *) echo "::error::unsupported runner architecture $RUNNER_ARCH"; exit 1 ;;
+        esac
+        if [ "$VERSION" = latest ]; then
+          command -v gh >/dev/null || { echo "::error::the gh CLI is required to resolve 'latest'"; exit 1; }
+          VERSION=$(gh api repos/axnic/rtunk/releases/latest --jq .tag_name) \
+            || { echo "::error::no published rtunk release found; pin a version or use version: source"; exit 1; }
+        fi
+        if [ "$VERSION" != source ] && ! [[ "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+          echo "::error::version must be 'latest', 'source' or a tag like v0.13.2 (got '$VERSION')"; exit 1
+        fi
+        { echo "os=$os"; echo "arch=$arch"; echo "version=$VERSION"; } >> "$GITHUB_OUTPUT"
+
+    - name: Set up Go (source builds only)
+      if: steps.resolve.outputs.version == 'source'
+      uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+      with:
+        go-version-file: ${{ github.action_path }}/go.mod
+        cache: false
+
+    - name: Install rtunk
+      id: install
+      shell: bash
+      env:
+        VERSION: ${{ steps.resolve.outputs.version }}
+        OS: ${{ steps.resolve.outputs.os }}
+        ARCH: ${{ steps.resolve.outputs.arch }}
+        REQUIRE_ATTESTATION: ${{ inputs.require-attestation }}
+        ACTION_PATH: ${{ github.action_path }}
+        GH_TOKEN: ${{ inputs.token }}
+      run: |
+        set -euo pipefail
+        sha256() { if command -v sha256sum >/dev/null; then sha256sum "$@"; else shasum -a 256 "$@"; fi; }
+        bin="$RUNNER_TEMP/rtunk-bin"
+        mkdir -p "$bin"
+
+        if [ "$VERSION" = source ]; then
+          (cd "$ACTION_PATH" && go build -trimpath -o "$bin/rtunk" ./cmd/rtunk)
+          # Same sources + toolchain give the same binary, so its hash keys the cache.
+          id="source-$(sha256 "$bin/rtunk" | cut -c1-12)"
+        else
+          command -v gh >/dev/null || { echo "::error::the gh CLI is required to download and verify rtunk"; exit 1; }
+          id="$VERSION"
+          archive="rtunk-${VERSION}-${OS}-${ARCH}.tar.gz"
+          dl="$RUNNER_TEMP/rtunk-dl"
+          mkdir -p "$dl"
+          gh release download "$VERSION" -R axnic/rtunk -D "$dl" --clobber -p "$archive" -p checksums.txt
+
+          # 1. The archive matches checksums.txt.
+          (cd "$dl" && grep -F " $archive" checksums.txt | sha256 -c -)
+
+          # 2. The archive was built and signed by the Release workflow (SECURITY.md,
+          #    "Verifying a release"). Releases from before signing have no bundle.
+          if gh release download "$VERSION" -R axnic/rtunk -D "$dl" --clobber -p checksums.txt.sigstore.json 2>/dev/null; then
+            gh attestation verify "$dl/$archive" -R axnic/rtunk
+            if command -v cosign >/dev/null; then
+              cosign verify-blob "$dl/checksums.txt" --bundle "$dl/checksums.txt.sigstore.json" \
+                --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+                --certificate-identity-regexp '^https://github.com/axnic/rtunk/\.github/workflows/workflow_dispatch\.release\.yaml@refs/heads/main$'
+            fi
+          elif [ "$REQUIRE_ATTESTATION" = true ]; then
+            echo "::error::rtunk $VERSION has no signature bundle and require-attestation is true"; exit 1
+          else
+            echo "::warning::rtunk $VERSION is not signed: verified against checksums.txt only"
+          fi
+
+          tar -xzf "$dl/$archive" -C "$bin" rtunk
+        fi
+
+        echo "$bin" >> "$GITHUB_PATH"
+        echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+        echo "id=$id" >> "$GITHUB_OUTPUT"
+
+    - name: Compute cache key
+      id: cache-key
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        WORKSPACE: ${{ github.workspace }}
+        ID: ${{ steps.install.outputs.id }}
+        PREFIX: rtunk-v1-${{ runner.os }}-${{ runner.arch }}
+      run: |
+        set -euo pipefail
+        # The config lives in the nearest ancestor holding .rtunk or .trunk (rtunk's project root).
+        root=$PWD
+        while [ ! -d "$root/.rtunk" ] && [ ! -d "$root/.trunk" ] && [ "$root" != "$WORKSPACE" ] && [ "$root" != / ]; do
+          root=$(dirname "$root")
+        done
+        files=()
+        for f in "$root"/.rtunk/*.yaml "$root"/.rtunk/*.yml "$root"/.rtunk/*.lock \
+                 "$root"/.trunk/*.yaml "$root"/.trunk/*.yml "$root"/rtunk.lock; do
+          [ -f "$f" ] && files+=("$f")
+        done
+        if [ ${#files[@]} -gt 0 ]; then
+          if command -v sha256sum >/dev/null; then h=$(cat "${files[@]}" | sha256sum); else h=$(cat "${files[@]}" | shasum -a 256); fi
+          h=${h%% *}
+        else
+          h=no-config
+        fi
+        {
+          echo "key=$PREFIX-$ID-$h"
+          echo "restore-prefix=$PREFIX-$ID-"
+          echo "dir=$HOME/.cache/rtunk"
+        } >> "$GITHUB_OUTPUT"
+
+    # Only downloads/, plugins/ and registry/ are cached: logs/ is per-run noise.
+    - name: Restore rtunk cache
+      id: cache
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: |
+          ${{ steps.cache-key.outputs.dir }}/downloads
+          ${{ steps.cache-key.outputs.dir }}/plugins
+          ${{ steps.cache-key.outputs.dir }}/registry
+        key: ${{ steps.cache-key.outputs.key }}
+        restore-keys: ${{ steps.cache-key.outputs.restore-prefix }}
+
+    - name: Run rtunk check
+      id: check
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        RTUNK_CACHE_DIR: ${{ steps.cache-key.outputs.dir }}
+        CHECK_MODE: ${{ inputs.check-mode }}
+        ARGUMENTS: ${{ inputs.arguments }}
+        EVENT_NAME: ${{ github.event_name }}
+        PR_BASE: ${{ github.event.pull_request.base.sha }}
+        MQ_BASE: ${{ github.event.merge_group.base_sha }}
+        PUSH_BEFORE: ${{ github.event.before }}
+      run: |
+        set -o pipefail
+        args=()
+        case "$CHECK_MODE" in
+          all) args+=(.) ;;
+          changed-since-base)
+            case "$EVENT_NAME" in
+              pull_request | pull_request_target) base=$PR_BASE ;;
+              merge_group) base=$MQ_BASE ;;
+              push) base=$PUSH_BEFORE ;;
+              *) base= ;;
+            esac
+            # An all-zero SHA is a new branch: no base, rtunk falls back to changes since HEAD.
+            if [ -n "$base" ] && [ "${base//0/}" != "" ]; then
+              if ! git cat-file -e "$base^{commit}" 2>/dev/null; then
+                if [ "$(git rev-parse --is-shallow-repository)" = true ]; then
+                  git fetch --no-tags --unshallow origin || true
+                else
+                  git fetch --no-tags origin "$base" || true
+                fi
+              fi
+              git cat-file -e "$base^{commit}" 2>/dev/null \
+                || { echo "::error::base commit $base is not in the checkout; use actions/checkout with fetch-depth: 0"; echo "exit-code=1" >> "$GITHUB_OUTPUT"; exit 0; }
+              args+=(--from "$base")
+            fi ;;
+          *) echo "::error::check-mode must be 'all' or 'changed-since-base' (got '$CHECK_MODE')"; echo "exit-code=1" >> "$GITHUB_OUTPUT"; exit 0 ;;
+        esac
+        read -r -a extra <<< "$ARGUMENTS"
+        out="$RUNNER_TEMP/rtunk-results.json"
+        rm -f "$out"
+        echo "::group::rtunk check ${args[*]} ${extra[*]:-}"
+        rtunk check "${args[@]}" ${extra[@]+"${extra[@]}"} --format json > "$out"
+        code=$?
+        echo "::endgroup::"
+        # With no file selected rtunk writes no document at all.
+        [ -s "$out" ] || { rm -f "$out"; out=; }
+        { echo "exit-code=$code"; echo "results-file=$out"; } >> "$GITHUB_OUTPUT"
+        exit 0
+
+    - name: Report results
+      if: always() && steps.check.outputs.results-file != ''
+      shell: bash
+      env:
+        RESULTS: ${{ steps.check.outputs.results-file }}
+      run: |
+        set -euo pipefail
+        # Workflow commands: %, CR and LF escaped in data; also : and , in properties.
+        # GitHub shows at most 10 annotations per level and step: cap the log noise at 50.
+        jq -r '
+          def e: gsub("%";"%25")|gsub("\r";"%0D")|gsub("\n";"%0A");
+          def p: e|gsub(":";"%3A")|gsub(",";"%2C");
+          (.issues[:50][] |
+            "::\(if .severity=="high" then "error" elif .severity=="medium" then "warning" else "notice" end) file=\(.file|p),line=\(if .line>0 then .line else 1 end),col=\(if .column>0 then .column else 1 end),title=\("\(.linter)\(if .rule!="" then "/"+.rule else "" end)"|p)::\(.message|e)"),
+          (.failures[] | "::error title=\(.linter|p)::linter failed to run: \(.error|e)")
+        ' "$RESULTS"
+        {
+          jq -r '
+            "### rtunk check\n",
+            "\(.files_checked) file(s), \(.linters) linter(s), \(.issues|length) issue(s), \(.failures|length) failure(s), \(.suppressed) suppressed, \(.elapsed_ms) ms.\n",
+            (if (.issues|length) > 0 then
+              "| Severity | Location | Linter | Message |\n| --- | --- | --- | --- |",
+              (.issues[:100][] | "| \(.severity) | `\(.file):\(.line)` | \(.linter)\(if .rule!="" then "/"+.rule else "" end) | \(.message|gsub("\n";" ")|gsub("\\|";"\\|")) |"),
+              (if (.issues|length) > 100 then "\n\(.issues|length-100) more issue(s) not shown." else empty end)
+            else "No issues." end),
+            (if (.failures|length) > 0 then "\n**Failures**\n", (.failures[] | "- \(.linter): \(.error|gsub("\n";" "))") else empty end)
+          ' "$RESULTS"
+        } >> "$GITHUB_STEP_SUMMARY"
+
+    # Save even when the check failed: tools downloaded by a failing run are still worth keeping.
+    # An exact hit is not saved again (the key is immutable).
+    - name: Save rtunk cache
+      if: always() && steps.cache.outputs.cache-hit != 'true'
+      uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: |
+          ${{ steps.cache-key.outputs.dir }}/downloads
+          ${{ steps.cache-key.outputs.dir }}/plugins
+          ${{ steps.cache-key.outputs.dir }}/registry
+        key: ${{ steps.cache-key.outputs.key }}
+
+    - name: Fail on findings
+      if: always() && steps.check.outputs.exit-code != '' && steps.check.outputs.exit-code != '0'
+      shell: bash
+      env:
+        CODE: ${{ steps.check.outputs.exit-code }}
+      run: |
+        echo "::error::rtunk check exited with code $CODE"
+        exit 1
