@@ -134,20 +134,34 @@ diff already shows what changed.
   it from the diff. If the user hasn't stated it, ask before writing the
   body.
 
-## `Assisted-by:` trailer
+## AI trailers
 
-When an AI assistant helps draft a commit, disclose it with `Assisted-by:`
-rather than `Co-authored-by:` — an AI assistant is a tool the human directs,
-not a co-author with legal authorship standing.
+AI-assisted commits carry one trailer, `Assisted-by:`, in the footer (after `BREAKING CHANGE:`
+when there is one):
 
-Format: `Assisted-by: <provider>:<model-id>` (dots in version numbers, not
-hyphens — e.g. `Assisted-by: anthropic:claude-sonnet-5`).
+```text
+Assisted-by: anthropic:claude-sonnet-5.5
+```
 
-## Signing
+- `Assisted-by: <provider>:<model-id>` is the repository's disclosure convention: the human
+  stays the author, the AI is a tool they direct. Use the model powering the session, with dots
+  in version numbers, not hyphens (`claude-sonnet-5.5`, not `claude-sonnet-5-5`).
+- Never `Co-authored-by:`/`Co-Authored-By:` for the AI tool: a tool a human directs is not a
+  co-author. If the tooling adds that trailer, strip it (amend the message) and keep
+  `Assisted-by:`.
 
-Always sign with GPG: `git commit -S -m "..."`. Never add `-s`/`--signoff` —
-DCO sign-off is the human committer's own attestation that they have the
-right to submit the change; an AI assistant must stay out of it.
+Commits made without AI help carry no trailer.
+
+## Signing and DCO: the AI must stay out of this
+
+Commits are signed by the human's own key, configured in their git config (GPG or SSH). The AI's
+command is always a plain `git commit`; signing happens on its own.
+
+- Never `-S` (it can pick another identity or key than the human's configured one).
+- Never `-s`/`--signoff` or a `Signed-off-by:` trailer: the DCO sign-off is the human's
+  attestation that they may submit the change, which an AI cannot give.
+- Never `--no-gpg-sign` to get past a signing failure, and never `--no-verify` to skip hooks.
+  If signing or a hook fails, stop and tell the user.
 
 ## Commitlint rules (canonical reference)
 
@@ -157,49 +171,61 @@ of the config.**
 
 Header pattern: `^(\S+?)\[([^\]]+)\]:\s(.+)$` (breaking: `^([+~-]!)\[([^\]]+)\]:\s(.+)$`).
 
-| Rule                     | Level | Value                                                                              |
-| ------------------------ | ----- | ---------------------------------------------------------------------------------- |
-| `header-max-length`      | error | 100                                                                                |
-| `header-full-stop`       | error | never `.`                                                                          |
-| `header-trim`            | error | always                                                                             |
-| `header-case`            | off   | symbols have no case                                                               |
-| `type-empty`             | error | never empty                                                                        |
-| `type-enum`              | error | see Types table                                                                    |
-| `scope-empty`            | error | never empty                                                                        |
-| `scope-case`             | error | lower-case                                                                         |
-| `scope-enum`             | warn  | see Scopes table (warn only — multi-scope commits won't match a single enum entry) |
-| `subject-empty`          | error | never empty                                                                        |
-| `subject-case`           | error | sentence-case                                                                      |
-| `subject-full-stop`      | error | never `.`                                                                          |
-| `subject-max-length`     | error | 100                                                                                |
-| `body-case`              | error | sentence-case                                                                      |
-| `body-max-line-length`   | error | 80                                                                                 |
-| `footer-leading-blank`   | error | always                                                                             |
-| `footer-max-line-length` | error | 80                                                                                 |
+| Rule                          | Level | Value                                                                                                                                 |
+| ----------------------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `header-max-length`           | error | 100                                                                                                                                   |
+| `header-full-stop`            | error | never `.`                                                                                                                             |
+| `header-trim`                 | error | always                                                                                                                                |
+| `header-case`                 | off   | symbols have no case                                                                                                                  |
+| `type-empty`                  | error | never empty                                                                                                                           |
+| `type-enum`                   | error | see Types table                                                                                                                       |
+| `scope-empty`                 | error | never empty                                                                                                                           |
+| `scope-case`                  | error | lower-case                                                                                                                            |
+| `scope-enum`                  | warn  | see Scopes table (warn only — multi-scope commits won't match a single enum entry)                                                    |
+| `subject-empty`               | error | never empty                                                                                                                           |
+| `subject-case`                | error | sentence-case                                                                                                                         |
+| `subject-full-stop`           | error | never `.`                                                                                                                             |
+| `subject-max-length`          | error | 100                                                                                                                                   |
+| `body-case`                   | error | sentence-case                                                                                                                         |
+| `body-max-line-length`        | error | 80                                                                                                                                    |
+| `footer-leading-blank`        | off   | built-in disabled, replaced by `squash-footer-leading-blank`                                                                          |
+| `squash-footer-leading-blank` | error | always: blank line before the footer, skipped when the subject ends with `(#N)` (GitHub squash-merge: the body is the PR description) |
+| `footer-max-line-length`      | error | 80                                                                                                                                    |
+| `signed-off-by`               | off   | no DCO sign-off required (and never added by the AI)                                                                                  |
 
 Prompt configuration (for interactive commit tooling, if wired up later):
 `allowBreakingChanges: ["+!", "~!", "-!"]`, `allowCustomScopes: false`,
 `allowEmptyScopes: false`, `enableMultipleScopes: true`,
-`scopeEnumSeparator: ","`, `useCommitSignGPG: true`, `useEmoji: false`.
+`scopeEnumSeparator: ","`, `skipQuestions: ["body", "footerPrefix", "footer"]`,
+`upperCaseSubject: true`, `useCommitSignGPG: true`, `useEmoji: false`.
 
 ### Keeping this skill in sync
 
-1. Read `.commitlintrc.js`.
-2. Update the matching table above (Types, Scopes, or the rule table).
-3. Verify the two files agree before committing the change (commit it with
-   `type[docs]:` or `type[ci]:` depending on what actually changed).
+`.commitlintrc.js` is authoritative; when it changes, update this skill to match:
+
+1. **Read `.commitlintrc.js`** and identify what changed (types, scopes, rules, local plugin
+   rules, parser patterns, or prompt config).
+2. **Update the matching section** here:
+   - New type: Types table and the `type-enum` row's wording.
+   - New scope: Scopes table and the decision tree.
+   - Rule change: the rules table (including the "If commitlint fails" row for it).
+   - Parser or prompt change: the header patterns and the prompt configuration paragraph.
+3. **Keep this skill self-contained**: the config's header comment points here as the readable
+   reference, so do not turn this section into "go check the config".
+4. **Verify**: re-read both files side by side and confirm every rule, level, value, type, scope
+   and pattern matches exactly. Commit with `type[docs]:` or `type[ci]:` depending on what changed.
 
 ### If commitlint fails
 
-| Rule                   | Likely cause                                              | Fix                                                                  |
-| ---------------------- | --------------------------------------------------------- | -------------------------------------------------------------------- |
-| `type-enum`            | Symbol missing or misspelled                              | Use one of the 12 base symbols, or a `+!`/`~!`/`-!` breaking variant |
-| `scope-empty`          | No `[scope]` bracket                                      | Add a bracketed scope from the Scopes table                          |
-| `header-max-length`    | Subject too long                                          | Trim to ≤100 chars total, move detail to the body                    |
-| `subject-full-stop`    | Trailing period on subject                                | Remove it                                                            |
-| `body-max-line-length` | Body line >80 chars                                       | Rewrap                                                               |
-| `body-case`            | Body starts with a lowercase word (often `rtunk`/`trunk`) | Rephrase the opening so the first character is uppercase             |
-| `footer-leading-blank` | No blank line before `Assisted-by:`/`BREAKING CHANGE:`    | Add a blank line before the footer                                   |
+| Rule                          | Likely cause                                              | Fix                                                                        |
+| ----------------------------- | --------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `type-enum`                   | Symbol missing or misspelled                              | Use one of the 12 base symbols, or a `+!`/`~!`/`-!` breaking variant       |
+| `scope-empty`                 | No `[scope]` bracket                                      | Add a bracketed scope from the Scopes table                                |
+| `header-max-length`           | Subject too long                                          | Trim to ≤100 chars total, move detail to the body                          |
+| `subject-full-stop`           | Trailing period on subject                                | Remove it                                                                  |
+| `body-max-line-length`        | Body line >80 chars                                       | Rewrap                                                                     |
+| `body-case`                   | Body starts with a lowercase word (often `rtunk`/`trunk`) | Rephrase the opening so the first character is uppercase                   |
+| `squash-footer-leading-blank` | No blank line before `BREAKING CHANGE:`/`Assisted-by:`    | Add a blank line before the footer (not enforced on `(#N)` squash commits) |
 
 ## Workflow
 
@@ -215,24 +241,24 @@ Prompt configuration (for interactive commit tooling, if wired up later):
    ≤100 chars.
 6. Write the body: ask the user for the "why" if it hasn't already come up
    in conversation. Skip the body only for genuinely trivial changes.
-7. Stage and commit:
-   ```bash
-   git commit -S -m "type[scope]: Subject" -m "Body explaining why" -m "Assisted-by: <provider>:<model-id>"
-   ```
-8. Never add `-s`/`--signoff` to the command above.
+7. Stage the files, then run a plain `git commit` whose message comes from a quoted heredoc
+   (`git commit -m "$(cat <<'EOF' ... EOF)"`), so multi-line bodies and trailers stay intact.
+   Include the `Assisted-by:` trailer (see "AI trailers") when the AI helped, and strip any
+   `Co-Authored-By:` the tooling adds.
+8. Never add `-S`, `-s`/`--signoff`, `--no-gpg-sign` or `--no-verify` (see "Signing and DCO").
 
 ## Examples
 
 **Good — simple add:**
 
 ```text
-+[check]: Add SARIF output normalization for gitleaks
++[output]: Add SARIF output normalization for gitleaks
 
 Trunk-compatible tooling expects SARIF; without it, downstream
 consumers (editors, CI annotators) can't parse gitleaks findings
 the same way they parse every other linter's output.
 
-Assisted-by: anthropic:claude-sonnet-5
+Assisted-by: anthropic:claude-sonnet-5.5
 ```
 
 **Good — dependency bump, no body needed:**
@@ -253,7 +279,7 @@ declares a version, so keeping v0.0 support only hid config bugs.
 BREAKING CHANGE: configs without a `version` field are now
 rejected at load time instead of falling back to v0.0 defaults.
 
-Assisted-by: anthropic:claude-sonnet-5
+Assisted-by: anthropic:claude-sonnet-5.5
 ```
 
 **Bad — no type/scope, restates the diff:**
@@ -265,17 +291,17 @@ Updated config.go to add new validation function
 Missing `type[scope]:` entirely, and the body (if any) would just repeat
 what the diff already shows instead of explaining why validation was added.
 
-**Bad — wrong trailer, wrong signing flag:**
+**Bad — Co-Authored-By for the tool, forbidden signing flags:**
 
 ```text
 ![check]: Fix nil pointer in report renderer
 
-Co-authored-by: Claude <claude@anthropic.com>
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
 ```
 
-committed with `git commit -s -S`. Should use `Assisted-by:`, not
-`Co-authored-by:`, and must never carry `-s` (DCO sign-off is the human's
-own attestation).
+committed with `git commit -s -S`. The AI tool is not a co-author: the trailer must be
+`Assisted-by: <provider>:<model-id>` only (and it is missing here), and the command must never
+carry `-s` or `-S`.
 
 **Bad — invalid type:**
 
