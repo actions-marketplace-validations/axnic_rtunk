@@ -10,7 +10,7 @@ import (
 	"runtime"
 	"sync"
 
-	"github.com/xunleii/rtunk/pkg/trunk/config"
+	"github.com/axnic/rtunk/pkg/trunk/config"
 )
 
 // Ref identifies one item to fetch. Version "" defers to whatever the enabled list (or the

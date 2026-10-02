@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/xunleii/rtunk/pkg/trunk/config"
+	"github.com/axnic/rtunk/pkg/trunk/config"
 )
 
 // runGit runs a git subcommand in dir, failing the test on error -- used to build a real git

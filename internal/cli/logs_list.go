@@ -5,7 +5,7 @@ import (
 	"io"
 	"time"
 
-	"github.com/xunleii/rtunk/pkg/run/runlog"
+	"github.com/axnic/rtunk/pkg/run/runlog"
 )
 
 type logsListCmd struct{}

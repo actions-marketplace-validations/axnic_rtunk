@@ -4,7 +4,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/xunleii/rtunk/pkg/trunk/config"
+	"github.com/axnic/rtunk/pkg/trunk/config"
 )
 
 // BuildEnv resolves a Runtime's RuntimeEnvironment/LinterEnvironment entries

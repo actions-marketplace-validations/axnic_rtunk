@@ -9,8 +9,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/xunleii/rtunk/pkg/git"
-	"github.com/xunleii/rtunk/pkg/run/actions"
+	"github.com/axnic/rtunk/pkg/git"
+	"github.com/axnic/rtunk/pkg/run/actions"
 )
 
 // seedHistoryForTest writes one history entry directly (bypassing actions.Run), so

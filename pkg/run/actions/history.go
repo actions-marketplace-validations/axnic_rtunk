@@ -9,7 +9,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/xunleii/rtunk/pkg/cache/download"
+	"github.com/axnic/rtunk/pkg/cache/download"
 )
 
 // maxHistoryEntries bounds the on-disk log -- an unbounded audit log for a local dev tool is the

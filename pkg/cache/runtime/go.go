@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/xunleii/rtunk/pkg/cache/install"
+	"github.com/axnic/rtunk/pkg/cache/install"
 )
 
 // installGoPackage runs `go install pkg@version` using the go toolchain shipped by the

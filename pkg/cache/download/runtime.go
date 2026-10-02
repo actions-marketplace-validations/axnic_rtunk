@@ -3,8 +3,8 @@ package download
 import (
 	"fmt"
 
-	"github.com/xunleii/rtunk/pkg/cache/runtime"
-	"github.com/xunleii/rtunk/pkg/trunk/config"
+	"github.com/axnic/rtunk/pkg/cache/runtime"
+	"github.com/axnic/rtunk/pkg/trunk/config"
 )
 
 // InstallPackage installs pkg@version, plus every one of extra (each a raw, unparsed

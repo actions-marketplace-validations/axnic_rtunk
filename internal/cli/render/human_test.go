@@ -9,8 +9,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/xunleii/rtunk/pkg/run/engine"
-	"github.com/xunleii/rtunk/pkg/trunk/output"
+	"github.com/axnic/rtunk/pkg/run/engine"
+	"github.com/axnic/rtunk/pkg/trunk/output"
 )
 
 // run feeds events to a fresh plain renderer and returns what it wrote to stderr and stdout.

@@ -6,7 +6,7 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"github.com/xunleii/rtunk/pkg/cache/install"
+	"github.com/axnic/rtunk/pkg/cache/install"
 )
 
 // installPythonPackage runs `pip install --prefix <scratch dir> pkg==version` using the pip

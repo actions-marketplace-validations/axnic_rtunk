@@ -10,9 +10,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/xunleii/rtunk/pkg/run/actions"
-	"github.com/xunleii/rtunk/pkg/run/runlog"
-	"github.com/xunleii/rtunk/pkg/trunk/config"
+	"github.com/axnic/rtunk/pkg/run/actions"
+	"github.com/axnic/rtunk/pkg/run/runlog"
+	"github.com/axnic/rtunk/pkg/trunk/config"
 )
 
 // runLogged runs action with a real run log attached and returns what the log recorded, plus

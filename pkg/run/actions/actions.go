@@ -4,7 +4,7 @@ import (
 	"slices"
 	"sort"
 
-	"github.com/xunleii/rtunk/pkg/trunk/config"
+	"github.com/axnic/rtunk/pkg/trunk/config"
 )
 
 // Resolve returns cfg's enabled actions, sorted by ID for deterministic execution order.

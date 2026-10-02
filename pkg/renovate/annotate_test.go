@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/xunleii/rtunk/pkg/trunk/config"
+	"github.com/axnic/rtunk/pkg/trunk/config"
 )
 
 func TestForLint_DownloadRecipe_AllGitHubEntries_OK(t *testing.T) {

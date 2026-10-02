@@ -3,7 +3,7 @@
 rtunk ships no prebuilt binary yet: build it from source with Go on macOS or Linux.
 
 ```bash
-go install github.com/xunleii/rtunk/cmd/rtunk@latest
+go install github.com/axnic/rtunk/cmd/rtunk@latest
 rtunk --version
 ```
 
@@ -25,7 +25,7 @@ This is the quickest path if you already have Go on `PATH`. It requires Go 1.27.
 floor declared in [`go.mod`](../go.mod).
 
 ```bash
-go install github.com/xunleii/rtunk/cmd/rtunk@latest
+go install github.com/axnic/rtunk/cmd/rtunk@latest
 ```
 
 This installs `rtunk` to `$(go env GOBIN)`, or to `$(go env GOPATH)/bin` if `GOBIN` is unset. Make
@@ -46,7 +46,7 @@ the setup [CONTRIBUTING.md](../CONTRIBUTING.md) assumes, and it requires
 [mise](https://mise.jdx.dev/).
 
 ```bash
-git clone https://github.com/xunleii/rtunk.git
+git clone https://github.com/axnic/rtunk.git
 cd rtunk
 mise trust    # if mise prompts about this repo's .mise.toml
 mise install  # installs the go and trunk versions .mise.toml declares

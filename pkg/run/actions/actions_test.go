@@ -6,8 +6,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/xunleii/rtunk/pkg/run/actions"
-	"github.com/xunleii/rtunk/pkg/trunk/config"
+	"github.com/axnic/rtunk/pkg/run/actions"
+	"github.com/axnic/rtunk/pkg/trunk/config"
 )
 
 func testConfig() config.Config {

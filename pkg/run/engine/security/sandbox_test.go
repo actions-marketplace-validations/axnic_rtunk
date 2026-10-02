@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/xunleii/rtunk/pkg/trunk/output"
+	"github.com/axnic/rtunk/pkg/trunk/output"
 )
 
 func TestStageSandbox_CopyTargetsOnlyStagesGivenFiles(t *testing.T) {

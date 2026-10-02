@@ -8,10 +8,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/xunleii/rtunk/pkg/git"
-	"github.com/xunleii/rtunk/pkg/run/actions"
-	"github.com/xunleii/rtunk/pkg/run/runlog"
-	"github.com/xunleii/rtunk/pkg/trunk/config"
+	"github.com/axnic/rtunk/pkg/git"
+	"github.com/axnic/rtunk/pkg/run/actions"
+	"github.com/axnic/rtunk/pkg/run/runlog"
+	"github.com/axnic/rtunk/pkg/trunk/config"
 )
 
 // actionsRunCmd is `rtunk actions run <id> [-- args...]` or `rtunk actions run --hook <name> [--

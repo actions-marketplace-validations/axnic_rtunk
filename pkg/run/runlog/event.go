@@ -1,6 +1,6 @@
 package runlog
 
-import "github.com/xunleii/rtunk/pkg/trunk/output"
+import "github.com/axnic/rtunk/pkg/trunk/output"
 
 // Event kinds -- the value of Event.T.
 const (

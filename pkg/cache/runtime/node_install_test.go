@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/xunleii/rtunk/pkg/cache/runtime"
+	"github.com/axnic/rtunk/pkg/cache/runtime"
 )
 
 // fakeNpm writes a stub `npm` script into dir/bin that records its own argv to argvFile instead

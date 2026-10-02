@@ -3,7 +3,7 @@
 ## Reporting a vulnerability
 
 Report suspected vulnerabilities privately through
-[GitHub Security Advisories](https://github.com/xunleii/rtunk/security/advisories/new),
+[GitHub Security Advisories](https://github.com/axnic/rtunk/security/advisories/new),
 not a public issue. This channel is private between the reporter and the
 maintainer, so nothing is disclosed publicly until a fix is available and
 disclosure is coordinated.

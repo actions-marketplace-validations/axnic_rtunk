@@ -6,7 +6,7 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"github.com/xunleii/rtunk/pkg/cache/install"
+	"github.com/axnic/rtunk/pkg/cache/install"
 )
 
 // installRubyPackage runs `gem install --install-dir <scratch> --bindir <scratch>/bin pkg -v

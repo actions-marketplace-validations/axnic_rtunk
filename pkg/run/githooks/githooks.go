@@ -8,8 +8,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/xunleii/rtunk/pkg/run/actions"
-	"github.com/xunleii/rtunk/pkg/trunk/config"
+	"github.com/axnic/rtunk/pkg/run/actions"
+	"github.com/axnic/rtunk/pkg/trunk/config"
 )
 
 // marker identifies a hook file as rtunk's own -- present verbatim in every shim Install writes,

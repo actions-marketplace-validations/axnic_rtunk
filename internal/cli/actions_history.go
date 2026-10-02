@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/xunleii/rtunk/pkg/git"
-	"github.com/xunleii/rtunk/pkg/run/actions"
+	"github.com/axnic/rtunk/pkg/git"
+	"github.com/axnic/rtunk/pkg/run/actions"
 )
 
 type actionsHistoryCmd struct {

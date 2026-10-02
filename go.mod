@@ -1,4 +1,4 @@
-module github.com/xunleii/rtunk
+module github.com/axnic/rtunk
 
 go 1.27.0
 

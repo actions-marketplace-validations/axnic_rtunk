@@ -9,8 +9,8 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"github.com/xunleii/rtunk/pkg/renovate"
-	"github.com/xunleii/rtunk/pkg/trunk/config"
+	"github.com/axnic/rtunk/pkg/renovate"
+	"github.com/axnic/rtunk/pkg/trunk/config"
 )
 
 // renovateAnnotateCmd is `rtunk renovate enable`.

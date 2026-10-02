@@ -3,8 +3,8 @@
 <p align="center"><strong>One command for your linters, formatters and security scanners. Open source, 100% local.</strong></p>
 
 <p align="center">
-<a href="go.mod"><img alt="Go version" src="https://img.shields.io/github/go-mod/go-version/xunleii/rtunk"></a>
-<a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/github/license/xunleii/rtunk"></a>
+<a href="go.mod"><img alt="Go version" src="https://img.shields.io/github/go-mod/go-version/axnic/rtunk"></a>
+<a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/github/license/axnic/rtunk"></a>
 <a href="https://github.com/axnic/rtunk/wiki"><img alt="Docs: wiki" src="https://img.shields.io/badge/docs-wiki-blue"></a>
 </p>
 
@@ -13,7 +13,7 @@ CLI](https://docs.trunk.io/code-quality/overview): it orchestrates existing tool
 declarative config.
 
 ```bash
-go install github.com/xunleii/rtunk/cmd/rtunk@latest   # needs Go on PATH; see Installation
+go install github.com/axnic/rtunk/cmd/rtunk@latest   # needs Go on PATH; see Installation
 cd your-git-repo && rtunk init   # on a terminal, pick yamllint in the linters picker
 rtunk check
 ```

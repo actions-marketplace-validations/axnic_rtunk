@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/xunleii/rtunk/pkg/trunk/output"
+	"github.com/axnic/rtunk/pkg/trunk/output"
 )
 
 // TestCheckRunCmd_SkipsUnsupportedFormats: an unsupported Output format and a formatter-only
