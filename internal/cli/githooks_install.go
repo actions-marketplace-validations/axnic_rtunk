@@ -5,8 +5,8 @@ import (
 	"io"
 	"path/filepath"
 
-	"github.com/xunleii/rtunk/pkg/git"
-	"github.com/xunleii/rtunk/pkg/run/githooks"
+	"github.com/axnic/rtunk/pkg/git"
+	"github.com/axnic/rtunk/pkg/run/githooks"
 )
 
 type gitHooksInstallCmd struct {

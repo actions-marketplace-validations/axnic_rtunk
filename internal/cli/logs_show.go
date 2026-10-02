@@ -4,7 +4,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/xunleii/rtunk/pkg/run/runlog"
+	"github.com/axnic/rtunk/pkg/run/runlog"
 )
 
 type logsShowCmd struct {

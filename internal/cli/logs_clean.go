@@ -1,6 +1,6 @@
 package cli
 
-import "github.com/xunleii/rtunk/pkg/run/runlog"
+import "github.com/axnic/rtunk/pkg/run/runlog"
 
 type logsCleanCmd struct {
 	All bool `help:"Delete every repository's logs, not just this one's."`

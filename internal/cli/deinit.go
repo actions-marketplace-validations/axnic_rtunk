@@ -6,8 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/xunleii/rtunk/pkg/git"
-	"github.com/xunleii/rtunk/pkg/run/githooks"
+	"github.com/axnic/rtunk/pkg/git"
+	"github.com/axnic/rtunk/pkg/run/githooks"
 )
 
 // deinitCmd is `rtunk deinit`: ROADMAP.md v0.7, reversing `rtunk init` -- removes .rtunk/ and any

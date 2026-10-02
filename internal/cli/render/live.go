@@ -11,7 +11,7 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/xunleii/rtunk/pkg/run/engine"
+	"github.com/axnic/rtunk/pkg/run/engine"
 )
 
 // Spinner frame sets (docs/Terminal-UX-Design.md "Spinners"); the frame is picked from the clock so every row of a

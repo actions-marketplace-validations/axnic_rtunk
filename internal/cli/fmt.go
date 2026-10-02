@@ -9,9 +9,9 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/xunleii/rtunk/internal/cli/render"
-	"github.com/xunleii/rtunk/pkg/run/engine"
-	"github.com/xunleii/rtunk/pkg/trunk/config"
+	"github.com/axnic/rtunk/internal/cli/render"
+	"github.com/axnic/rtunk/pkg/run/engine"
+	"github.com/axnic/rtunk/pkg/trunk/config"
 )
 
 // fmtCmd is `rtunk fmt [paths...]`: ROADMAP.md v0.4, running every enabled linter's Formatter

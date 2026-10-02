@@ -7,10 +7,10 @@ import (
 	"os"
 	"slices"
 
-	"github.com/xunleii/rtunk/internal/cli/render"
-	"github.com/xunleii/rtunk/pkg/cache/download"
-	"github.com/xunleii/rtunk/pkg/run/engine"
-	"github.com/xunleii/rtunk/pkg/trunk/config"
+	"github.com/axnic/rtunk/internal/cli/render"
+	"github.com/axnic/rtunk/pkg/cache/download"
+	"github.com/axnic/rtunk/pkg/run/engine"
+	"github.com/axnic/rtunk/pkg/trunk/config"
 )
 
 // toolboxCategory maps the CLI's `runtime|tools` argument to the cache's category name.

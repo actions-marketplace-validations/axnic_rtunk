@@ -13,8 +13,8 @@ import (
 
 	"github.com/ulikunitz/xz"
 
-	"github.com/xunleii/rtunk/pkg/cache/install"
-	"github.com/xunleii/rtunk/pkg/trunk/config"
+	"github.com/axnic/rtunk/pkg/cache/install"
+	"github.com/axnic/rtunk/pkg/trunk/config"
 )
 
 // maxExtractedEntrySize bounds how much data one archive entry (or a bare .gz) may decompress to.

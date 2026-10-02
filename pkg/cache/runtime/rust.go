@@ -6,7 +6,7 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"github.com/xunleii/rtunk/pkg/cache/install"
+	"github.com/axnic/rtunk/pkg/cache/install"
 )
 
 // installRustPackage runs `cargo install --root <scratch> --version version pkg` using the cargo

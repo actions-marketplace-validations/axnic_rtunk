@@ -4,7 +4,7 @@ import (
 	"os"
 	"sort"
 
-	"github.com/xunleii/rtunk/pkg/trunk/output"
+	"github.com/axnic/rtunk/pkg/trunk/output"
 )
 
 // ApplyInlineFixes writes every non-overlapping output.Finding.Fix in findings to disk, grouped by

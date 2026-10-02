@@ -7,9 +7,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/xunleii/rtunk/pkg/cache/download"
-	"github.com/xunleii/rtunk/pkg/run/runlog"
-	"github.com/xunleii/rtunk/pkg/trunk/config"
+	"github.com/axnic/rtunk/pkg/cache/download"
+	"github.com/axnic/rtunk/pkg/run/runlog"
+	"github.com/axnic/rtunk/pkg/trunk/config"
 )
 
 // linkCmd is `rtunk toolbox link`: (re)builds .rtunk/{logs,tools/<tool-id>,plugins/<source-id>}

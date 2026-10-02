@@ -12,7 +12,7 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 
-	"github.com/xunleii/rtunk/pkg/cache/download"
+	"github.com/axnic/rtunk/pkg/cache/download"
 )
 
 type cacheCleanCmd struct{}

@@ -3,7 +3,7 @@ package cli
 import (
 	"io"
 
-	"github.com/xunleii/rtunk/pkg/cache/download"
+	"github.com/axnic/rtunk/pkg/cache/download"
 )
 
 type cachePruneCmd struct{}

@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/xunleii/rtunk/pkg/trunk/config"
+	"github.com/axnic/rtunk/pkg/trunk/config"
 )
 
 // goosNames maps Go's GOOS to trunk's own os vocabulary (ARCHITECTURE.md "downloads[].os"),

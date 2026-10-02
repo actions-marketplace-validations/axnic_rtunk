@@ -13,7 +13,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/xunleii/rtunk/pkg/cache/download"
+	"github.com/axnic/rtunk/pkg/cache/download"
 )
 
 const (

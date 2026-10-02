@@ -6,7 +6,7 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"github.com/xunleii/rtunk/pkg/cache/install"
+	"github.com/axnic/rtunk/pkg/cache/install"
 )
 
 // installPhpPackage runs `composer require --working-dir <scratch> --no-interaction pkg:version`

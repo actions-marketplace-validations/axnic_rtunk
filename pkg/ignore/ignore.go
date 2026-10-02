@@ -7,7 +7,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/xunleii/rtunk/pkg/trunk/output"
+	"github.com/axnic/rtunk/pkg/trunk/output"
 )
 
 // directiveRE matches an (rtunk|trunk)-ignore directive anywhere on a line: the bare form

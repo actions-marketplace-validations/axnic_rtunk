@@ -15,7 +15,7 @@ CLI](https://docs.trunk.io/code-quality/overview): it orchestrates existing tool
 declarative config.
 
 ```bash
-go install github.com/xunleii/rtunk/cmd/rtunk@latest   # needs Go on PATH; see Installation
+go install github.com/axnic/rtunk/cmd/rtunk@latest   # needs Go on PATH; see Installation
 cd your-git-repo && rtunk init   # on a terminal, pick yamllint in the linters picker
 rtunk check
 ```

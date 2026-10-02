@@ -8,7 +8,7 @@ import (
 	"runtime/debug"
 	"strings"
 
-	"github.com/xunleii/rtunk/internal/cli"
+	"github.com/axnic/rtunk/internal/cli"
 )
 
 // version is set at build time via -ldflags "-X main.version=vX.Y.Z" (the release workflow's

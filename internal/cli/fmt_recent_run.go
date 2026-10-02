@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/xunleii/rtunk/pkg/cache/download"
+	"github.com/axnic/rtunk/pkg/cache/download"
 )
 
 // recentFmtRun is a plain fmt/check --fix run's own outcome, persisted so the next invocation

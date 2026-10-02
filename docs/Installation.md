@@ -3,7 +3,7 @@
 rtunk installs from a release archive, with a version manager (mise, aqua) or from source with Go, on macOS or Linux.
 
 ```bash
-go install github.com/xunleii/rtunk/cmd/rtunk@latest
+go install github.com/axnic/rtunk/cmd/rtunk@latest
 rtunk --version
 ```
 
@@ -126,7 +126,7 @@ This is the quickest path if you already have Go on `PATH`. It requires Go 1.27.
 floor declared in [`go.mod`](../go.mod).
 
 ```bash
-go install github.com/xunleii/rtunk/cmd/rtunk@latest
+go install github.com/axnic/rtunk/cmd/rtunk@latest
 ```
 
 This installs `rtunk` to `$(go env GOBIN)`, or to `$(go env GOPATH)/bin` if `GOBIN` is unset. Make

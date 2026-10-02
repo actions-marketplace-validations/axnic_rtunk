@@ -12,7 +12,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/xunleii/rtunk/pkg/trunk/config"
+	"github.com/axnic/rtunk/pkg/trunk/config"
 	"gopkg.in/yaml.v3"
 )
 

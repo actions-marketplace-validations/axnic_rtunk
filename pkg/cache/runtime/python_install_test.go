@@ -10,8 +10,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/xunleii/rtunk/pkg/cache/download"
-	"github.com/xunleii/rtunk/pkg/cache/runtime"
+	"github.com/axnic/rtunk/pkg/cache/download"
+	"github.com/axnic/rtunk/pkg/cache/runtime"
 )
 
 // fakePip writes a stub `pip` script into dir/bin that records its own argv to argvFile and,

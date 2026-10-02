@@ -3,7 +3,7 @@ package renovate
 import (
 	"regexp"
 
-	"github.com/xunleii/rtunk/pkg/trunk/config"
+	"github.com/axnic/rtunk/pkg/trunk/config"
 )
 
 // Annotation is a resolved Renovate regex-manager target: the datasource and dependency name

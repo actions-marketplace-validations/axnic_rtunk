@@ -12,10 +12,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/xunleii/rtunk/internal/cli/render"
-	"github.com/xunleii/rtunk/pkg/run/engine"
-	"github.com/xunleii/rtunk/pkg/trunk/config"
-	"github.com/xunleii/rtunk/pkg/trunk/output"
+	"github.com/axnic/rtunk/internal/cli/render"
+	"github.com/axnic/rtunk/pkg/run/engine"
+	"github.com/axnic/rtunk/pkg/trunk/config"
+	"github.com/axnic/rtunk/pkg/trunk/output"
 )
 
 // checkRunCmd is `rtunk check [paths...]`: given paths, or the whole repository if none.

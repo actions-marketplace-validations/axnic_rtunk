@@ -8,8 +8,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/xunleii/rtunk/pkg/ignore"
-	"github.com/xunleii/rtunk/pkg/trunk/output"
+	"github.com/axnic/rtunk/pkg/ignore"
+	"github.com/axnic/rtunk/pkg/trunk/output"
 )
 
 // leaders is a representative slice of the real trunk-io/plugins comment_formats catalog (hash,
