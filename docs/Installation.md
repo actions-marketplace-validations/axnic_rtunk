@@ -1,6 +1,6 @@
 # Installation
 
-rtunk installs from a release archive or from source with Go, on macOS or Linux.
+rtunk installs from a release archive, with a version manager (mise, aqua) or from source with Go, on macOS or Linux.
 
 ```bash
 go install github.com/xunleii/rtunk/cmd/rtunk@latest
@@ -43,6 +43,82 @@ verified against the Release workflow's identity: the steps are in
 [SECURITY.md](../SECURITY.md#verifying-a-release). Releases published before signing was added
 (`v0.13.0` to `v0.13.2`) carry `checksums.txt` only, so the checksum comparison is the only check
 available for them.
+
+## Install with a version manager
+
+rtunk is not in the central registry of any version manager yet, so both tools below read the
+GitHub release archives directly. Pin an exact version: it is what makes the install reproducible.
+
+### mise
+
+[mise](https://mise.jdx.dev) installs release archives through its `github` backend. In
+`mise.toml` (or `.mise.toml`):
+
+```toml
+[tools]
+"github:axnic/rtunk" = "0.13.2"
+```
+
+or one-off, from the command line:
+
+```bash
+mise use "github:axnic/rtunk@0.13.2"      # adds it to mise.toml and installs it
+mise exec "github:axnic/rtunk@0.13.2" -- rtunk --version
+```
+
+Run `mise lock` to record the archive checksums in `mise.lock`, so every machine and CI run
+installs the same bytes.
+
+### aqua
+
+[aqua](https://aquaproj.github.io) has no `axnic/rtunk` entry in its standard registry, so declare
+the package in a local registry. `registry.yaml`:
+
+```yaml
+packages:
+  - type: github_release
+    repo_owner: axnic
+    repo_name: rtunk
+    asset: rtunk-{{.Version}}-{{.OS}}-{{.Arch}}.tar.gz
+    format: tar.gz
+    files:
+      - name: rtunk
+    checksum:
+      type: github_release
+      asset: checksums.txt
+      algorithm: sha256
+```
+
+`aqua.yaml`:
+
+```yaml
+registries:
+  - type: local
+    name: rtunk
+    path: registry.yaml
+packages:
+  - name: axnic/rtunk@v0.13.2
+    registry: rtunk
+```
+
+aqua refuses packages from a registry it has not been told to trust, so add the registry to your
+[policy file](https://aquaproj.github.io/docs/reference/security/policy) (`aqua-policy.yaml`, then
+`aqua policy allow`):
+
+```yaml
+registries:
+  - type: local
+    name: rtunk
+    path: registry.yaml
+packages:
+  - registry: rtunk
+```
+
+Then `aqua i` installs rtunk and verifies the archive against `checksums.txt`.
+
+Neither tool checks the cosign signature or the build provenance: for that, follow
+[SECURITY.md](../SECURITY.md#verifying-a-release) on a downloaded archive. Releases before signing
+(`v0.13.0` to `v0.13.2`) have no signature to check anyway.
 
 ## Install with `go install`
 
