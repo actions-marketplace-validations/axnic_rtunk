@@ -24,6 +24,15 @@ matching `go.mod`'s floor, and `trunk`, the metalinter used below. See
 [docs/Installation.md](docs/Installation.md) for prerequisites and platform support (macOS and
 Linux only) — this file doesn't repeat that.
 
+### Dev container
+
+[`.devcontainer/devcontainer.json`](.devcontainer/devcontainer.json) gives VS Code, Codespaces
+or the `devcontainer` CLI the same toolchain without installing anything on the host: a
+non-root Ubuntu image (amd64 and arm64) with `git`, `gh`, `mise` and the Go extension. On first
+creation it runs `mise install`, which resolves [`.mise.toml`](.mise.toml) as pinned by
+`mise.lock`; the config is pre-trusted, so no `mise trust` is needed. Downloaded tools live in
+the `rtunk-mise-data` volume and survive rebuilds. `mise run ci` is the gate there as well.
+
 ## Tests and lint
 
 Run all of the following before opening a pull request:

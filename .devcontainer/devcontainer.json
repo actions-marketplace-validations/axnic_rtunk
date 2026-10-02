@@ -1,0 +1,34 @@
+// Development container for rtunk. The toolchain comes from .mise.toml, pinned by mise.lock;
+// the image only provides mise, git and gh. Multi-arch (amd64, arm64) by construction.
+{
+  "name": "rtunk",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "remoteUser": "vscode",
+  "features": {
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers-extra/features/mise:1": {}
+  },
+  "containerEnv": {
+    "MISE_TRUSTED_CONFIG_PATHS": "${containerWorkspaceFolder}"
+  },
+  // Keeps downloaded tools across rebuilds. Docker creates the volume and its parent dirs
+  // root-owned, hence the chown.
+  "mounts": [
+    "source=rtunk-mise-data,target=/home/vscode/.local/share/mise,type=volume"
+  ],
+  "postCreateCommand": "sudo chown -R vscode:vscode /home/vscode/.local && mise install",
+  "customizations": {
+    "vscode": {
+      "extensions": ["golang.go"],
+      "settings": {
+        "go.toolsManagement.autoUpdate": false,
+        "go.alternateTools": {
+          "go": "/home/vscode/.local/share/mise/shims/go",
+          "gopls": "/home/vscode/.local/share/mise/shims/gopls"
+        },
+        "go.lintTool": "golangci-lint",
+        "go.lintOnSave": "workspace"
+      }
+    }
+  }
+}
