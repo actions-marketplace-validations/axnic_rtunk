@@ -106,11 +106,12 @@ flag list: [`rtunk check`](Command-Reference.md#rtunk-check).
 
 `--format` selects what rtunk writes to stdout. Progress lines stay on stderr whatever the format.
 
-| Format  | Use it for                                                     |
-| ------- | -------------------------------------------------------------- |
-| `human` | Reading in a terminal (default)                                |
-| `json`  | Scripts: one JSON document with issues, failures, run metadata |
-| `sarif` | CI code-scanning tools that read SARIF 2.1.0                   |
+| Format   | Use it for                                                     |
+| -------- | -------------------------------------------------------------- |
+| `human`  | Reading in a terminal (default)                                |
+| `json`   | Scripts: one JSON document with issues, failures, run metadata |
+| `sarif`  | CI code-scanning tools that read SARIF 2.1.0                   |
+| `github` | GitHub Actions: one annotation per finding, plus a job summary |
 
 ```console
 $ rtunk check --format json run.sh 2>/dev/null
@@ -143,6 +144,35 @@ $ rtunk check --format json run.sh 2>/dev/null
 (Output trimmed to one issue.) Every key is always present, empty lists are `[]`, and `line` and
 `column` are `0` when the linter does not report them. `failures` lists linters that could not run.
 With no files selected, rtunk writes no document at all and exits `0`.
+
+### GitHub Actions annotations
+
+`--format github` writes one [workflow command](https://docs.github.com/actions/reference/workflow-commands-for-github-actions)
+per finding on stdout, which GitHub turns into an annotation on the pull request:
+
+```console
+$ rtunk check --format github README.md 2>/dev/null
+::error file=README.md,line=2,title=markdownlint/MD001::Heading levels should only increment by one level at a time
+```
+
+- **Level.** `high` findings (`error`) become `::error`, `medium` (`warning`) become `::warning`,
+  anything else `::notice`.
+- **Location.** `file` is relative to `$GITHUB_WORKSPACE` (the repository root when unset) with
+  forward slashes. `line` and `col` are present only when the linter reports them, and a finding
+  without a file becomes an annotation that is not attached to any file. rtunk does not record end
+  positions, so `endLine` and `endColumn` are never written. `title` is `linter/rule`, or `linter`.
+- **Failed and skipped linters** become `::error title=<linter>::linter failed to run: ...` and
+  `::warning title=<linter>::linter skipped: ...`.
+- **Escaping.** `%`, CR and LF are escaped in messages, and `:` and `,` also in properties, as
+  GitHub requires.
+- **No truncation.** rtunk emits every finding. GitHub shows at most 10 errors and 10 warnings per
+  step, and 50 annotations per job; the rest only appear in the step log.
+
+When `GITHUB_STEP_SUMMARY` is set (GitHub sets it in every step), rtunk also appends a Markdown job
+summary to that file: totals, counts per severity and per linter, a table of the first 50 findings
+with an `N more not shown` line, and the failed and skipped linters. When it is unset, nothing is
+written. The format is never selected automatically: pass `--format github` explicitly. The
+exit code is the same as for every other format.
 
 ```bash
 rtunk check --format sarif --from origin/main > rtunk.sarif

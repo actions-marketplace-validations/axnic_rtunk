@@ -79,7 +79,7 @@ Arguments:
 | `--no-progress`         | flag   | —                                                          | Do not print the per-linter progress lines on stderr.                                                           |
 | `--ascii`               | flag   | —                                                          | Use ASCII glyphs in the live view.                                                                              |
 | `--live-height`         | int    | half the terminal height, minimum 3 (`$RTUNK_LIVE_HEIGHT`) | Maximum height of the live view in lines.                                                                       |
-| `--format`              | string | `human`                                                    | Output format: `human`, `sarif` (for CI) or `json`.                                                             |
+| `--format`              | string | `human`                                                    | Output format: `human`, `sarif` (for CI), `json`, or `github` (annotations and job summary).                    |
 | `--from`                | string | —                                                          | Diff base for the default file selection (e.g. `origin/main`, for CI).                                          |
 | `-j`, `--jobs`          | int    | number of CPUs                                             | Number of parallel linter workers.                                                                              |
 | `--format-before-check` | flag   | —                                                          | Run every formatter, then check the reformatted files.                                                          |

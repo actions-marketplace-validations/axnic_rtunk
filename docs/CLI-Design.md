@@ -89,7 +89,7 @@ run logs are not affected.
   half the terminal height, minimum 3. Not a config file key.
 - Ctrl+C erases the area and re-raises SIGINT.
 
-`--format human|sarif|json` (`check` and `fmt`, implemented; default `human`):
+`--format human|sarif|json|github` (`human` and `json` for `check` and `fmt`, `sarif` and `github` for `check` only; default `human`):
 
 - `human`: the report described in [Terminal-UX-Design.md](Terminal-UX-Design.md). ANSI color is added only when stdout is a
   terminal and `NO_COLOR` is empty; stderr progress lines are never colored. Output outside a
@@ -104,6 +104,12 @@ url}], failures: [{linter, error}], skipped: [], changed: []}`. All keys are alw
   run carries `properties.suppressed` when at least one finding was suppressed.
   `fmt --format sarif` is refused with `--format sarif is only supported by check` (exit `1`)
   before anything runs.
+- `github`: GitHub Actions workflow commands for `check` only, on stdout: one `::error`,
+  `::warning` or `::notice` per finding (`file`, `line`, `col`, `title=linter/rule` properties,
+  each omitted when unknown; paths relative to `$GITHUB_WORKSPACE`), `::error` per failed linter and
+  `::warning` per skipped one. Every finding is emitted; GitHub caps what it displays. With
+  `$GITHUB_STEP_SUMMARY` set, a Markdown job summary is appended to that file. Never selected
+  automatically from `$GITHUB_ACTIONS`. `fmt --format github` is a usage error.
 
 Progress lines stay on stderr for every format (`--no-progress` silences them); stdout carries only
 the report or document. `check --fix`/`--format-before-check` under `json`/`sarif` emit a single
@@ -154,7 +160,7 @@ fix application, final checking pass. (Implemented, internal/cli/check_run.go.)
 ## Everyday commands
 
 ```text
-rtunk check [--from <ref>] [--no-progress] [--ascii] [--live-height <n>] [--format human|sarif|json] [<path>...]
+rtunk check [--from <ref>] [--no-progress] [--ascii] [--live-height <n>] [--format human|sarif|json|github] [<path>...]
   -> read the config
   => [in parallel]
     -> download runtimes if needed
