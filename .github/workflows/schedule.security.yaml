@@ -3,14 +3,14 @@
 # =============================================================================
 # Security — daily supply-chain and vulnerability scans
 # =============================================================================
-# Three independent checks run every day at 06:00 UTC:
+# Two independent checks run every day at 06:00 UTC:
 #
 #   govulncheck — known CVEs in Go dependencies
-#   codeql      — GitHub's SAST engine for Go
 #   scorecard   — OpenSSF Scorecard (supply-chain hygiene score)
 #
-# Can also be triggered manually for on-demand scans.
-# CodeQL and Scorecard findings are surfaced in the repository's Security tab.
+# Can also be triggered manually for on-demand scans. Scorecard findings are surfaced in the
+# repository's Security tab. CodeQL has its own workflow (pull_request,push,schedule.codeql.yaml):
+# it analyses every pull request, not only the daily run.
 # =============================================================================
 
 name: Security
@@ -46,35 +46,6 @@ jobs:
 
       - name: 🔍 Run govulncheck
         run: mise run ci:vulncheck
-
-  # ---------------------------------------------------------------------------
-  # codeql — Static Application Security Testing (SAST)
-  # ---------------------------------------------------------------------------
-  codeql:
-    name: 🧬 CodeQL
-    runs-on: ubuntu-latest
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
-
-    steps:
-      - name: ⬇️ Checkout repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - name: 🔧 Initialize CodeQL
-        uses: github/codeql-action/init@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v3
-        with:
-          languages: go
-          queries: security-and-quality
-
-      - name: 🏗️ Autobuild
-        uses: github/codeql-action/autobuild@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v3
-
-      - name: 🔍 Run CodeQL analysis
-        uses: github/codeql-action/analyze@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v3
-        with:
-          category: /language:go
 
   # ---------------------------------------------------------------------------
   # scorecard — OpenSSF supply-chain security score
