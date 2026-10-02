@@ -12,7 +12,7 @@ Use [docs/Installation.md](docs/Installation.md)'s "clone and build" path rather
 `go install` — it's the setup this file assumes:
 
 ```bash
-git clone https://github.com/xunleii/rtunk.git
+git clone https://github.com/axnic/rtunk.git
 cd rtunk
 mise trust    # if mise prompts about this repo's .mise.toml
 mise install  # installs the go and trunk versions .mise.toml declares
