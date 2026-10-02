@@ -3,6 +3,7 @@ package cli
 import (
 	"os"
 	"path/filepath"
+	"regexp"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -81,11 +82,20 @@ func TestFmtCmd_DedupesFilesChangedByMultipleLinters(t *testing.T) {
 	assert.Contains(t, stdout, want, "the same file changed by two different linters must be listed once, not twice")
 }
 
+// elapsedRe matches the run duration in the summary line ("Checked 0 files with 0 linters in 0.1s").
+// It is the only part of the output that differs between two otherwise identical runs, and rounding
+// to a tenth of a second makes two runs land on either side of a boundary ("0.0s" against "0.1s").
+var elapsedRe = regexp.MustCompile(`in \d+(\.\d+)?s`)
+
+func withoutElapsed(s string) string { return elapsedRe.ReplaceAllString(s, "in <elapsed>") }
+
 func TestFmtCmd_NoFixAlias_MatchesCheckFlag(t *testing.T) {
 	cfgPath, _ := writeLinterFixture(t, nil, "")
 	longOut, longStderr, longErr := run2(t, "--config", cfgPath, "fmt", "--check", filepath.Dir(filepath.Dir(cfgPath)))
 	aliasOut, aliasStderr, aliasErr := run2(t, "--config", cfgPath, "fmt", "--no-fix", filepath.Dir(filepath.Dir(cfgPath)))
 	shortOut, shortStderr, shortErr := run2(t, "--config", cfgPath, "fmt", "-n", filepath.Dir(filepath.Dir(cfgPath)))
+	longOut, aliasOut, shortOut = withoutElapsed(longOut), withoutElapsed(aliasOut), withoutElapsed(shortOut)
+	longStderr, aliasStderr, shortStderr = withoutElapsed(longStderr), withoutElapsed(aliasStderr), withoutElapsed(shortStderr)
 	assert.Equal(t, longErr, aliasErr)
 	assert.Equal(t, longOut, aliasOut)
 	assert.Equal(t, longStderr, aliasStderr)
