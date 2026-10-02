@@ -15,3 +15,7 @@ rtunk-check-sandbox-*/
 # `mise run ci` just before it.
 /rtunk
 /coverage.txt
+
+# mise local state. mise.lock references .mise/locks/ (aube lock directories), so those stay tracked.
+.mise/*
+!.mise/locks/
