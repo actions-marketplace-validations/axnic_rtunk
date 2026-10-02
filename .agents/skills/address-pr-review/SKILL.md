@@ -64,7 +64,7 @@ the user asking for it.
 ## 6. Get approval, then push
 
 Show the user the commits and a per-thread table (thread, class, planned reply). Push only after
-an explicit yes. Replying "Fixed in <sha>" before the SHA exists on the remote is a lie: no
+an explicit yes. Replying `Fixed in <sha>` before the SHA exists on the remote is a lie: no
 reply or resolve step happens before the push.
 
 ## 7. Reply and resolve (write, per thread)
