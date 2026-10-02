@@ -87,23 +87,25 @@ For documentation-only changes, this repository's own convention is `./rtunk fmt
 
 Workflows live in [`.github/workflows/`](.github/workflows), named `<triggers>.<name>.yaml`.
 
-| Workflow                                  | Runs                                                                                                                  |
-| ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| `merge_group,pull_request,push.ci.yaml`   | On pull requests, merge-queue entries and pushes to `main`: `changes`, `lint`, `rtunk`, `commitlint`, `build`, `test` |
-| `schedule.security.yaml`                  | Daily `govulncheck`, CodeQL and OpenSSF Scorecard                                                                     |
-| `push,workflow_dispatch.wiki.yaml`        | Publishes `docs/` to the GitHub Wiki on pushes to `main` that touch it                                                |
-| `pull_request.dependabot-auto-merge.yaml` | Approves and auto-merges Dependabot patch and security updates                                                        |
+| Workflow                                  | Runs                                                                                                      |
+| ----------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `merge_group,pull_request,push.lint.yaml` | `Lint`, on pull requests, merge-queue entries and pushes to `main`, always: `lint`, `rtunk`, `commitlint` |
+| `merge_group,pull_request,push.go.yaml`   | `Go`, same triggers but path-filtered: `build`, `test`                                                    |
+| `schedule.security.yaml`                  | Daily `govulncheck`, CodeQL and OpenSSF Scorecard                                                         |
+| `push,workflow_dispatch.wiki.yaml`        | Publishes `docs/` to the GitHub Wiki on pushes to `main` that touch it                                    |
+| `pull_request.dependabot-auto-merge.yaml` | Approves and auto-merges Dependabot patch and security updates                                            |
 | `issue_comment,pull_request.pr-agent.yaml` | Posts a comment listing the commands when a pull request is opened; runs `/describe`, `/review`, `/improve`, `/ask`, `/help` comments from allowed users (PR Agent) |
-| `workflow_dispatch.release.yaml`          | Cuts a release (run manually, see below)                                                                              |
+| `workflow_dispatch.release.yaml`          | Cuts a release (run manually, see below)                                                                  |
 
-The `test` job runs on Linux and macOS (`fail-fast: false`, so one platform's failure does not hide
-the other's); the release-tooling tests run on Linux only. The `rtunk` job dogfoods the tool and the
-[GitHub Action](docs/GitHub-Action.md) on its latest release: it checks every file, and findings
-appear as annotations.
+The `lint` workflow always runs, on every file, with no path filter. `lint` runs golangci-lint; the
+`rtunk` job dogfoods the tool and the [GitHub Action](docs/GitHub-Action.md) on its latest release:
+it checks every file, and findings appear as annotations; `commitlint` validates the commit messages.
 
-A `changes` job skips `build` and `test` unless Go code or what feeds it changed: `*.go`,
-`go.mod`/`go.sum`, `testdata/`, `scripts/`, `.mise.toml`, `mise.lock` or the workflow itself.
-`lint`, `rtunk` and `commitlint` always run, on every file.
+The `go` workflow runs `build` and `test`. On pull requests and pushes to `main` it only runs when
+`**.go`, `go.mod`, `go.sum` or the workflow file itself changed. GitHub does not evaluate path
+filters for `merge_group`, so merge-queue entries always run it. The `test` job runs on Linux and
+macOS (`fail-fast: false`, so one platform's failure does not hide the other's); the release-tooling
+tests run on Linux only.
 
 [PR Agent](https://github.com/The-PR-Agent/pr-agent) (pinned by SHA, v0.47.0) never runs on its own
 on pull requests or pushes. When a pull request is opened, a `welcome` job posts one comment listing

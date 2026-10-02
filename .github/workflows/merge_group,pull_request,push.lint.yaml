@@ -1,0 +1,117 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+#
+# =============================================================================
+# Lint — Pull-request, merge-queue & main lint gate
+# =============================================================================
+# Validates every PR (and merge-queue entry) before it lands on main, and every
+# push to main (main only accepts merged PRs, so a push is the merge commit).
+# Always runs, on every file: no path filter.
+#
+#   lint        — golangci-lint (drives .golangci.yml)
+#   rtunk       — rtunk's own lint stack (.rtunk/rtunk.yaml) through the repository's
+#                 GitHub Action (action.yml) on its latest release: rtunk dogfoods itself
+#                 and the action. Findings become annotations
+#   commitlint  — rtunk commit convention on every commit in the PR. Skipped
+#                 for Dependabot PRs: its own commit messages never follow the
+#                 `type[scope]: Subject` convention; the dependabot-auto-merge
+#                 workflow sets a compliant subject on the merge commit, and on
+#                 push only that merge commit (--last) is validated, since the
+#                 PR's own commits were already checked (or exempted) above.
+#
+# Build and tests live in merge_group,pull_request,push.go.yaml and only run when Go
+# code changes. Every job calls a `ci:*` task defined in .mise.toml.
+# =============================================================================
+
+name: Lint
+
+on:
+  merge_group: {}
+  pull_request: {}
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+# Minimal top-level permissions — each job declares what it needs.
+permissions: {}
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # lint — golangci-lint
+  # ---------------------------------------------------------------------------
+  lint:
+    name: 🔍 Lint
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # Restores/saves the mise cache under one key shared by every job; the key hashes the mise
+      # config files, including mise.lock, so it changes only when a tool version changes.
+      - name: 🔧 Install tools via mise
+        uses: jdx/mise-action@9149ea85001c7435d5a66bb127d6a1b6227cb0a5 # v5.0.0
+        with:
+          cache: true
+          cache_key: "mise-v1-{{platform}}-{{file_hash}}"
+
+      - name: 🔍 Run golangci-lint
+        run: mise run ci:lint
+
+  # ---------------------------------------------------------------------------
+  # rtunk — dogfood: rtunk checks this repository through its own action
+  # ---------------------------------------------------------------------------
+  rtunk:
+    name: 🧹 rtunk
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # Latest published release, not a local build: the action is what users run. Every file is
+      # checked, so a change to the lint stack itself is validated against the whole repository.
+      - name: 🧹 Run rtunk check
+        uses: ./
+        with:
+          version: latest
+          check-mode: all
+
+  # ---------------------------------------------------------------------------
+  # commitlint — every commit must follow the rtunk commit convention
+  # ---------------------------------------------------------------------------
+  commitlint:
+    name: ✉️ Commit Messages
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      # Full history is needed to compare base..head SHA range.
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: 🔧 Install tools via mise
+        uses: jdx/mise-action@9149ea85001c7435d5a66bb127d6a1b6227cb0a5 # v5.0.0
+        with:
+          cache: true
+          cache_key: "mise-v1-{{platform}}-{{file_hash}}"
+
+      - name: ✅ Validate commit messages
+        if: github.event_name != 'push' && github.actor != 'dependabot[bot]'
+        run: |
+          mise run ci:commitlint -- \
+            --from ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }} \
+            --to   ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha }}
+
+      - name: ✅ Validate commit messages (push to main)
+        if: github.event_name == 'push'
+        run: mise run ci:commitlint -- --last
