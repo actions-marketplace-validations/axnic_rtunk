@@ -13,9 +13,13 @@
 #      through OpenRouter (deterministic draft + LLM polish)
 #   4. Creates and pushes the v<version> git tag
 #   5. Builds rtunk for darwin/linux (amd64+arm64) with goreleaser and
-#      publishes the archives + checksums + release notes as a draft GitHub
-#      Release (prerelease for RC); the version is injected via -X main.version
-#      (see .goreleaser.yml)
+#      publishes the archives + checksums + SBOMs + release notes as a draft
+#      GitHub Release (prerelease for RC); the version is injected via
+#      -X main.version (see .goreleaser.yml)
+#   6. Proves the artifacts come from this workflow (supply-chain protection):
+#      checksums.txt is signed keyless with cosign (Sigstore, bundle uploaded
+#      next to it), and a SLSA build provenance attestation is recorded for
+#      every archive. Verification commands are in SECURITY.md.
 #
 # Bump types:
 #   patch / minor / major          → stable release computed from the last stable tag
@@ -96,6 +100,8 @@ jobs:
     permissions:
       contents: write
       pull-requests: read # resolves the PR behind each commit for the release notes
+      id-token: write # OIDC token: keyless cosign signature and build provenance
+      attestations: write # stores the build provenance attestation
     env:
       # Cheap, fast model that follows a strict Markdown template; the task is a short summary of
       # a few KB of commit text, so a release costs a fraction of a cent. Any OpenRouter model id.
@@ -342,3 +348,11 @@ jobs:
           args: release --clean --release-notes=${{ runner.temp }}/release/release-notes.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # ── Provenance ─────────────────────────────────────────────────────────
+      # checksums.txt lists every archive, so attesting its entries covers them all; the SBOM
+      # and signature bundle are uploaded by goreleaser itself.
+      - name: 🛡️ Attest build provenance
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-checksums: dist/checksums.txt
