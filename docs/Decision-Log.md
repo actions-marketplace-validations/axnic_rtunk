@@ -379,7 +379,7 @@ Beyond the fields already covered above (version range, platform restriction, fi
 the two caching opt-outs), the real catalog declares a further set of fields on commands, tools, and
 actions that the resolved configuration shape either drops entirely while parsing or parses and then
 never reads again. See
-[Plugin-Model.md](Plugin-Model.md#declared-fields-the-current-execution-engine-does-not-act-on) for
+[Plugin-Model.md](Plugin-Model.md#declared-fields-and-whether-the-execution-engine-acts-on-them) for
 the full field-by-field index with catalog occurrence counts.
 
 - **`suggest_if` (linter-level, the single most common of these fields in the real catalog)**:
