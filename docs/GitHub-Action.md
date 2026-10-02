@@ -48,8 +48,8 @@ job fails.
    top of the workflow and grant it to the job.
 4. **Check out with enough history** when `check-mode` is `changed-since-base`: `actions/checkout`
    with `fetch-depth: 0` (see [Choose which files are checked](#choose-which-files-are-checked)).
-5. **Use a Linux or macOS runner** (`amd64` or `arm64`). The runner needs the `gh` CLI and `jq`,
-   both present on GitHub-hosted runners.
+5. **Use a Linux or macOS runner** (`amd64` or `arm64`). The runner needs the `gh` CLI, present on
+   GitHub-hosted runners.
 
 ## Inputs and outputs
 
@@ -64,13 +64,13 @@ Defaults are those of [`action.yml`](../action.yml).
 | `require-attestation` | `false`        | Fail when the release has no signature bundle to verify, instead of falling back to the checksum alone       |
 | `token`               | `github.token` | Token the `gh` CLI uses to resolve, download and verify the release                                          |
 
-| Output         | Meaning                                                                                        |
-| -------------- | ---------------------------------------------------------------------------------------------- |
-| `version`      | The version that ran: a tag, or `source`                                                       |
-| `exit-code`    | Exit code of `rtunk check`: `0` clean, `1` findings or error                                   |
-| `results-file` | Path of the JSON report (`rtunk-results.json` in `RUNNER_TEMP`); empty if no file was selected |
+| Output      | Meaning                                                      |
+| ----------- | ------------------------------------------------------------ |
+| `version`   | The version that ran: a tag, or `source`                     |
+| `exit-code` | Exit code of `rtunk check`: `0` clean, `1` findings or error |
 
-The action sets `--format json` itself, so `arguments` must not contain `--format`.
+The action sets `--format github` itself (see [Annotations and job summary](#annotations-and-job-summary)),
+so `arguments` must not contain `--format`.
 
 ## Choose which files are checked
 
@@ -101,8 +101,10 @@ reproducible runs. Use `source` only in a repository that hosts rtunk, to check 
 code under review; this repository's own CI does exactly that, and `source` verifies nothing since
 nothing is downloaded.
 
-Releases before `v0.14.0` can still be installed through the action, but they are unsigned (see
-below) and declare the previous Go module path.
+`source` always has `--format github`, since it is built from the code the action ships with. Releases
+before `v0.14.0` can still be installed through the action, but they are unsigned (see below),
+declare the previous Go module path and have no `--format github`: see
+[Annotations and job summary](#annotations-and-job-summary).
 
 ## Install and verify rtunk
 
@@ -152,21 +154,34 @@ Cache entries follow GitHub's scoping rules: a pull request reads caches saved o
 and saves its own under its merge ref, so a run on `main` (a push, or a nightly job) is what warms
 the cache for later pull requests.
 
-## Results
+## Annotations and job summary
 
-`rtunk check` runs with `--format json`. Progress lines stay in the step log, and the action turns
-the report into:
+The action runs `rtunk check --format github` and rtunk itself writes the report; the action does no
+post-processing. Before running, it probes `rtunk check run --help` for the `--format github`
+option, so a release that lacks it still runs:
 
-- one annotation per issue, on its file and line, titled `<linter>/<rule>`: `high` is an error,
-  `medium` a warning, `low` a notice. A linter that failed to run is an error annotation. The log
-  receives the first 50 issues, and GitHub itself displays at most 10 annotations per level and
-  step; on a pull request they appear in the Files changed tab and the checks list;
-- a job summary titled `rtunk check`: counts of files, linters, issues, failures and suppressed
-  issues, the run time, then a table of the first 100 issues.
+| rtunk release                                                   | What the step does                                                                                                                                                                      |
+| --------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| With `--format github` (`source`, and releases after `v0.14.0`) | Runs with `--format github`: annotations on stdout and the job summary in `GITHUB_STEP_SUMMARY`                                                                                         |
+| Without it (`v0.14.0` and earlier)                              | Runs with the human format and emits `::warning::this rtunk release has no --format github: findings are only in the log, no annotations`. The check still runs and still fails the job |
+
+The `--format github` output is described in
+[Checking code](Checking-Code.md#github-actions-annotations): one annotation per finding on its file
+and line, titled `<linter>/<rule>` (`error` for `high`, `warning` for `medium`, `notice` for the
+rest), an error annotation for a linter that failed to run and a warning for a skipped one. On a
+pull request, annotations appear in the Files changed tab and the checks list.
+
+rtunk emits every finding, but GitHub displays only the first 10 errors and 10 warnings per step,
+and 50 annotations per job. The rest appear in the step log only, so a run with more findings than
+that shows fewer annotations than the log lists.
+
+The job summary (`rtunk check`) holds the totals, counts per severity and per linter, a table of the
+first 50 findings with an `N more not shown` line, and the failed and skipped linters. rtunk appends
+it to the file named by `GITHUB_STEP_SUMMARY`, which GitHub sets in every step.
 
 The job fails in the last step, after the cache is saved and the results reported, with the exit
-code of rtunk (see [exit codes](Checking-Code.md#use-rtunk-in-ci)). The `results-file` output
-holds the whole report for a later step, such as one that uploads it.
+code of rtunk (see [exit codes](Checking-Code.md#use-rtunk-in-ci)). The `exit-code` output exposes
+it to later steps.
 
 ## Examples
 
@@ -251,9 +266,9 @@ jobs:
 
 Legs that resolve to the same project root share one cache key.
 
-### Narrow the run and keep the report
+### Narrow the run
 
-`arguments` forwards flags to `rtunk check`; `results-file` hands the JSON report to later steps.
+`arguments` forwards flags to `rtunk check`, here to run two linters and the security checks only.
 
 ```yaml
 - uses: axnic/rtunk@v0.14.0
@@ -261,11 +276,6 @@ Legs that resolve to the same project root share one cache key.
   with:
     version: v0.14.0
     arguments: --filter=shellcheck,yamllint --security-only
-- if: always() && steps.rtunk.outputs.results-file != ''
-  uses: actions/upload-artifact@<sha>
-  with:
-    name: rtunk-report
-    path: ${{ steps.rtunk.outputs.results-file }}
 ```
 
 ### Forks and private repositories
@@ -280,26 +290,26 @@ Legs that resolve to the same project root share one cache key.
   `axnic/rtunk` releases and never sends your code anywhere. It configures no credentials for
   private plugin sources; a `plugins.sources` entry that rtunk cannot clone with the checkout's
   credentials fails the run.
-- **Self-hosted runners** must provide `gh` and `jq`, run Linux or macOS, and be `amd64` or
-  `arm64`.
+- **Self-hosted runners** must provide `gh`, run Linux or macOS, and be `amd64` or `arm64`.
 
 ## Troubleshooting
 
-| Message or symptom                                                        | Cause and fix                                                                                                                                                  |
-| ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `rtunk supports Linux and macOS runners only`                             | Windows runner. Use `ubuntu-latest` or `macos-latest`.                                                                                                         |
-| `the gh CLI is required to ...`                                           | The runner has no `gh`. Install it, or use a GitHub-hosted image.                                                                                              |
-| `no published rtunk release found; pin a version or use version: source`  | `latest` could not be resolved: no non-draft release, or the token cannot read it. Pin `version: vX.Y.Z`.                                                      |
-| `version must be 'latest', 'source' or a tag like v0.13.2`                | Malformed `version`. Use the tag with its `v` prefix, as `v0.14.0`.                                                                                            |
-| `base commit <sha> is not in the checkout; use actions/checkout with ...` | Shallow checkout with `changed-since-base`. Set `fetch-depth: 0` on `actions/checkout`.                                                                        |
-| `rtunk <tag> has no signature bundle and require-attestation is true`     | The release predates signing (up to `v0.13.2`). Move to `v0.14.0` or later, or set `require-attestation: false`.                                               |
-| `rtunk <tag> is not signed: verified against checksums.txt only`          | Warning for a release up to `v0.13.2`. Pin a newer version and set `require-attestation: true`.                                                                |
-| `gh attestation verify` or `cosign verify-blob` fails                     | The archive or `checksums.txt` was not produced by the Release workflow. Do not use it; report it per [SECURITY.md](../SECURITY.md).                           |
-| `check-mode must be 'all' or 'changed-since-base'`                        | Typo in `check-mode`.                                                                                                                                          |
-| Job fails with `rtunk check exited with code 1`, no annotation            | A linter failed to run, the config is invalid, or no `.rtunk`/`.trunk` was found above `working-directory`. Read the step log and the summary's Failures list. |
-| Green job, nothing checked (`results-file` empty)                         | No file was selected. With `changed-since-base`, no relevant file changed; on `schedule` use `all`.                                                            |
-| Fewer annotations than issues                                             | GitHub shows at most 10 per level and step. The summary lists the first 100; `results-file` holds all.                                                         |
-| Every run downloads the linters again                                     | The cache key changed (config or rtunk version) or the run is on a new branch with no base-branch cache. Warm it with a run on `main`.                         |
+| Message or symptom                                                        | Cause and fix                                                                                                                                                                                                           |
+| ------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `rtunk supports Linux and macOS runners only`                             | Windows runner. Use `ubuntu-latest` or `macos-latest`.                                                                                                                                                                  |
+| `the gh CLI is required to ...`                                           | The runner has no `gh`. Install it, or use a GitHub-hosted image.                                                                                                                                                       |
+| `no published rtunk release found; pin a version or use version: source`  | `latest` could not be resolved: no non-draft release, or the token cannot read it. Pin `version: vX.Y.Z`.                                                                                                               |
+| `version must be 'latest', 'source' or a tag like v0.13.2`                | Malformed `version`. Use the tag with its `v` prefix, as `v0.14.0`.                                                                                                                                                     |
+| `base commit <sha> is not in the checkout; use actions/checkout with ...` | Shallow checkout with `changed-since-base`. Set `fetch-depth: 0` on `actions/checkout`.                                                                                                                                 |
+| `rtunk <tag> has no signature bundle and require-attestation is true`     | The release predates signing (up to `v0.13.2`). Move to `v0.14.0` or later, or set `require-attestation: false`.                                                                                                        |
+| `rtunk <tag> is not signed: verified against checksums.txt only`          | Warning for a release up to `v0.13.2`. Pin a newer version and set `require-attestation: true`.                                                                                                                         |
+| `gh attestation verify` or `cosign verify-blob` fails                     | The archive or `checksums.txt` was not produced by the Release workflow. Do not use it; report it per [SECURITY.md](../SECURITY.md).                                                                                    |
+| `check-mode must be 'all' or 'changed-since-base'`                        | Typo in `check-mode`.                                                                                                                                                                                                   |
+| Job fails with `rtunk check exited with code 1`, no annotation            | The config is invalid, no `.rtunk`/`.trunk` was found above `working-directory`, or the release has no `--format github`. Read the step log; a failed linter is an annotation and in the summary's Failed linters list. |
+| `this rtunk release has no --format github`                               | Warning: the pinned release is `v0.14.0` or earlier. Findings are only in the step log. Pin a later release, or `source` in a repository that hosts rtunk.                                                              |
+| Green job, nothing checked                                                | No file was selected. With `changed-since-base`, no relevant file changed; on `schedule` use `all`.                                                                                                                     |
+| Fewer annotations than findings                                           | GitHub shows at most 10 errors and 10 warnings per step and 50 annotations per job. The step log lists all; the summary lists the first 50.                                                                             |
+| Every run downloads the linters again                                     | The cache key changed (config or rtunk version) or the run is on a new branch with no base-branch cache. Warm it with a run on `main`.                                                                                  |
 
 ## Limits
 

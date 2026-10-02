@@ -1,5 +1,6 @@
-# This file controls the behavior of Trunk: https://docs.trunk.io/cli
-# To learn more about the format of this file, see https://docs.trunk.io/reference/trunk-yaml
+# Configuration of rtunk for this repository: the linters, runtimes and plugin sources that
+# `rtunk check` and `rtunk fmt` use here. rtunk reads the trunk.yaml format; keys are documented in
+# docs/Configuration-Reference.md.
 version: 0.1
 cli:
   version: 1.25.0
