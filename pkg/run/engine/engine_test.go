@@ -602,10 +602,12 @@ func TestRun_RecordsUsageRegistry(t *testing.T) {
 	assert.NotEmpty(t, entries, "Run must record a registry entry for env.RepoRoot")
 }
 
-// TestRun_ParallelWorkersRunConcurrently covers the actual point of concurrency workers: two
-// linters that each take ~250ms must finish in well under 2x that when concurrency lets both run
-// at once, proving jobs for different linters really execute in parallel rather than queued
-// behind each other one at a time.
+// TestRun_ParallelWorkersRunConcurrently covers the actual point of concurrency workers: jobs
+// for different linters really execute in parallel rather than queued behind each other one at
+// a time. It reads the enter/exit order of a shared probe log (the "labeledsleep" fake-tool case)
+// instead of timing the run: with two workers the second job must have entered before the first
+// one exited, with one worker it must not. Wall-clock thresholds made this flaky on slow CI
+// runners, where process start-up alone could exceed any fixed margin.
 func TestRun_ParallelWorkersRunConcurrently(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("faketool invoked via sh -c")
@@ -621,6 +623,7 @@ func TestRun_ParallelWorkersRunConcurrently(t *testing.T) {
 
 	repoRoot := t.TempDir()
 	require.NoError(t, os.WriteFile(filepath.Join(repoRoot, "a.txt"), []byte("a\n"), 0o644))
+	probe := filepath.Join(t.TempDir(), "probe.log")
 
 	newCfg := func() config.Config {
 		return config.Config{
@@ -631,11 +634,11 @@ func TestRun_ParallelWorkersRunConcurrently(t *testing.T) {
 					Definitions: map[string]config.Linter{
 						"slow1": {
 							Name: "slow1", Files: []string{"ALL"}, Tools: []string{"faketool"},
-							Commands: []config.Command{{Name: "lint", Run: "faketool sleep ${target}", Output: "pass_fail", Batch: true}},
+							Commands: []config.Command{{Name: "lint", Run: "faketool labeledsleep S1 " + probe + " ${target}", Output: "pass_fail", Batch: true}},
 						},
 						"slow2": {
 							Name: "slow2", Files: []string{"ALL"}, Tools: []string{"faketool"},
-							Commands: []config.Command{{Name: "lint", Run: "faketool sleep ${target}", Output: "pass_fail", Batch: true}},
+							Commands: []config.Command{{Name: "lint", Run: "faketool labeledsleep S2 " + probe + " ${target}", Output: "pass_fail", Batch: true}},
 						},
 					},
 				},
@@ -643,20 +646,29 @@ func TestRun_ParallelWorkersRunConcurrently(t *testing.T) {
 		}
 	}
 
-	drain := func(concurrency int) time.Duration {
-		start := time.Now()
+	// drain runs both linters at the given concurrency and returns the probe log, in order.
+	drain := func(concurrency int) []string {
+		require.NoError(t, os.RemoveAll(probe))
 		events, err := Run(context.Background(), Env{Cfg: newCfg(), RepoRoot: repoRoot, CacheDir: cacheDir, Concurrency: concurrency}, nil, notFormatter)
 		require.NoError(t, err)
 		for range events { //nolint:revive // draining the channel is the whole point; there is nothing to do per event
 		}
-		return time.Since(start)
+		data, err := os.ReadFile(probe)
+		require.NoError(t, err)
+		return strings.Fields(string(data))
 	}
 
-	sequential := drain(1)
-	parallel := drain(2)
+	label := func(line string) string { return strings.SplitN(line, ":", 2)[0] }
 
-	assert.Greater(t, sequential, 400*time.Millisecond, "two 250ms jobs one worker at a time must take close to 500ms")
-	assert.Less(t, parallel, 400*time.Millisecond, "two 250ms jobs on two workers must take close to 250ms, not ~500ms")
+	sequential := drain(1)
+	require.Len(t, sequential, 4, "two jobs, each logging enter and exit")
+	assert.True(t, strings.HasSuffix(sequential[1], ":exit") && label(sequential[1]) == label(sequential[0]),
+		"one worker must finish a job before starting the next, got %v", sequential)
+
+	parallel := drain(2)
+	require.Len(t, parallel, 4, "two jobs, each logging enter and exit")
+	assert.True(t, strings.HasSuffix(parallel[0], ":enter") && strings.HasSuffix(parallel[1], ":enter"),
+		"two workers must have both jobs entered before either exits, got %v", parallel)
 }
 
 // TestRun_MaxConcurrency_CapsParallelInvocationsOfOneCommand proves Command.MaxConcurrency caps
