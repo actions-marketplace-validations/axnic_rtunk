@@ -1,0 +1,39 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+#
+# =============================================================================
+# OpenSSF Scorecard — Supply-chain security score
+# =============================================================================
+# Runs the OpenSSF Scorecard checks weekly and on demand, and publishes the results
+# to the Security tab and the public Scorecard API.
+#
+# Jobs:
+#   scorecard — OpenSSF Scorecard checks, from oss.scorecard
+#
+# MANAGED BY TERRAFORM (axnic/.github-private, modules/workflows) — do not edit by hand.
+# Reusable workflow: https://github.com/axnic/.github/blob/main/.github/workflows/oss.scorecard.yaml
+# =============================================================================
+
+name: OpenSSF Scorecard
+
+on:
+  schedule:
+    - cron: "0 5 * * 1"
+  workflow_dispatch: {}
+
+# Minimal top-level permissions — each job declares what it needs.
+permissions: {}
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # scorecard — OpenSSF Scorecard checks, from oss.scorecard
+  # ---------------------------------------------------------------------------
+  scorecard:
+    name: 🛡️ OpenSSF Scorecard
+    # Intentionally not pinned: follows the latest axnic/.github (owner-controlled repo).
+    uses: axnic/.github/.github/workflows/oss.scorecard.yaml@main
+    secrets: inherit
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+      security-events: write
