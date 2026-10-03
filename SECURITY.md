@@ -36,17 +36,30 @@ the [Releases page](https://github.com/axnic/rtunk/releases). Each one ships, ne
 - A [SLSA build provenance](https://slsa.dev) attestation per archive, stored on GitHub.
 
 ```bash
-# 1. The checksums were signed by the Release workflow of this repository
+# 1. The checksums were signed by a Release workflow, for this repository
 cosign verify-blob checksums.txt --bundle checksums.txt.sigstore.json \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-  --certificate-identity-regexp '^https://github.com/axnic/rtunk/\.github/workflows/workflow_dispatch\.release\.yaml@refs/heads/main$'
+  --certificate-identity-regexp '^https://github\.com/(axnic/rtunk/\.github/workflows/workflow_dispatch\.release\.yaml|axnic/\.github/\.github/workflows/go\.publish\.yaml)@refs/heads/main$' \
+  --certificate-github-workflow-repository axnic/rtunk
 
 # 2. The archive matches the signed checksums
 sha256sum --ignore-missing -c checksums.txt        # shasum -a 256 -c on macOS
 
 # 3. The archive was built by that workflow from this repository
+#    Releases signed by the central workflow:
+gh attestation verify rtunk-<tag>-<os>-<arch>.tar.gz -R axnic/rtunk \
+  --signer-workflow axnic/.github/.github/workflows/go.publish.yaml
+#    Releases signed by rtunk's own workflow (no --signer-workflow):
 gh attestation verify rtunk-<tag>-<os>-<arch>.tar.gz -R axnic/rtunk
 ```
+
+Two signing identities exist, because the release job moved to the central, reusable workflow
+`go.publish.yaml` of [axnic/.github](https://github.com/axnic/.github): releases cut before the move
+were signed by this repository's own `workflow_dispatch.release.yaml`, later ones by the central
+workflow, which then is the certificate identity. The regexp above accepts exactly these two, and
+`--certificate-github-workflow-repository` pins the repository in both cases. In step 3, use the
+command matching the release (the second one fails on a release signed centrally, and the first on
+an older one).
 
 A release that fails any of these steps must not be used; report it as described above.
 

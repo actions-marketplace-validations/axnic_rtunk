@@ -133,12 +133,19 @@ runs:
 
           # 2. The archive was built and signed by the Release workflow (SECURITY.md,
           #    "Verifying a release"). Releases from before signing have no bundle.
+          #    Two signing identities are accepted: rtunk's own Release workflow (releases up to
+          #    the last one cut before the central workflows) and the central go.publish.yaml
+          #    of axnic/.github (later releases). The repository is pinned in both cases.
           if gh release download "$VERSION" -R axnic/rtunk -D "$dl" --clobber -p checksums.txt.sigstore.json 2>/dev/null; then
-            gh attestation verify "$dl/$archive" -R axnic/rtunk
+            # Central signer first (quiet); else rtunk's own, whose failure is the one shown.
+            gh attestation verify "$dl/$archive" -R axnic/rtunk \
+              --signer-workflow axnic/.github/.github/workflows/go.publish.yaml >/dev/null 2>&1 \
+              || gh attestation verify "$dl/$archive" -R axnic/rtunk
             if command -v cosign >/dev/null; then
               cosign verify-blob "$dl/checksums.txt" --bundle "$dl/checksums.txt.sigstore.json" \
                 --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-                --certificate-identity-regexp '^https://github.com/axnic/rtunk/\.github/workflows/workflow_dispatch\.release\.yaml@refs/heads/main$'
+                --certificate-identity-regexp '^https://github\.com/(axnic/rtunk/\.github/workflows/workflow_dispatch\.release\.yaml|axnic/\.github/\.github/workflows/go\.publish\.yaml)@refs/heads/main$' \
+                --certificate-github-workflow-repository axnic/rtunk
             fi
           elif [ "$REQUIRE_ATTESTATION" = true ]; then
             echo "::error::rtunk $VERSION has no signature bundle and require-attestation is true"; exit 1

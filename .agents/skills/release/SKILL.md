@@ -136,17 +136,23 @@ mkdir -p "${TMPDIR:-/tmp}/rtunk-verify" && cd "${TMPDIR:-/tmp}/rtunk-verify"
 gh release download "$tag" --repo axnic/rtunk \
   -p checksums.txt -p checksums.txt.sigstore.json -p "rtunk-$tag-linux-amd64.tar.gz"
 
-# 1. checksums.txt was signed by the Release workflow of this repository
+# 1. checksums.txt was signed by a Release workflow, for this repository
 cosign verify-blob checksums.txt --bundle checksums.txt.sigstore.json \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-  --certificate-identity-regexp '^https://github.com/axnic/rtunk/\.github/workflows/workflow_dispatch\.release\.yaml@refs/heads/main$'
+  --certificate-identity-regexp '^https://github\.com/(axnic/rtunk/\.github/workflows/workflow_dispatch\.release\.yaml|axnic/\.github/\.github/workflows/go\.publish\.yaml)@refs/heads/main$' \
+  --certificate-github-workflow-repository axnic/rtunk
 
 # 2. the archive matches the signed checksums
 sha256sum --ignore-missing -c checksums.txt        # shasum -a 256 -c on macOS
 
 # 3. the archive was built by that workflow from this repository
-gh attestation verify "rtunk-$tag-linux-amd64.tar.gz" -R axnic/rtunk
+#    (a release cut by the central workflow, which is what this skill produces)
+gh attestation verify "rtunk-$tag-linux-amd64.tar.gz" -R axnic/rtunk \
+  --signer-workflow axnic/.github/.github/workflows/go.publish.yaml
 ```
+
+Releases cut before the central workflows were signed by rtunk's own `workflow_dispatch.release.yaml`:
+for those, run step 3 without `--signer-workflow`. Step 1 accepts both identities.
 
 The commands above are SECURITY.md's, run on the published release (the draft is not public
 until published). Any failed step
