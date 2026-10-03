@@ -3,15 +3,16 @@
 # =============================================================================
 # This mise configuration provides the complete toolchain needed to build,
 # lint, test and release rtunk, and defines the tasks shared by local
-# development and CI (.github/workflows/*). CI never calls the tools directly:
-# it runs `mise run ci:<task>`, so a green local `mise run ci` is the same gate
-# a pull request goes through.
+# development and CI. CI never calls the tools directly: the central workflows
+# of axnic/.github, called from this repository, run `mise run` tasks (`lint`
+# is local only, rtunk being the CI gate through its own action).
 #
 # Usage:
 #   mise install     # Install all tools
 #   mise trust       # Trust this configuration (if prompted)
 #   mise tasks       # List the available tasks
-#   mise run ci      # Run the whole CI quality gate (commit messages excluded)
+#   mise run lint    # Lint every file with rtunk (outside the ci: namespace)
+#   mise run ci      # Local gate: action.yml check, build, tests (no lint, no audit)
 #
 # Tool versions are resolved into mise.lock (`mise lock`); CI installs with
 # `--locked`, so a version only changes through a reviewed lockfile update.
@@ -38,14 +39,14 @@ go = "latest"                                     # rtunk is implemented in Go (
 # -----------------------------------------------------------------------------
 # Tools enforcing the repository conventions
 
-"github:axnic/rtunk" = "latest"                              # rtunk lints itself with its own release (`lint`), never a local build
-node = "lts"                                                   # Runtime for commitlint
-"npm:@commitlint/cli" = "latest"                               # Commit convention check, drives .commitlintrc.js (`ci:commitlint`)
+"github:axnic/rtunk" = "latest"  # rtunk lints itself with its own release (`lint`), never a local build
+node = "lts"                     # Runtime for commitlint
+"npm:@commitlint/cli" = "latest" # Commit convention check, drives .commitlintrc.js (`ci:commitlint`)
 
 # -----------------------------------------------------------------------------
 # Release Tools
 # -----------------------------------------------------------------------------
-# Tools used by the release workflow only (.github/workflows/*release*)
+# Tools used by the release workflow only (central `release` and `go.publish` workflows)
 
 goreleaser = "latest" # Cross-platform release builds, drives .goreleaser.yml
 cosign = "latest"     # Keyless signing of release checksums (goreleaser `signs`)
@@ -54,8 +55,9 @@ syft = "latest"       # SBOM generation for release archives (goreleaser `sboms`
 # =============================================================================
 # Tasks
 # =============================================================================
-# `ci:*` tasks are the units the CI workflows run, one per job. Each is also
-# the exact command to run locally; `ci` chains them as the quality gate.
+# `ci:*` tasks are the units the central CI workflows run. Each is also the
+# exact command to run locally; `ci` chains the lint-free ones as a local gate.
+# `lint` and `security:audit` live outside the `ci:` namespace.
 
 # -----------------------------------------------------------------------------
 # Quality Gate
@@ -63,7 +65,7 @@ syft = "latest"       # SBOM generation for release archives (goreleaser `sboms`
 # Repository-specific checks (rtunk covers the generic linters through `lint`)
 
 [tasks.lint]
-description = "Run rtunk's own lint stack (.rtunk/rtunk.yaml, golangci-lint included) on every file"
+description = "Run rtunk's own lint stack (.rtunk/rtunk.yaml) on every file"
 run = "rtunk check ."
 
 [tasks."lint:fix"]

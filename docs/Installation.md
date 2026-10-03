@@ -11,9 +11,8 @@ rtunk --version
 version comes from the module's build information). A local `go build` carries no version
 metadata and prints `dev`: expected, not an error (`resolveVersion()` in
 [`cmd/rtunk/main.go`](../cmd/rtunk/main.go)). Releases are built by the
-[Release workflow](https://github.com/axnic/rtunk/blob/main/.github/workflows/workflow_dispatch.release.yaml)
-with [GoReleaser](https://goreleaser.com) ([`.goreleaser.yml`](../.goreleaser.yml)) and published on
-the [Releases page](https://github.com/axnic/rtunk/releases).
+Release workflow (Actions, Release, on GitHub) with [GoReleaser](https://goreleaser.com)
+([`.goreleaser.yml`](../.goreleaser.yml)) and published on the [Releases page](https://github.com/axnic/rtunk/releases).
 
 > [!IMPORTANT]
 > `v0.14.0` is the first release that `go install github.com/axnic/rtunk/cmd/rtunk` can install,

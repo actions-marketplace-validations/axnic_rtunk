@@ -14,8 +14,8 @@ inventory below. Do not re-study the reference wikis; the style guide is their e
 ## Hard constraints (wiki rendering)
 
 These come from how GitHub Wiki and the sync action (`Andrew-Chen-Wang/github-wiki-action`,
-`path: docs`, preprocessing on — see `.github/workflows/push,workflow_dispatch.wiki.yaml`, which publishes on every push to
-`main` touching `docs/`) behave. Breaking one produces a broken page on the wiki even when
+`path: docs`, preprocessing on — run by the central `wiki` workflow, called from the
+Terraform-generated `push,workflow_dispatch.wiki.yaml`, which publishes `docs/` to the wiki) behave. Breaking one produces a broken page on the wiki even when
 the repo view looks fine.
 
 - **Flat directory.** Every page is a file directly in `docs/`; no subdirectories. Wiki page names

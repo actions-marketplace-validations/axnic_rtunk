@@ -25,8 +25,9 @@ exists. No support or backport policy is defined for tagged releases yet.
 
 ## Verifying a release
 
-Every release is built by the [Release workflow](.github/workflows/workflow_dispatch.release.yaml)
-on GitHub Actions, never on a maintainer's machine. Each one ships, next to the archives:
+Every release is built by the Release workflow (Actions, Release) on GitHub Actions, never on a
+maintainer's machine: it tags the commit, builds the archives with GoReleaser and publishes them on
+the [Releases page](https://github.com/axnic/rtunk/releases). Each one ships, next to the archives:
 
 - `checksums.txt` and `checksums.txt.sigstore.json`: the SHA256 of every archive, signed
   keyless with [cosign](https://docs.sigstore.dev) (Sigstore). The signature is bound to the

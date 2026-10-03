@@ -13,9 +13,7 @@
   },
   // Keeps downloaded tools across rebuilds. Docker creates the volume and its parent dirs
   // root-owned, hence the chown.
-  "mounts": [
-    "source=rtunk-mise-data,target=/home/vscode/.local/share/mise,type=volume"
-  ],
+  "mounts": ["source=rtunk-mise-data,target=/home/vscode/.local/share/mise,type=volume"],
   "postCreateCommand": "sudo chown -R vscode:vscode /home/vscode/.local && mise install",
   "customizations": {
     "vscode": {
@@ -25,9 +23,7 @@
         "go.alternateTools": {
           "go": "/home/vscode/.local/share/mise/shims/go",
           "gopls": "/home/vscode/.local/share/mise/shims/gopls"
-        },
-        "go.lintTool": "golangci-lint",
-        "go.lintOnSave": "workspace"
+        }
       }
     }
   }
