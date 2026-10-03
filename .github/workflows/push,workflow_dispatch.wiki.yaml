@@ -9,7 +9,7 @@
 # Jobs:
 #   wiki — mirror the docs directory to the wiki, from wiki.publish
 #
-# MANAGED BY TERRAFORM (axnic/.github-private, modules/workflows) — do not edit by hand.
+# MANAGED BY TERRAFORM (axnic/.github, terraform/modules/workflows) — do not edit by hand.
 # Reusable workflow: https://github.com/axnic/.github/blob/main/.github/workflows/wiki.publish.yaml
 # =============================================================================
 
