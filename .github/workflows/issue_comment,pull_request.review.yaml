@@ -9,7 +9,7 @@
 # Jobs:
 #   review — PR-Agent review and /commands, from core.review
 #
-# MANAGED BY TERRAFORM (axnic/.github-private, modules/workflows) — do not edit by hand.
+# MANAGED BY TERRAFORM (axnic/.github, terraform/modules/workflows) — do not edit by hand.
 # Reusable workflow: https://github.com/axnic/.github/blob/main/.github/workflows/core.review.yaml
 # =============================================================================
 
