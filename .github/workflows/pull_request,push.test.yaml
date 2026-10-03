@@ -1,18 +1,6 @@
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
-#
-# =============================================================================
-# Quality Assurance — Go build, tests and coverage
-# =============================================================================
-# Builds the Go code, runs the tests and reports coverage when Go files change,
-# on pull requests and pushes to the default branch.
-# Requires the mise tasks: ci:build, ci:test, ci:coverage.
-#
-# Jobs:
-#   test — Go build, tests and coverage, from go.test
-#
 # MANAGED BY TERRAFORM (axnic/.github-private, modules/workflows) — do not edit by hand.
 # Reusable workflow: https://github.com/axnic/.github/blob/main/.github/workflows/go.test.yaml
-# =============================================================================
 
 name: Quality Assurance
 
@@ -20,16 +8,16 @@ on:
   pull_request:
     paths:
       - "**.go"
-      - "go.mod"
-      - "go.sum"
-      - ".github/workflows/pull_request,push.test.yaml"
+      - go.mod
+      - go.sum
+      - .github/workflows/pull_request,push.test.yaml
   push:
-    branches: ["main"]
+    branches: [main]
     paths:
       - "**.go"
-      - "go.mod"
-      - "go.sum"
-      - ".github/workflows/pull_request,push.test.yaml"
+      - go.mod
+      - go.sum
+      - .github/workflows/pull_request,push.test.yaml
 
 concurrency:
   group: test-${{ github.event.pull_request.number || github.ref }}
@@ -39,9 +27,6 @@ concurrency:
 permissions: {}
 
 jobs:
-  # ---------------------------------------------------------------------------
-  # test — Go build, tests and coverage, from go.test
-  # ---------------------------------------------------------------------------
   test:
     name: 🧪 Go
     # Intentionally not pinned: follows the latest axnic/.github (owner-controlled repo).
