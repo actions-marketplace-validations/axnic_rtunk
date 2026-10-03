@@ -1,0 +1,35 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+#
+# =============================================================================
+# Contributor Welcome — Greet external contributors
+# =============================================================================
+# Comments on pull requests opened by external contributors to say a maintainer
+# will review them.
+#
+# Jobs:
+#   welcome — greet external contributors, from oss.welcome
+#
+# MANAGED BY TERRAFORM (axnic/.github-private, modules/workflows) — do not edit by hand.
+# Reusable workflow: https://github.com/axnic/.github/blob/main/.github/workflows/oss.welcome.yaml
+# =============================================================================
+
+name: Contributor Welcome
+
+on:
+  pull_request_target:
+    types: [opened]
+
+# Minimal top-level permissions — each job declares what it needs.
+permissions: {}
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # welcome — greet external contributors, from oss.welcome
+  # ---------------------------------------------------------------------------
+  welcome:
+    name: 👋 Welcome
+    # Intentionally not pinned: follows the latest axnic/.github (owner-controlled repo).
+    uses: axnic/.github/.github/workflows/oss.welcome.yaml@main
+    secrets: inherit
+    permissions:
+      pull-requests: write
