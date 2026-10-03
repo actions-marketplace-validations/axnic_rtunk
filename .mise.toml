@@ -110,10 +110,13 @@ run = "go test -race -covermode=atomic -coverprofile=coverage.txt ./..."
 # A floor, not a target: it catches coverage regressions without pinning today's exact number.
 # Raise it as coverage improves; never lower it to make a failing PR pass.
 [tasks."ci:coverage"]
-description = "Fail if total statement coverage is below the floor (default 80%)"
-depends = ["ci:test"]
+description = "Fail if total statement coverage is below the floor (default 80%); runs the tests only if coverage.txt is absent"
 env = { COVERAGE_FLOOR = "80" }
 run = '''
+# The central go.test workflow runs ci:test then ci:coverage: evaluate the profile ci:test just wrote
+# rather than running the tests again. Run alone with no profile, produce it. An existing profile is
+# trusted as is, so rerun ci:test first after changing code (`ci` does).
+[ -f coverage.txt ] || go test -race -covermode=atomic -coverprofile=coverage.txt ./...
 total=$(go tool cover -func=coverage.txt | tail -1 | awk '{print $NF}' | tr -d '%')
 echo "Total statement coverage: ${total}%"
 awk -v total="$total" -v floor="$COVERAGE_FLOOR" 'BEGIN { if (total + 0 < floor + 0) { print "coverage " total "% is below the " floor "% floor"; exit 1 } }'
@@ -125,4 +128,6 @@ awk -v total="$total" -v floor="$COVERAGE_FLOOR" 'BEGIN { if (total + 0 < floor 
 
 [tasks.ci]
 description = "Local gate run before a release (lint, commit messages and dependency audit excluded)"
-depends = ["ci:lint", "ci:build", "ci:coverage"]
+# Explicit order, not `depends` (which would run the tasks in parallel): ci:test writes the profile
+# that ci:coverage reads.
+run = [{ task = "ci:lint" }, { task = "ci:build" }, { task = "ci:test" }, { task = "ci:coverage" }]

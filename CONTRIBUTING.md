@@ -40,17 +40,17 @@ the `rtunk-mise-data` volume and survive rebuilds. `mise run ci` is the local ga
 CI never calls a tool directly: the central workflows run tasks of `.mise.toml`, so a green local run
 matches what a pull request goes through (`lint` and `security:audit` sit outside the `ci:` namespace). `mise tasks` lists them.
 
-| Task                      | What it does                                                                                                      |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `mise run lint`           | `rtunk check .` with the released rtunk mise installs (pinned by `mise.lock`), every file                         |
-| `mise run lint:fix`       | `rtunk check --fix .`                                                                                             |
-| `mise run ci:lint`        | Checks `action.yml` can be published to the Marketplace (single-line name, description of at most 125 characters) |
-| `mise run ci:build`       | Builds `./rtunk`                                                                                                  |
-| `mise run ci:test`        | `go test -race` with a coverage profile                                                                           |
-| `mise run ci:coverage`    | `ci:test`, then fails under the 80% statement-coverage floor                                                      |
-| `mise run ci:commitlint`  | Validates commit messages (`-- --from <sha> --to <sha>`)                                                          |
-| `mise run security:audit` | `govulncheck ./...`                                                                                               |
-| `mise run ci`             | `ci:lint`, `ci:build`, `ci:coverage`: the release gate, without `lint`, commit messages and the audit             |
+| Task                      | What it does                                                                                                         |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `mise run lint`           | `rtunk check .` with the released rtunk mise installs (pinned by `mise.lock`), every file                            |
+| `mise run lint:fix`       | `rtunk check --fix .`                                                                                                |
+| `mise run ci:lint`        | Checks `action.yml` can be published to the Marketplace (single-line name, description of at most 125 characters)    |
+| `mise run ci:build`       | Builds `./rtunk`                                                                                                     |
+| `mise run ci:test`        | `go test -race` with a coverage profile                                                                              |
+| `mise run ci:coverage`    | Fails under the 80% statement-coverage floor, from the `coverage.txt` of `ci:test` (runs the tests itself if absent) |
+| `mise run ci:commitlint`  | Validates commit messages (`-- --from <sha> --to <sha>`)                                                             |
+| `mise run security:audit` | `govulncheck ./...`                                                                                                  |
+| `mise run ci`             | `ci:lint`, `ci:build`, `ci:test`, `ci:coverage`: the release gate, without `lint`, commit messages and the audit     |
 
 `lint` does not build: it runs the released rtunk, not `./rtunk`, so use `./rtunk` (after `mise run ci:build`)
 to exercise your own changes.
@@ -109,7 +109,7 @@ do not edit them here.
 | `test`      | Quality Assurance: build and tests (`ci:build`, `ci:test`, `ci:coverage`)                 |
 | `review`    | AI Review (PR Agent)                                                                      |
 | `scan`      | Code Scanning                                                                             |
-| `deps`      | Dependency Updates                                                                        |
+| `deps`      | Dependency Updates (auto-merges Dependabot PRs; merge commit subject `[deps]: Bump ...`)  |
 | `audit`     | Dependency Audit (`security:audit`)                                                       |
 | `scorecard` | OpenSSF Scorecard                                                                         |
 | `wiki`      | Publishes `docs/` to the GitHub Wiki                                                      |
