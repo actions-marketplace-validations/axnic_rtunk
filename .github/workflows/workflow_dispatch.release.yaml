@@ -1,0 +1,85 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+#
+# =============================================================================
+# Release — Create a versioned release from the GitHub UI
+# =============================================================================
+# Triggered manually (Actions → Release → Run workflow). Set either `bump` or `version`,
+# not both. prepare runs `mise run ci`, computes the version, writes the notes and pushes
+# the tag; publish (go.publish) builds the artifacts of the draft GitHub Release
+# and leaves it in draft for review.
+# Requires the mise task: ci.
+#
+# Jobs:
+#   prepare — run `mise run ci`, compute the version, write the notes, push the tag
+#   publish — build the artifacts of the draft GitHub Release, from go.publish
+#
+# MANAGED BY TERRAFORM (axnic/.github-private, modules/workflows) — do not edit by hand.
+# Reusable workflow: https://github.com/axnic/.github/blob/main/.github/workflows/release.prepare.yaml
+# =============================================================================
+
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Version bump (leave empty when `version` is set)
+        required: false
+        type: choice
+        default: ""
+        options:
+          - ""
+          - auto
+          - patch
+          - minor
+          - major
+      version:
+        description: Exact version to release, without the leading "v" (leave empty when `bump` is set)
+        required: false
+        type: string
+      notes:
+        description: Release notes override (leave empty to generate them)
+        required: false
+        type: string
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+# Minimal top-level permissions — each job declares what it needs.
+permissions: {}
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # prepare — run `mise run ci`, compute the version, write the notes, push the tag
+  # ---------------------------------------------------------------------------
+  prepare:
+    name: 🏷️ Prepare
+    # Intentionally not pinned: follows the latest axnic/.github (owner-controlled repo).
+    uses: axnic/.github/.github/workflows/release.prepare.yaml@main
+    secrets: inherit
+    permissions:
+      contents: write
+      pull-requests: read
+    with:
+      bump: "${{ inputs.bump }}"
+      notes: "${{ inputs.notes }}"
+      version: "${{ inputs.version }}"
+
+  # ---------------------------------------------------------------------------
+  # publish — build the artifacts of the draft GitHub Release, from go.publish
+  # ---------------------------------------------------------------------------
+  publish:
+    name: 🚀 Publish
+    needs: prepare
+    # Intentionally not pinned: follows the latest axnic/.github (owner-controlled repo).
+    uses: axnic/.github/.github/workflows/go.publish.yaml@main
+    secrets: inherit
+    permissions:
+      attestations: write
+      contents: write
+      id-token: write
+    with:
+      prerelease: "${{ needs.prepare.outputs.prerelease == 'true' }}"
+      tag: "${{ needs.prepare.outputs.tag }}"
+      version: "${{ needs.prepare.outputs.version }}"
