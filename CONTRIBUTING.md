@@ -20,7 +20,7 @@ go build -o rtunk ./cmd/rtunk
 ```
 
 `mise install` resolves the toolchain declared in [`.mise.toml`](.mise.toml), pinned by
-`mise.lock`: the Go compiler matching `go.mod`'s floor, `golangci-lint`, `govulncheck`,
+`mise.lock`: the Go compiler matching `go.mod`'s floor, `govulncheck`,
 `goreleaser`, `cosign`, `syft` and Node with `commitlint`. The metalinter used below is rtunk
 itself, built from your clone, so there is nothing else to install. See
 [docs/Installation.md](docs/Installation.md) for prerequisites and platform support (macOS and
@@ -42,19 +42,17 @@ same gate a pull request goes through. `mise tasks` lists them.
 
 | Task                     | What it does                                                                                                      |
 | ------------------------ | ----------------------------------------------------------------------------------------------------------------- |
-| `mise run ci:lint`       | `golangci-lint run ./...`                                                                                         |
-| `mise run ci:action`     | Checks `action.yml` can be published to the Marketplace (single-line name, description of at most 125 characters) |
+| `mise run lint`          | `rtunk check .` with the released rtunk mise installs (pinned by `mise.lock`), every file                     |
+| `mise run lint:fix`      | `rtunk check --fix .`                                                                                         |
+| `mise run ci:lint`       | Checks `action.yml` can be published to the Marketplace (single-line name, description of at most 125 characters) |
 | `mise run ci:build`      | Builds `./rtunk`                                                                                                  |
-| `mise run ci:rtunk`      | `rtunk check` with the released rtunk mise installs (pinned by `mise.lock`), changed files                        |
 | `mise run ci:test`       | `go test -race` with a coverage profile                                                                           |
 | `mise run ci:coverage`   | `ci:test`, then fails under the 80% statement-coverage floor                                                      |
-| `mise run ci:scripts`    | Tests of the release tooling in `scripts/` (Node's built-in runner)                                               |
 | `mise run ci:commitlint` | Validates commit messages (`-- --from <sha> --to <sha>`)                                                          |
-| `mise run ci:vulncheck`  | `govulncheck ./...`                                                                                               |
-| `mise run ci`            | `ci:lint`, `ci:build`, `ci:coverage`, `ci:scripts`: the CI gate minus `ci:rtunk` and commit messages              |
+| `mise run security:audit`| `govulncheck ./...`                                                                                               |
+| `mise run ci`            | `ci:lint`, `ci:build`, `ci:coverage`: the release gate, without `lint`, commit messages and the audit              |
 
-Extra arguments reach rtunk through the task: `mise run ci:rtunk -- docs/Installation.md`. `ci:rtunk`
-does not build: it runs the released rtunk, not `./rtunk`, so use `./rtunk` (after `mise run ci:build`)
+`lint` does not build: it runs the released rtunk, not `./rtunk`, so use `./rtunk` (after `mise run ci:build`)
 to exercise your own changes.
 
 ## Tests and lint
@@ -70,7 +68,7 @@ gofmt -l .
 
 `go test ./...` and `go vet ./...` exit `0` with no output on success. `gofmt -l .` exits `0` and
 prints nothing when the tree is already formatted; any path it lists needs `gofmt -w`. `./rtunk
-check` (build it first with `mise run ci:build`; `mise run ci:rtunk` runs the released rtunk instead) runs the full
+check` (build it first with `mise run ci:build`; `mise run lint` runs the released rtunk instead) runs the full
 lint stack declared in [`.rtunk/rtunk.yaml`](.rtunk/rtunk.yaml) — `gofmt`, `golangci-lint2`,
 `markdownlint`, `prettier`, `yamllint`, `taplo`, plus the security scanners (`grype`,
 `osv-scanner`, `checkov`, `trufflehog`); it's read-only and exits non-zero on any finding. It
@@ -152,7 +150,7 @@ shows how to verify the result. Releases from `v0.14.0` on are signed; earlier o
 Listing the action on the GitHub Marketplace is a manual step, as GitHub documents no API or CLI for it: when
 publishing the draft, tick "Publish this Release to the GitHub Marketplace" in the release form (it needs the
 valid `action.yml` at the repository root and the Marketplace Developer Agreement accepted once by the owner).
-`mise run ci:action` (part of `mise run ci`, so it also runs before a release is tagged) fails on an `action.yml`
+`mise run ci:lint` (part of `mise run ci`, so it also runs before a release is tagged) fails on an `action.yml`
 without a single-line name or with a description over 125 characters; it cannot check that the name (`rtunk check`)
 is unique, which only GitHub knows.
 

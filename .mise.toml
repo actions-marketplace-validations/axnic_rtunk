@@ -31,16 +31,15 @@
 
 go = "latest"                                     # rtunk is implemented in Go (see AGENTS.md)
 "go:golang.org/x/tools/gopls" = "latest"          # Go language server, used by editors/agents (Serena)
-golangci-lint = "latest"                          # Go linter, drives .golangci.yml (`ci:lint`)
-"go:golang.org/x/vuln/cmd/govulncheck" = "latest" # Known-CVE scan of Go dependencies (`ci:vulncheck`)
+"go:golang.org/x/vuln/cmd/govulncheck" = "latest" # Known-CVE scan of Go dependencies (`security:audit`)
 
 # -----------------------------------------------------------------------------
 # Lint and Convention Tools
 # -----------------------------------------------------------------------------
 # Tools enforcing the repository conventions
 
-"github:axnic/rtunk" = "latest"                              # rtunk lints itself with its own release (`ci:rtunk`), never a local build
-node = "lts"                                                   # Runtime for commitlint and the release tooling in scripts/
+"github:axnic/rtunk" = "latest"                              # rtunk lints itself with its own release (`lint`), never a local build
+node = "lts"                                                   # Runtime for commitlint
 "npm:@commitlint/cli" = "latest"                               # Commit convention check, drives .commitlintrc.js (`ci:commitlint`)
 
 # -----------------------------------------------------------------------------
@@ -61,13 +60,17 @@ syft = "latest"       # SBOM generation for release archives (goreleaser `sboms`
 # -----------------------------------------------------------------------------
 # Quality Gate
 # -----------------------------------------------------------------------------
-# Static analysis of the whole repository
+# Repository-specific checks (rtunk covers the generic linters through `lint`)
+
+[tasks.lint]
+description = "Run rtunk's own lint stack (.rtunk/rtunk.yaml, golangci-lint included) on every file"
+run = "rtunk check ."
+
+[tasks."lint:fix"]
+description = "Run rtunk's lint stack on every file and apply the available fixes"
+run = "rtunk check --fix ."
 
 [tasks."ci:lint"]
-description = "Run golangci-lint on every Go package"
-run = "golangci-lint run ./..."
-
-[tasks."ci:action"]
 description = "Check that action.yml can be published to the GitHub Marketplace (a name, and a description of at most 125 characters)"
 run = '''
 name=$(sed -n 's/^name: *//p' action.yml)
@@ -81,15 +84,11 @@ len=$(printf '%s' "$desc" | wc -c)
 [ "$len" -le 125 ] || { echo "action.yml: the description has $len characters, the Marketplace allows at most 125"; exit 1; }
 '''
 
-[tasks."ci:rtunk"]
-description = "Run rtunk's own lint stack (.rtunk/rtunk.yaml) on the changed files; extra arguments go to rtunk check"
-run = "rtunk check"
-
 [tasks."ci:commitlint"]
 description = "Validate commit messages in a range (usage: mise run ci:commitlint -- --from <sha> --to <sha>)"
 run = "commitlint --verbose"
 
-[tasks."ci:vulncheck"]
+[tasks."security:audit"]
 description = "Scan Go dependencies for known vulnerabilities"
 run = "govulncheck ./..."
 
@@ -118,14 +117,10 @@ echo "Total statement coverage: ${total}%"
 awk -v total="$total" -v floor="$COVERAGE_FLOOR" 'BEGIN { if (total + 0 < floor + 0) { print "coverage " total "% is below the " floor "% floor"; exit 1 } }'
 '''
 
-[tasks."ci:scripts"]
-description = "Run the tests of the release tooling in scripts/ (Node's built-in runner)"
-run = 'node --test "scripts/*.test.mjs"'
-
 # -----------------------------------------------------------------------------
 # Aggregate
 # -----------------------------------------------------------------------------
 
 [tasks.ci]
-description = "Local equivalent of the CI quality gate (commit messages excluded)"
-depends = ["ci:lint", "ci:action", "ci:build", "ci:coverage", "ci:scripts"]
+description = "Local gate run before a release (lint, commit messages and dependency audit excluded)"
+depends = ["ci:lint", "ci:build", "ci:coverage"]
