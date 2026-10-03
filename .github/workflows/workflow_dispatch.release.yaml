@@ -13,7 +13,7 @@
 #   prepare — run `mise run ci`, compute the version, write the notes, push the tag
 #   publish — build the artifacts of the draft GitHub Release, from go.publish
 #
-# MANAGED BY TERRAFORM (axnic/.github-private, modules/workflows) — do not edit by hand.
+# MANAGED BY TERRAFORM (axnic/.github, terraform/modules/workflows) — do not edit by hand.
 # Reusable workflow: https://github.com/axnic/.github/blob/main/.github/workflows/release.prepare.yaml
 # =============================================================================
 
