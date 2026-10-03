@@ -121,6 +121,12 @@ and verifies the archive as described in [SECURITY.md](../SECURITY.md#verifying-
    signature of `checksums.txt` against the Release workflow's identity when `cosign` is on `PATH`.
    Any failure fails the job.
 
+Two Release workflow identities are accepted, so pinned older versions and `latest` both verify:
+rtunk's own `workflow_dispatch.release.yaml` (releases cut before the move to the central
+workflows) and the central `go.publish.yaml` of `axnic/.github` (later releases). Both are
+anchored on `refs/heads/main`, the OIDC issuer is GitHub Actions', and the signing repository is
+pinned to `axnic/rtunk`. See [SECURITY.md](../SECURITY.md#verifying-a-release) for the exact patterns.
+
 `v0.14.0` is the first release signed with cosign and carrying SBOMs and SLSA provenance, so every
 release from `v0.14.0` on has a bundle to verify. Releases up to `v0.13.2` have none: the action
 warns (`rtunk <tag> is not signed: verified against checksums.txt only`) and relies on the checksum,

@@ -16,6 +16,7 @@ rtunk-check-sandbox-*/
 /rtunk
 /coverage.txt
 
-# mise local state. mise.lock references .mise/locks/ (aube lock directories), so those stay tracked.
+# mise state is ignored, but .mise/locks/ holds the aube sidecars that mise.lock references and
+# `mise install --locked` needs.
 .mise/*
 !.mise/locks/

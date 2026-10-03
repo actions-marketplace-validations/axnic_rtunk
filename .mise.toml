@@ -3,15 +3,16 @@
 # =============================================================================
 # This mise configuration provides the complete toolchain needed to build,
 # lint, test and release rtunk, and defines the tasks shared by local
-# development and CI (.github/workflows/*). CI never calls the tools directly:
-# it runs `mise run ci:<task>`, so a green local `mise run ci` is the same gate
-# a pull request goes through.
+# development and CI. CI never calls the tools directly: the central workflows
+# of axnic/.github, called from this repository, run `mise run` tasks (`lint`
+# is local only, rtunk being the CI gate through its own action).
 #
 # Usage:
 #   mise install     # Install all tools
 #   mise trust       # Trust this configuration (if prompted)
 #   mise tasks       # List the available tasks
-#   mise run ci      # Run the whole CI quality gate (commit messages excluded)
+#   mise run lint    # Lint every file with rtunk (outside the ci: namespace)
+#   mise run ci      # Local gate: action.yml check, build, tests (no lint, no audit)
 #
 # Tool versions are resolved into mise.lock (`mise lock`); CI installs with
 # `--locked`, so a version only changes through a reviewed lockfile update.
@@ -31,22 +32,21 @@
 
 go = "latest"                                     # rtunk is implemented in Go (see AGENTS.md)
 "go:golang.org/x/tools/gopls" = "latest"          # Go language server, used by editors/agents (Serena)
-golangci-lint = "latest"                          # Go linter, drives .golangci.yml (`ci:lint`)
-"go:golang.org/x/vuln/cmd/govulncheck" = "latest" # Known-CVE scan of Go dependencies (`ci:vulncheck`)
+"go:golang.org/x/vuln/cmd/govulncheck" = "latest" # Known-CVE scan of Go dependencies (`security:audit`)
 
 # -----------------------------------------------------------------------------
 # Lint and Convention Tools
 # -----------------------------------------------------------------------------
 # Tools enforcing the repository conventions
 
-"github:axnic/rtunk" = "latest"                              # rtunk lints itself with its own release (`ci:rtunk`), never a local build
-node = "lts"                                                   # Runtime for commitlint and the release tooling in scripts/
-"npm:@commitlint/cli" = "latest"                               # Commit convention check, drives .commitlintrc.js (`ci:commitlint`)
+"github:axnic/rtunk" = "latest"  # rtunk lints itself with its own release (`lint`), never a local build
+node = "lts"                     # Runtime for commitlint
+"npm:@commitlint/cli" = "latest" # Commit convention check, drives .commitlintrc.js (`ci:commitlint`)
 
 # -----------------------------------------------------------------------------
 # Release Tools
 # -----------------------------------------------------------------------------
-# Tools used by the release workflow only (.github/workflows/*release*)
+# Tools used by the release workflow only (central `release` and `go.publish` workflows)
 
 goreleaser = "latest" # Cross-platform release builds, drives .goreleaser.yml
 cosign = "latest"     # Keyless signing of release checksums (goreleaser `signs`)
@@ -55,19 +55,24 @@ syft = "latest"       # SBOM generation for release archives (goreleaser `sboms`
 # =============================================================================
 # Tasks
 # =============================================================================
-# `ci:*` tasks are the units the CI workflows run, one per job. Each is also
-# the exact command to run locally; `ci` chains them as the quality gate.
+# `ci:*` tasks are the units the central CI workflows run. Each is also the
+# exact command to run locally; `ci` chains the lint-free ones as a local gate.
+# `lint` and `security:audit` live outside the `ci:` namespace.
 
 # -----------------------------------------------------------------------------
 # Quality Gate
 # -----------------------------------------------------------------------------
-# Static analysis of the whole repository
+# Repository-specific checks (rtunk covers the generic linters through `lint`)
+
+[tasks.lint]
+description = "Run rtunk's own lint stack (.rtunk/rtunk.yaml) on every file"
+run = "rtunk check ."
+
+[tasks."lint:fix"]
+description = "Run rtunk's lint stack on every file and apply the available fixes"
+run = "rtunk check --fix ."
 
 [tasks."ci:lint"]
-description = "Run golangci-lint on every Go package"
-run = "golangci-lint run ./..."
-
-[tasks."ci:action"]
 description = "Check that action.yml can be published to the GitHub Marketplace (a name, and a description of at most 125 characters)"
 run = '''
 name=$(sed -n 's/^name: *//p' action.yml)
@@ -81,15 +86,11 @@ len=$(printf '%s' "$desc" | wc -c)
 [ "$len" -le 125 ] || { echo "action.yml: the description has $len characters, the Marketplace allows at most 125"; exit 1; }
 '''
 
-[tasks."ci:rtunk"]
-description = "Run rtunk's own lint stack (.rtunk/rtunk.yaml) on the changed files; extra arguments go to rtunk check"
-run = "rtunk check"
-
 [tasks."ci:commitlint"]
 description = "Validate commit messages in a range (usage: mise run ci:commitlint -- --from <sha> --to <sha>)"
 run = "commitlint --verbose"
 
-[tasks."ci:vulncheck"]
+[tasks."security:audit"]
 description = "Scan Go dependencies for known vulnerabilities"
 run = "govulncheck ./..."
 
@@ -109,23 +110,24 @@ run = "go test -race -covermode=atomic -coverprofile=coverage.txt ./..."
 # A floor, not a target: it catches coverage regressions without pinning today's exact number.
 # Raise it as coverage improves; never lower it to make a failing PR pass.
 [tasks."ci:coverage"]
-description = "Fail if total statement coverage is below the floor (default 80%)"
-depends = ["ci:test"]
+description = "Fail if total statement coverage is below the floor (default 80%); runs the tests only if coverage.txt is absent"
 env = { COVERAGE_FLOOR = "80" }
 run = '''
+# The central go.test workflow runs ci:test then ci:coverage: evaluate the profile ci:test just wrote
+# rather than running the tests again. Run alone with no profile, produce it. An existing profile is
+# trusted as is, so rerun ci:test first after changing code (`ci` does).
+[ -f coverage.txt ] || go test -race -covermode=atomic -coverprofile=coverage.txt ./...
 total=$(go tool cover -func=coverage.txt | tail -1 | awk '{print $NF}' | tr -d '%')
 echo "Total statement coverage: ${total}%"
 awk -v total="$total" -v floor="$COVERAGE_FLOOR" 'BEGIN { if (total + 0 < floor + 0) { print "coverage " total "% is below the " floor "% floor"; exit 1 } }'
 '''
-
-[tasks."ci:scripts"]
-description = "Run the tests of the release tooling in scripts/ (Node's built-in runner)"
-run = 'node --test "scripts/*.test.mjs"'
 
 # -----------------------------------------------------------------------------
 # Aggregate
 # -----------------------------------------------------------------------------
 
 [tasks.ci]
-description = "Local equivalent of the CI quality gate (commit messages excluded)"
-depends = ["ci:lint", "ci:action", "ci:build", "ci:coverage", "ci:scripts"]
+description = "Local gate run before a release (lint, commit messages and dependency audit excluded)"
+# Explicit order, not `depends` (which would run the tasks in parallel): ci:test writes the profile
+# that ci:coverage reads.
+run = [{ task = "ci:lint" }, { task = "ci:build" }, { task = "ci:test" }, { task = "ci:coverage" }]

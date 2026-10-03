@@ -1,0 +1,56 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+#
+# =============================================================================
+# Action Check — tests the repository's own GitHub Action
+# =============================================================================
+# Validates action.yml on every PR (and merge-queue entry), and on every push
+# to main (main only accepts merged PRs, so a push is the merge commit).
+# Always runs, on every file: no path filter. The generic CI (quality
+# assurance, tests, scans, release) comes from the central workflows of
+# axnic/.github; only this check is specific to rtunk.
+#
+#   action  — runs the local action (`uses: ./`) on its latest release, on every
+#             file, so rtunk dogfoods itself and the action; then checks that
+#             action.yml can be published to the Marketplace (`ci:lint`)
+# =============================================================================
+
+name: Action Check
+
+on:
+  merge_group: {}
+  pull_request: {}
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+# Minimal top-level permissions — each job declares what it needs.
+permissions: {}
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # action — dogfood the local action and check the Marketplace metadata
+  # ---------------------------------------------------------------------------
+  action:
+    name: 🧹 Quality Assurance
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # Restores/saves the mise cache; the key hashes the mise config files, including mise.lock,
+      # so it changes only when a tool version changes.
+      - name: 🔧 Install tools via mise
+        uses: jdx/mise-action@9149ea85001c7435d5a66bb127d6a1b6227cb0a5 # v5.0.0
+        with:
+          cache: true
+          cache_key: "mise-v1-{{platform}}-{{file_hash}}"
+
+      # A name or description the Marketplace refuses only shows up when the release is published.
+      - name: 🏪 Check action.yml can be published to the Marketplace
+        run: mise run ci:lint

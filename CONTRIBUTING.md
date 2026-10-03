@@ -20,7 +20,7 @@ go build -o rtunk ./cmd/rtunk
 ```
 
 `mise install` resolves the toolchain declared in [`.mise.toml`](.mise.toml), pinned by
-`mise.lock`: the Go compiler matching `go.mod`'s floor, `golangci-lint`, `govulncheck`,
+`mise.lock`: the Go compiler matching `go.mod`'s floor, `govulncheck`,
 `goreleaser`, `cosign`, `syft` and Node with `commitlint`. The metalinter used below is rtunk
 itself, built from your clone, so there is nothing else to install. See
 [docs/Installation.md](docs/Installation.md) for prerequisites and platform support (macOS and
@@ -33,28 +33,26 @@ or the `devcontainer` CLI the same toolchain without installing anything on the 
 non-root Ubuntu image (amd64 and arm64) with `git`, `gh`, `mise` and the Go extension. On first
 creation it runs `mise install`, which resolves [`.mise.toml`](.mise.toml) as pinned by
 `mise.lock`; the config is pre-trusted, so no `mise trust` is needed. Downloaded tools live in
-the `rtunk-mise-data` volume and survive rebuilds. `mise run ci` is the gate there as well.
+the `rtunk-mise-data` volume and survive rebuilds. `mise run ci` is the local gate there as well.
 
 ### Mise tasks
 
-CI never calls a tool directly: every job runs a task of `.mise.toml`, so a green local run is the
-same gate a pull request goes through. `mise tasks` lists them.
+CI never calls a tool directly: the central workflows run tasks of `.mise.toml`, so a green local run
+matches what a pull request goes through (`lint` and `security:audit` sit outside the `ci:` namespace). `mise tasks` lists them.
 
-| Task                     | What it does                                                                                                      |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------- |
-| `mise run ci:lint`       | `golangci-lint run ./...`                                                                                         |
-| `mise run ci:action`     | Checks `action.yml` can be published to the Marketplace (single-line name, description of at most 125 characters) |
-| `mise run ci:build`      | Builds `./rtunk`                                                                                                  |
-| `mise run ci:rtunk`      | `rtunk check` with the released rtunk mise installs (pinned by `mise.lock`), changed files                        |
-| `mise run ci:test`       | `go test -race` with a coverage profile                                                                           |
-| `mise run ci:coverage`   | `ci:test`, then fails under the 80% statement-coverage floor                                                      |
-| `mise run ci:scripts`    | Tests of the release tooling in `scripts/` (Node's built-in runner)                                               |
-| `mise run ci:commitlint` | Validates commit messages (`-- --from <sha> --to <sha>`)                                                          |
-| `mise run ci:vulncheck`  | `govulncheck ./...`                                                                                               |
-| `mise run ci`            | `ci:lint`, `ci:build`, `ci:coverage`, `ci:scripts`: the CI gate minus `ci:rtunk` and commit messages              |
+| Task                      | What it does                                                                                                         |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `mise run lint`           | `rtunk check .` with the released rtunk mise installs (pinned by `mise.lock`), every file                            |
+| `mise run lint:fix`       | `rtunk check --fix .`                                                                                                |
+| `mise run ci:lint`        | Checks `action.yml` can be published to the Marketplace (single-line name, description of at most 125 characters)    |
+| `mise run ci:build`       | Builds `./rtunk`                                                                                                     |
+| `mise run ci:test`        | `go test -race` with a coverage profile                                                                              |
+| `mise run ci:coverage`    | Fails under the 80% statement-coverage floor, from the `coverage.txt` of `ci:test` (runs the tests itself if absent) |
+| `mise run ci:commitlint`  | Validates commit messages (`-- --from <sha> --to <sha>`)                                                             |
+| `mise run security:audit` | `govulncheck ./...`                                                                                                  |
+| `mise run ci`             | `ci:lint`, `ci:build`, `ci:test`, `ci:coverage`: the release gate, without `lint`, commit messages and the audit     |
 
-Extra arguments reach rtunk through the task: `mise run ci:rtunk -- docs/Installation.md`. `ci:rtunk`
-does not build: it runs the released rtunk, not `./rtunk`, so use `./rtunk` (after `mise run ci:build`)
+`lint` does not build: it runs the released rtunk, not `./rtunk`, so use `./rtunk` (after `mise run ci:build`)
 to exercise your own changes.
 
 ## Tests and lint
@@ -70,7 +68,7 @@ gofmt -l .
 
 `go test ./...` and `go vet ./...` exit `0` with no output on success. `gofmt -l .` exits `0` and
 prints nothing when the tree is already formatted; any path it lists needs `gofmt -w`. `./rtunk
-check` (build it first with `mise run ci:build`; `mise run ci:rtunk` runs the released rtunk instead) runs the full
+check` (build it first with `mise run ci:build`; `mise run lint` runs the released rtunk instead) runs the full
 lint stack declared in [`.rtunk/rtunk.yaml`](.rtunk/rtunk.yaml) — `gofmt`, `golangci-lint2`,
 `markdownlint`, `prettier`, `yamllint`, `taplo`, plus the security scanners (`grype`,
 `osv-scanner`, `checkov`, `trufflehog`); it's read-only and exits non-zero on any finding. It
@@ -93,66 +91,54 @@ go test -run '^$' -fuzz=FuzzInstallDownloadTarGz -fuzztime=30s ./pkg/cache/downl
 
 A crash writes a reproducer under `testdata/fuzz/` next to the test; commit it with the fix.
 
-`mise run ci` runs lint, build, tests with the coverage floor and the release-tooling tests
-locally: the same gate the `lint`, `build` and `test` jobs below run, without the `rtunk` and
-`commitlint` jobs.
+`mise run ci` runs the `action.yml` check, build and tests with the coverage floor locally: the same
+tasks the central `test` workflow runs. It does not lint: run `mise run lint` for that.
 
 For documentation-only changes, this repository's own convention is `./rtunk fmt <path>` then
 `./rtunk check <path>` scoped to the files touched, in place of the full `./rtunk check` above.
 
 ## Continuous integration and releases
 
-Workflows live in [`.github/workflows/`](.github/workflows), named `<triggers>.<name>.yaml`.
+CI is defined centrally in the `axnic/.github` repository as reusable workflows. The callers in
+[`.github/workflows/`](.github/workflows) are generated by Terraform, named `<triggers>.<action>.yaml`:
+do not edit them here.
 
-| Workflow                                   | Runs                                                                                                                                                                                                      |
-| ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `merge_group,pull_request,push.lint.yaml`  | `Lint`, on pull requests, merge-queue entries and pushes to `main`, always: `lint`, `rtunk`, `commitlint`                                                                                                 |
-| `pull_request,push.go.yaml`                | `Go`, on pull requests and pushes to `main`, path-filtered: `build`, `test`                                                                                                                               |
-| `pull_request,push,schedule.codeql.yaml`   | `CodeQL` (`security-and-quality` suite), on every pull request and push to `main`, plus daily at 06:00 UTC; skipped for Dependabot and fork pull requests, whose token cannot write code-scanning results |
-| `schedule.security.yaml`                   | Daily `govulncheck` and OpenSSF Scorecard                                                                                                                                                                 |
-| `push,workflow_dispatch.wiki.yaml`         | Publishes `docs/` to the GitHub Wiki on pushes to `main` that touch it                                                                                                                                    |
-| `pull_request.dependabot-auto-merge.yaml`  | Approves and auto-merges Dependabot patch and security updates                                                                                                                                            |
-| `issue_comment,pull_request.pr-agent.yaml` | Posts a comment listing the commands when a pull request is opened; runs `/describe`, `/review`, `/improve`, `/ask`, `/help` comments from allowed users (PR Agent)                                       |
-| `workflow_dispatch.release.yaml`           | Cuts a release (run manually, see below)                                                                                                                                                                  |
+| Action      | Runs                                                                                      |
+| ----------- | ----------------------------------------------------------------------------------------- |
+| `qa`        | Quality Assurance: lint, rtunk, commit messages (`merge_group,pull_request,push.qa.yaml`) |
+| `test`      | Quality Assurance: build and tests (`ci:build`, `ci:test`, `ci:coverage`)                 |
+| `review`    | AI Review (PR Agent)                                                                      |
+| `scan`      | Code Scanning                                                                             |
+| `deps`      | Dependency Updates (auto-merges Dependabot PRs; merge commit subject `[deps]: Bump ...`)  |
+| `audit`     | Dependency Audit (`security:audit`)                                                       |
+| `scorecard` | OpenSSF Scorecard                                                                         |
+| `wiki`      | Publishes `docs/` to the GitHub Wiki                                                      |
+| `release`   | Release (run manually, see below; `workflow_dispatch.release.yaml`)                       |
 
-The `lint` workflow always runs, on every file, with no path filter. `lint` runs golangci-lint; the
-`rtunk` job dogfoods the tool and the [GitHub Action](docs/GitHub-Action.md) on its latest release:
-it checks every file, and findings appear as annotations; `commitlint` validates the commit messages.
+The hand-written `merge_group,pull_request,push.action.yaml` (Action Check) dogfoods the
+[GitHub Action](docs/GitHub-Action.md) on rtunk's latest release.
 
-The `go` workflow runs `build` and `test`. It has no `merge_group` trigger: it runs on pull requests
-and pushes to `main` only, and only when `**.go`, `go.mod`, `go.sum` or the workflow file itself
-changed. Merge-queue entries do not run it, since the pull request already passed it; `Lint` still
-runs on them. The `test` job runs on Linux and
-macOS (`fail-fast: false`, so one platform's failure does not hide the other's); the release-tooling
-tests run on Linux only.
+Look in [`.github/workflows/`](.github/workflows) for the exact trigger-prefixed file names and in
+`axnic/.github` for what each reusable workflow does. Some of the tasks they call are defined in
+[`.mise.toml`](.mise.toml): `ci:commitlint`, `ci:build`, `ci:test`, `ci:coverage`, `security:audit`,
+and `ci:lint` when present.
 
-[PR Agent](https://github.com/The-PR-Agent/pr-agent) (pinned by SHA, v0.47.0) never runs on its own
-on pull requests or pushes. When a pull request is opened, a `welcome` job posts one comment listing
-the commands, without calling the model; it is skipped for bots (Dependabot included), draft pull
-requests and pull requests from forks, which cannot read secrets, and when `OPENROUTER_API_KEY` is
-unset. A comment starting with `/` (`/describe`, `/review`, `/improve`, `/ask <question>`, `/help`)
-runs that command in the `pr-agent` job, only for the GitHub logins listed in the repository
-variable `PR_AGENT_ALLOWED_USERS` (Settings, Secrets and variables, Actions, Variables): a JSON list
-such as `["xunleii", "someone"]`, compared case-insensitively and defaulting to `["xunleii"]` when
-unset. Everyone else's comments are ignored, so nobody else can spend the key; edit the variable,
-not the workflow, to add or remove someone. It never edits the pull request's title or body:
-`/describe` publishes one persistent comment. The model (Pareto 26.10 preview, with Claude Sonnet
-5.5 as the fallback) is reached through OpenRouter with the same `OPENROUTER_API_KEY` secret as the
-release notes. The `welcome` job has `pull-requests: write` permission, the `pr-agent` job
-`contents: read`, `issues: write` and `pull-requests: write`. The answers are advisory and never
-block a merge; they are not a substitute for human review.
+[PR Agent](https://github.com/The-PR-Agent/pr-agent) is the AI Review workflow. It is configured
+centrally; its allowed users, model and secrets are not described here, check `axnic/.github`.
+Its answers are advisory and never block a merge; they are not a substitute for human review.
 
-A release is cut from `main` through Actions, Release, Run workflow: the workflow computes the next
-version from the last tag (or takes an explicit `version`), runs `mise run ci`, tags, builds the
-`darwin` and `linux` archives (`amd64`, `arm64`) with GoReleaser, signs `checksums.txt` keyless
-with cosign, attaches an SBOM per archive and records SLSA build provenance, then publishes a draft
-release with generated notes for the maintainer to review. [SECURITY.md](SECURITY.md#verifying-a-release)
-shows how to verify the result. Releases from `v0.14.0` on are signed; earlier ones are not.
+A release is cut from `main` through Actions, Release, Run workflow (defined by the Terraform-generated
+`workflow_dispatch.release.yaml`). Pass exactly one input: `bump` (`auto`, `patch`, `minor` or `major`)
+or `version` (an exact version such as `0.13.0`, or `0.13.0-rc.1` for a release candidate). The workflow
+runs `mise run ci`, creates the tag and a draft release with AI-written notes, then publishes the
+`darwin` and `linux` archives (`amd64`, `arm64`) with GoReleaser, signed keyless with cosign, with an SBOM
+per archive and SLSA build provenance. [SECURITY.md](SECURITY.md#verifying-a-release) shows how to verify
+the result. Releases from `v0.14.0` on are signed; earlier ones are not.
 
 Listing the action on the GitHub Marketplace is a manual step, as GitHub documents no API or CLI for it: when
 publishing the draft, tick "Publish this Release to the GitHub Marketplace" in the release form (it needs the
 valid `action.yml` at the repository root and the Marketplace Developer Agreement accepted once by the owner).
-`mise run ci:action` (part of `mise run ci`, so it also runs before a release is tagged) fails on an `action.yml`
+`mise run ci:lint` (part of `mise run ci`, so it also runs before a release is tagged) fails on an `action.yml`
 without a single-line name or with a description over 125 characters; it cannot check that the name (`rtunk check`)
 is unique, which only GitHub knows.
 
@@ -205,5 +191,5 @@ in the same commit. Page inventory, templates and writing rules:
    body: write the title as a valid `type[scope]: Subject` header, since CI validates that merge
    commit on the push to `main`.
 5. CI re-runs lint, commit-message validation, build and tests (with a coverage floor) on every
-   pull request; the same gate runs locally with `mise run ci`. Passing "Tests and lint" locally
+   pull request; the build and tests run locally with `mise run ci`, the lint with `mise run lint`. Passing "Tests and lint" locally
    before opening the PR is what keeps review fast.
