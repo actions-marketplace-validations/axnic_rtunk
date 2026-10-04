@@ -42,4 +42,4 @@ jobs:
     permissions:
       contents: write
     with:
-      docs-dir: "docs"
+      docs-dir: docs
