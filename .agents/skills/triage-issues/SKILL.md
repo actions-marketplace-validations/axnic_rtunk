@@ -40,7 +40,7 @@ area is not a reason. Walk the rungs in order and stop at the first that applies
    milestone being worked on now, a user report, another issue that needs it) makes a feature or
    refactor `medium`, or `high` if it blocks the milestone. A refactor, cleanup or feature with no
    rationale, or scheduled for a later milestone and not started, is `low` however large it is (C2).
-7. **Dependency bumps** (Dependabot and manual): driven by a feature you need `medium`; by a
+7. **Dependency bumps** (Renovate, Dependabot security updates and manual): driven by a feature you need `medium`; by a
    reachable CVE `high` (rung 3); routine `low`. A bump of `go.mod`'s Go version or a core tool the
    CI depends on is `medium` even when routine.
 8. **Documentation:** docs that mislead users into doing the wrong thing, or contradict the
