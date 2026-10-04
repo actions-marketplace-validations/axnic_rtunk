@@ -1,14 +1,15 @@
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 #
 # =============================================================================
-# Dependency Updates — Dependabot auto-merge
+# Dependency Updates — Dependabot and Renovate auto-merge
 # =============================================================================
-# Approves and auto-merges Dependabot pull requests for patch updates and for security updates
-# at any semver level (minor/major non-security updates stay open for review), with a merge-commit
-# subject that follows the commit convention.
+# Approves and auto-merges the pull requests of Dependabot (patch and security updates) and of
+# Renovate (the updates its preset marks as safe: patches, minors from 1.0 on, security updates),
+# with a merge-commit subject that follows the commit convention. Everything else stays open for
+# review.
 #
 # Jobs:
-#   deps — approve and merge Dependabot patch and security updates, from core.deps
+#   deps — approve and merge Dependabot and Renovate updates, from core.deps
 #
 # MANAGED BY TERRAFORM (axnic/.github, terraform/modules/workflows) — do not edit by hand.
 # Reusable workflow: https://github.com/axnic/.github/blob/main/.github/workflows/core.deps.yaml
@@ -25,10 +26,10 @@ permissions: {}
 
 jobs:
   # ---------------------------------------------------------------------------
-  # deps — approve and merge Dependabot patch and security updates, from core.deps
+  # deps — approve and merge Dependabot and Renovate updates, from core.deps
   # ---------------------------------------------------------------------------
   deps:
-    name: 🤖 Dependabot Auto-merge
+    name: 🤖 Dependency Auto-merge
     # Intentionally not pinned: follows the latest axnic/.github (owner-controlled repo).
     uses: axnic/.github/.github/workflows/core.deps.yaml@main
     secrets: inherit
