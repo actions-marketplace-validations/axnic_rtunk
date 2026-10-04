@@ -50,44 +50,44 @@ url_api = "https://api.github.com/repos/sigstore/cosign/releases/assets/50328623
 provenance = "cosign"
 
 [[tools."github:axnic/rtunk"]]
-version = "0.14.0"
+version = "0.16.0"
 backend = "github:axnic/rtunk"
 specifiers = ["latest"]
 
 [tools."github:axnic/rtunk"."platforms.linux-arm64"]
-checksum = "sha256:82febf12ec82672d4a504314b24e55c768116a886fe69e3d713c4276457c0226"
-url = "https://github.com/axnic/rtunk/releases/download/v0.14.0/rtunk-v0.14.0-linux-arm64.tar.gz"
-url_api = "https://api.github.com/repos/axnic/rtunk/releases/assets/605512741"
+checksum = "sha256:154d198ac52b71b7df866835006bb26213f8a733cc7d064a1e0dff7c2dd636ad"
+url = "https://github.com/axnic/rtunk/releases/download/v0.16.0/rtunk-v0.16.0-linux-arm64.tar.gz"
+url_api = "https://api.github.com/repos/axnic/rtunk/releases/assets/606613834"
 provenance = "github-attestations"
 
 [tools."github:axnic/rtunk"."platforms.linux-arm64-musl"]
-checksum = "sha256:82febf12ec82672d4a504314b24e55c768116a886fe69e3d713c4276457c0226"
-url = "https://github.com/axnic/rtunk/releases/download/v0.14.0/rtunk-v0.14.0-linux-arm64.tar.gz"
-url_api = "https://api.github.com/repos/axnic/rtunk/releases/assets/605512741"
+checksum = "sha256:154d198ac52b71b7df866835006bb26213f8a733cc7d064a1e0dff7c2dd636ad"
+url = "https://github.com/axnic/rtunk/releases/download/v0.16.0/rtunk-v0.16.0-linux-arm64.tar.gz"
+url_api = "https://api.github.com/repos/axnic/rtunk/releases/assets/606613834"
 provenance = "github-attestations"
 
 [tools."github:axnic/rtunk"."platforms.linux-x64"]
-checksum = "sha256:01b30b69ae4597b4fefbd06eacd2d20ff7d8acc3ddbabec23f7348b5f30395b8"
-url = "https://github.com/axnic/rtunk/releases/download/v0.14.0/rtunk-v0.14.0-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/axnic/rtunk/releases/assets/605512744"
+checksum = "sha256:f0a78e0745ad5cfe567ca2bb1f0015efeb25b701dc3a0f21476bd4aef47f83d5"
+url = "https://github.com/axnic/rtunk/releases/download/v0.16.0/rtunk-v0.16.0-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/axnic/rtunk/releases/assets/606613828"
 provenance = "github-attestations"
 
 [tools."github:axnic/rtunk"."platforms.linux-x64-musl"]
-checksum = "sha256:01b30b69ae4597b4fefbd06eacd2d20ff7d8acc3ddbabec23f7348b5f30395b8"
-url = "https://github.com/axnic/rtunk/releases/download/v0.14.0/rtunk-v0.14.0-linux-amd64.tar.gz"
-url_api = "https://api.github.com/repos/axnic/rtunk/releases/assets/605512744"
+checksum = "sha256:f0a78e0745ad5cfe567ca2bb1f0015efeb25b701dc3a0f21476bd4aef47f83d5"
+url = "https://github.com/axnic/rtunk/releases/download/v0.16.0/rtunk-v0.16.0-linux-amd64.tar.gz"
+url_api = "https://api.github.com/repos/axnic/rtunk/releases/assets/606613828"
 provenance = "github-attestations"
 
 [tools."github:axnic/rtunk"."platforms.macos-arm64"]
-checksum = "sha256:bc17cdaad56b84589d318056ffe69e342f9ec2071b3239b27b6dc48f24450855"
-url = "https://github.com/axnic/rtunk/releases/download/v0.14.0/rtunk-v0.14.0-darwin-arm64.tar.gz"
-url_api = "https://api.github.com/repos/axnic/rtunk/releases/assets/605512745"
+checksum = "sha256:4c82045a7683df4faefc03e2b411ad4b4bc3d9ca817d51b3faadc0536c0b693d"
+url = "https://github.com/axnic/rtunk/releases/download/v0.16.0/rtunk-v0.16.0-darwin-arm64.tar.gz"
+url_api = "https://api.github.com/repos/axnic/rtunk/releases/assets/606613832"
 provenance = "github-attestations"
 
 [tools."github:axnic/rtunk"."platforms.macos-x64"]
-checksum = "sha256:7824a7b0aa49bdfca03e636a7842ace392ed4427654431de666057f54191b698"
-url = "https://github.com/axnic/rtunk/releases/download/v0.14.0/rtunk-v0.14.0-darwin-amd64.tar.gz"
-url_api = "https://api.github.com/repos/axnic/rtunk/releases/assets/605512746"
+checksum = "sha256:18aa78d83fe8e4fc40a6f677929580a8209f23833ca0b53cef83de53b912b67d"
+url = "https://github.com/axnic/rtunk/releases/download/v0.16.0/rtunk-v0.16.0-darwin-amd64.tar.gz"
+url_api = "https://api.github.com/repos/axnic/rtunk/releases/assets/606613827"
 provenance = "github-attestations"
 
 [[tools.go]]
