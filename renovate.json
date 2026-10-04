@@ -1,0 +1,6 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["local>axnic/.github:default"],
+  "semanticCommits": "disabled",
+  "commitMessagePrefix": "^[deps]:"
+}

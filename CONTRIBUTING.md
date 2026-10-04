@@ -109,7 +109,7 @@ do not edit them here.
 | `test`      | Quality Assurance: build and tests (`ci:build`, `ci:test`, `ci:coverage`)                 |
 | `review`    | AI Review (PR Agent)                                                                      |
 | `scan`      | Code Scanning                                                                             |
-| `deps`      | Dependency Updates (auto-merges Dependabot PRs; merge commit subject `[deps]: Bump ...`)  |
+| `deps`      | Dependency Updates (auto-merges Renovate PRs; subject `^[deps]: Update ...`)              |
 | `audit`     | Dependency Audit (`security:audit`)                                                       |
 | `scorecard` | OpenSSF Scorecard                                                                         |
 | `wiki`      | Publishes `docs/` to the GitHub Wiki                                                      |
