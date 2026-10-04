@@ -37,5 +37,5 @@ jobs:
       contents: write
       pull-requests: write
     with:
-      merge-method: "merge"
-      subject-prefix: "^[deps]"
+      merge-method: merge
+      subject-prefix: ^[deps]
