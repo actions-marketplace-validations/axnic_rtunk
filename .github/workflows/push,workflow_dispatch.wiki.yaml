@@ -36,8 +36,8 @@ jobs:
   # ---------------------------------------------------------------------------
   wiki:
     name: 📚 Publish Wiki
-    # Intentionally not pinned: follows the latest axnic/.github (owner-controlled repo).
-    uses: axnic/.github/.github/workflows/wiki.publish.yaml@main
+    # Pinned to the axnic/.github commit that last changed this workflow; Terraform keeps it up to date.
+    uses: axnic/.github/.github/workflows/wiki.publish.yaml@019e130c21885a9ede2745f9400c8b1d34a38f7e # main
     secrets: inherit
     permissions:
       contents: write
