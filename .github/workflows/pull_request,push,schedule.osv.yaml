@@ -36,8 +36,8 @@ jobs:
   # ---------------------------------------------------------------------------
   osv:
     name: 🛡️ OSV-Scanner
-    # Intentionally not pinned: follows the latest axnic/.github (owner-controlled repo).
-    uses: axnic/.github/.github/workflows/security.osv.yaml@main
+    # Pinned to the axnic/.github commit that last changed this workflow; Terraform keeps it up to date.
+    uses: axnic/.github/.github/workflows/security.osv.yaml@2be6fad9cc86f4520dd7295f2ea34407331082dd # main
     secrets: inherit
     permissions:
       actions: read
