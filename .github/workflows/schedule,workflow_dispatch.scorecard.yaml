@@ -29,8 +29,8 @@ jobs:
   # ---------------------------------------------------------------------------
   scorecard:
     name: 🛡️ OpenSSF Scorecard
-    # Intentionally not pinned: follows the latest axnic/.github (owner-controlled repo).
-    uses: axnic/.github/.github/workflows/oss.scorecard.yaml@main
+    # Pinned to the axnic/.github commit that last changed this workflow; Terraform keeps it up to date.
+    uses: axnic/.github/.github/workflows/oss.scorecard.yaml@b774f843ae4860bbbfa4603da7d6dbc50f1a5d99 # main
     secrets: inherit
     permissions:
       actions: read
